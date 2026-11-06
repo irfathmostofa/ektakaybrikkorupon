@@ -166,18 +166,38 @@ function Branch({ d, w, grp }: { d: string; w: number; grp: string }) {
   );
 }
 
-function DonateHand() {
+const HAND_SKIN = "#f3c4a0";
+const COIN_X = 208;
+const COIN_Y = 54;
+
+function DonateHandBack() {
   return (
-    <g id="tj-hand" aria-hidden="true">
+    <g id="tj-hand-back" data-hand="" aria-hidden="true">
       <g className="tj-hand-idle">
-        <g fill="#f3c4a0" stroke="#f3c4a0" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M206 -88 L206 8" strokeWidth={34} />
-          <circle cx={200} cy={24} r={24} stroke="none" />
-          <path d="M176 20 C162 26 154 42 160 58" fill="none" strokeWidth={13} />
-          <path d="M188 24 C176 34 172 52 178 66" fill="none" strokeWidth={14} />
-          <path d="M200 26 C192 38 192 56 198 70" fill="none" strokeWidth={14} />
-          <path d="M222 12 C238 18 244 34 236 48" fill="none" strokeWidth={16} />
+        <g fill={HAND_SKIN} stroke={HAND_SKIN} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M200 -96 L200 16" fill="none" strokeWidth={32} />
+          <ellipse cx={194} cy={18} rx={24} ry={20} stroke="none" />
+          <path d="M176 22 C162 32 154 48 160 66" fill="none" strokeWidth={12} />
+          <path d="M188 26 C176 40 172 58 178 76" fill="none" strokeWidth={13} />
+          <path d="M200 28 C192 44 192 62 198 80" fill="none" strokeWidth={13} />
         </g>
+      </g>
+    </g>
+  );
+}
+
+function DonateHandFront() {
+  return (
+    <g id="tj-hand-front" data-hand="" aria-hidden="true">
+      <g className="tj-hand-idle">
+        <path
+          d="M216 8 C234 10 246 26 238 46 C232 60 218 64 210 56"
+          fill="none"
+          stroke={HAND_SKIN}
+          strokeWidth={16}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </g>
     </g>
   );
@@ -364,14 +384,14 @@ const TreeArt = memo(function TreeArt({ label }: { label: string }) {
         ))}
       </g>
 
-      <DonateHand />
+      <DonateHandBack />
       <g id="tj-coin">
-        <circle cx="200" cy="30" r="34" fill="url(#tj-fg)" />
-        <circle cx="200" cy="30" r="15" fill="#e6c071" stroke="#c99a45" strokeWidth={2.5} />
-        <circle cx="200" cy="30" r="10.5" fill="none" stroke="#f7e6b8" strokeWidth={1.2} opacity={0.85} />
+        <circle cx={COIN_X} cy={COIN_Y} r="28" fill="url(#tj-fg)" />
+        <circle cx={COIN_X} cy={COIN_Y} r="15" fill="#e6c071" stroke="#c99a45" strokeWidth={2.5} />
+        <circle cx={COIN_X} cy={COIN_Y} r="10.5" fill="none" stroke="#f7e6b8" strokeWidth={1.2} opacity={0.85} />
         <text
-          x="200"
-          y="36"
+          x={COIN_X}
+          y={COIN_Y + 6}
           textAnchor="middle"
           fontSize="18"
           fontWeight="700"
@@ -381,6 +401,7 @@ const TreeArt = memo(function TreeArt({ label }: { label: string }) {
           ৳
         </text>
       </g>
+      <DonateHandFront />
     </svg>
   );
 });
@@ -504,7 +525,7 @@ export function TreeJourney({
     const trunk = tree.querySelector<SVGRectElement>("#tj-tr");
     const group = tree.querySelector<SVGGElement>("#tj-tg");
     const coin = tree.querySelector<SVGGElement>("#tj-coin");
-    const hand = tree.querySelector<SVGGElement>("#tj-hand");
+    const hands = tree.querySelectorAll<SVGGElement>("[data-hand]");
 
     let topPx = 0;
     let stageW = 0;
@@ -576,20 +597,28 @@ export function TreeJourney({
 
       if (coin) {
         const fall = clamp(g / (d1 * 0.3));
-        const y = 548 * ease.in(fall);
+        const y = (600 - COIN_Y) * ease.in(fall);
         const fade = clamp((g - d1 * 0.3) / (d1 * 0.06));
         const s = 1 - 0.8 * fade;
-        coin.setAttribute("transform", `translate(200 ${(30 + y).toFixed(1)}) scale(${s.toFixed(3)}) translate(-200 -30)`);
+        const rot = -18 * (1 - fall);
+        coin.setAttribute(
+          "transform",
+          `translate(${COIN_X} ${(COIN_Y + y).toFixed(1)}) rotate(${rot.toFixed(2)}) scale(${s.toFixed(3)}) translate(${-COIN_X} ${-COIN_Y})`,
+        );
         coin.setAttribute("opacity", String(1 - fade));
       }
 
-      if (hand) {
-        const release = clamp(g / (d1 * 0.3));
+      if (hands.length) {
+        const release = clamp(g / (d1 * 0.22));
         const recede = ease.in(release);
-        const op = 1 - smooth(g, d1 * 0.06, d1 * 0.36);
-        hand.setAttribute("transform", `translate(0 ${(-52 * recede).toFixed(1)})`);
-        hand.setAttribute("opacity", op.toFixed(3));
-        hand.setAttribute("visibility", op <= 0.01 ? "hidden" : "visible");
+        const op = 1 - smooth(g, 0, d1 * 0.28);
+        const t = `translate(0 ${(-64 * recede).toFixed(1)})`;
+        const vis = op <= 0.01 ? "hidden" : "visible";
+        hands.forEach((el) => {
+          el.setAttribute("transform", t);
+          el.setAttribute("opacity", op.toFixed(3));
+          el.setAttribute("visibility", vis);
+        });
       }
 
       if (wide) {
