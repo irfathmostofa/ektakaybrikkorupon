@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { requireStaff } from "@/lib/auth";
 import { noIndexMetadata } from "@/lib/seo";
@@ -20,6 +21,7 @@ function AdminShellFallback() {
 }
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
+  await connection();
   const user = await requireStaff();
 
   return (

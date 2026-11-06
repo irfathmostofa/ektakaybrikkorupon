@@ -28,7 +28,7 @@ export default async function AdminSettingsPage() {
             emailjs_template_id: null,
             emailjs_public_key: null,
             emailjs_private_key: null,
-            updated_at: new Date().toISOString(),
+            updated_at: "1970-01-01T00:00:00.000Z",
           }
         }
       />
