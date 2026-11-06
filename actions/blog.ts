@@ -65,9 +65,12 @@ export async function createBlogPostAction(
     .from("blog_posts")
     .insert({
       title,
+      title_en: String(formData.get("title_en") ?? "").trim() || null,
       slug,
       excerpt: String(formData.get("excerpt") ?? "").trim() || null,
+      excerpt_en: String(formData.get("excerpt_en") ?? "").trim() || null,
       content: String(formData.get("content") ?? "").trim() || null,
+      content_en: String(formData.get("content_en") ?? "").trim() || null,
       cover_image_url:
         String(formData.get("cover_image_url") ?? "").trim() || null,
       status,
@@ -110,9 +113,12 @@ export async function updateBlogPostAction(
     .from("blog_posts")
     .update({
       title,
+      title_en: String(formData.get("title_en") ?? "").trim() || null,
       slug,
       excerpt: String(formData.get("excerpt") ?? "").trim() || null,
+      excerpt_en: String(formData.get("excerpt_en") ?? "").trim() || null,
       content: String(formData.get("content") ?? "").trim() || null,
+      content_en: String(formData.get("content_en") ?? "").trim() || null,
       cover_image_url:
         String(formData.get("cover_image_url") ?? "").trim() || null,
       status,

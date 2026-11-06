@@ -540,6 +540,7 @@ export const FALLBACK_FINANCE: FinanceEntry[] = [
     source_or_payee: "সদস্যবৃন্দ",
     receipt_url: null,
     is_published: true,
+    transaction_id: null,
     category: categories[0],
   },
   {
@@ -555,6 +556,7 @@ export const FALLBACK_FINANCE: FinanceEntry[] = [
     source_or_payee: "আঞ্চলিক তহবিল",
     receipt_url: null,
     is_published: true,
+    transaction_id: null,
     category: categories[1],
   },
   {
@@ -570,6 +572,7 @@ export const FALLBACK_FINANCE: FinanceEntry[] = [
     source_or_payee: "নার্সারি সমবায়",
     receipt_url: null,
     is_published: true,
+    transaction_id: null,
     category: categories[2],
   },
   {
@@ -585,6 +588,7 @@ export const FALLBACK_FINANCE: FinanceEntry[] = [
     source_or_payee: "স্থানীয় দল",
     receipt_url: null,
     is_published: true,
+    transaction_id: null,
     category: categories[3],
   },
   {
@@ -600,6 +604,7 @@ export const FALLBACK_FINANCE: FinanceEntry[] = [
     source_or_payee: "শিক্ষা ইউনিট",
     receipt_url: null,
     is_published: true,
+    transaction_id: null,
     category: categories[2],
   },
 ];

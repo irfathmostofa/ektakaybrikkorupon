@@ -1,4 +1,7 @@
--- Phase 5 additive schema. Safe to run after supabase/schema.sql and supabase/phase4.sql.
+-- Legacy additive file. Donation extra fields and the finance transaction
+-- unique index now live in supabase/schema.sql. Keep this file only for
+-- databases that already ran the original Phase 2 + Phase 4 schema.
+-- Safe to skip on a fresh install.
 
 alter table public.donations
   add column if not exists donor_phone text,

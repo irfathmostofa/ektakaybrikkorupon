@@ -54,13 +54,19 @@ export async function updatePageAction(
     .from("page_content")
     .update({
       title,
+      title_en: String(formData.get("title_en") ?? "").trim() || null,
       subtitle: String(formData.get("subtitle") ?? "").trim() || null,
+      subtitle_en: String(formData.get("subtitle_en") ?? "").trim() || null,
       body: String(formData.get("body") ?? "").trim() || null,
+      body_en: String(formData.get("body_en") ?? "").trim() || null,
       hero_image_url:
         String(formData.get("hero_image_url") ?? "").trim() || null,
       meta_title: String(formData.get("meta_title") ?? "").trim() || null,
+      meta_title_en: String(formData.get("meta_title_en") ?? "").trim() || null,
       meta_description:
         String(formData.get("meta_description") ?? "").trim() || null,
+      meta_description_en:
+        String(formData.get("meta_description_en") ?? "").trim() || null,
     })
     .eq("id", id);
 

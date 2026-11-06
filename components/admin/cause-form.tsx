@@ -28,15 +28,23 @@ export function CauseForm({ cause }: { cause?: CauseProject }) {
       <form action={formAction} className="grid max-w-3xl gap-4">
         {cause ? <input type="hidden" name="id" value={cause.id} /> : null}
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Title (Bangla)</Label>
           <Input id="title" name="title" defaultValue={cause?.title} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="title_en">Title (English)</Label>
+          <Input
+            id="title_en"
+            name="title_en"
+            defaultValue={cause?.title_en ?? ""}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="slug">Slug</Label>
           <Input id="slug" name="slug" defaultValue={cause?.slug} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="short_description">Short description</Label>
+          <Label htmlFor="short_description">Short description (Bangla)</Label>
           <Input
             id="short_description"
             name="short_description"
@@ -44,11 +52,27 @@ export function CauseForm({ cause }: { cause?: CauseProject }) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="short_description_en">Short description (English)</Label>
+          <Input
+            id="short_description_en"
+            name="short_description_en"
+            defaultValue={cause?.short_description_en ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Description (Bangla)</Label>
           <Textarea
             id="description"
             name="description"
             defaultValue={cause?.description ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="description_en">Description (English)</Label>
+          <Textarea
+            id="description_en"
+            name="description_en"
+            defaultValue={cause?.description_en ?? ""}
           />
         </div>
         <div className="space-y-2">

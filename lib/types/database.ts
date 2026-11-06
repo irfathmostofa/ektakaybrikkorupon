@@ -21,6 +21,7 @@ export type JobApplicationStatus =
   | "reviewed"
   | "shortlisted"
   | "rejected";
+export type ContentLocale = "bn" | "en";
 
 export type SocialLinks = {
   facebook?: string;
@@ -43,12 +44,12 @@ export type User = {
 export type CauseProject = {
   id: string;
   title: string;
-  title_en?: string | null;
+  title_en: string | null;
   slug: string;
   description: string | null;
-  description_en?: string | null;
+  description_en: string | null;
   short_description: string | null;
-  short_description_en?: string | null;
+  short_description_en: string | null;
   goal_amount: number;
   raised_amount: number;
   image_url: string | null;
@@ -62,10 +63,10 @@ export type Donation = {
   id: string;
   donor_name: string;
   donor_email: string;
-  donor_phone?: string | null;
-  donor_address?: string | null;
-  message?: string | null;
-  locale?: string | null;
+  donor_phone: string | null;
+  donor_address: string | null;
+  message: string | null;
+  locale: ContentLocale | string | null;
   amount: number;
   transaction_id: string | null;
   cause_id: string | null;
@@ -79,13 +80,13 @@ export type SiteSettings = {
   id: number;
   logo_url: string | null;
   foundation_name: string;
-  foundation_name_en?: string | null;
+  foundation_name_en: string | null;
   contact_email: string | null;
   contact_phone: string | null;
   address: string | null;
-  address_en?: string | null;
+  address_en: string | null;
   social_links: SocialLinks;
-  default_locale?: string | null;
+  default_locale: ContentLocale | string | null;
   sslcommerz_store_id: string | null;
   sslcommerz_store_password: string | null;
   sslcommerz_is_live: boolean;
@@ -95,9 +96,9 @@ export type SiteSettings = {
   emailjs_private_key: string | null;
   google_site_verification_code: string | null;
   meta_title: string | null;
-  meta_title_en?: string | null;
+  meta_title_en: string | null;
   meta_description: string | null;
-  meta_description_en?: string | null;
+  meta_description_en: string | null;
   updated_at: string;
 };
 
@@ -121,12 +122,12 @@ export type PublicSiteSettings = Pick<
 export type BlogPost = {
   id: string;
   title: string;
-  title_en?: string | null;
+  title_en: string | null;
   slug: string;
   excerpt: string | null;
-  excerpt_en?: string | null;
+  excerpt_en: string | null;
   content: string | null;
-  content_en?: string | null;
+  content_en: string | null;
   cover_image_url: string | null;
   status: BlogStatus;
   published_at: string | null;
@@ -138,16 +139,16 @@ export type PageContent = {
   id: string;
   page_key: string;
   title: string;
-  title_en?: string | null;
+  title_en: string | null;
   subtitle: string | null;
-  subtitle_en?: string | null;
+  subtitle_en: string | null;
   body: string | null;
-  body_en?: string | null;
+  body_en: string | null;
   hero_image_url: string | null;
   meta_title: string | null;
-  meta_title_en?: string | null;
+  meta_title_en: string | null;
   meta_description: string | null;
-  meta_description_en?: string | null;
+  meta_description_en: string | null;
   updated_at: string;
 };
 
@@ -177,6 +178,8 @@ export type TeamMember = {
   photo_url: string | null;
   sort_order: number;
   is_published: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type GalleryAlbum = {
@@ -191,6 +194,8 @@ export type GalleryAlbum = {
   sort_order: number;
   is_published: boolean;
   image_count?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type GalleryImage = {
@@ -242,7 +247,7 @@ export type FinanceEntry = {
   source_or_payee: string | null;
   receipt_url: string | null;
   is_published: boolean;
-  transaction_id?: string | null;
+  transaction_id: string | null;
   category?: FinanceCategory | null;
 };
 
@@ -262,6 +267,20 @@ export type MembershipPlan = {
   sort_order: number;
 };
 
+export type MembershipApplication = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  plan_id: string | null;
+  motivation: string | null;
+  status: MembershipStatus;
+  admin_notes: string | null;
+  locale: ContentLocale | string | null;
+  created_at: string;
+};
+
 export type JobPosting = {
   id: string;
   title: string;
@@ -278,6 +297,19 @@ export type JobPosting = {
   requirements_en: string | null;
   deadline: string | null;
   is_published: boolean;
+};
+
+export type JobApplication = {
+  id: string;
+  job_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  cover_letter: string | null;
+  resume_url: string | null;
+  status: JobApplicationStatus;
+  locale: ContentLocale | string | null;
+  created_at: string;
 };
 
 type Table<TRow, TInsert, TUpdate> = {
@@ -354,33 +386,10 @@ export type Database = {
         Partial<MembershipPlan>
       >;
       membership_applications: Table<
-        {
-          id: string;
-          full_name: string;
-          email: string;
-          phone: string | null;
-          address: string | null;
-          plan_id: string | null;
-          motivation: string | null;
-          status: MembershipStatus;
-          admin_notes: string | null;
-          locale: string | null;
-          created_at: string;
-        },
-        {
-          full_name: string;
-          email: string;
-          phone?: string | null;
-          address?: string | null;
-          plan_id?: string | null;
-          motivation?: string | null;
-          status?: MembershipStatus;
-          locale?: string | null;
-        },
-        Partial<{
-          status: MembershipStatus;
-          admin_notes: string | null;
-        }>
+        MembershipApplication,
+        Partial<MembershipApplication> &
+          Pick<MembershipApplication, "full_name" | "email">,
+        Partial<Pick<MembershipApplication, "status" | "admin_notes">>
       >;
       job_postings: Table<
         JobPosting,
@@ -388,31 +397,10 @@ export type Database = {
         Partial<JobPosting>
       >;
       job_applications: Table<
-        {
-          id: string;
-          job_id: string;
-          full_name: string;
-          email: string;
-          phone: string | null;
-          cover_letter: string | null;
-          resume_url: string | null;
-          status: JobApplicationStatus;
-          locale: string | null;
-          created_at: string;
-        },
-        {
-          job_id: string;
-          full_name: string;
-          email: string;
-          phone?: string | null;
-          cover_letter?: string | null;
-          resume_url?: string | null;
-          status?: JobApplicationStatus;
-          locale?: string | null;
-        },
-        Partial<{
-          status: JobApplicationStatus;
-        }>
+        JobApplication,
+        Partial<JobApplication> &
+          Pick<JobApplication, "job_id" | "full_name" | "email">,
+        Partial<Pick<JobApplication, "status">>
       >;
     };
     Views: {

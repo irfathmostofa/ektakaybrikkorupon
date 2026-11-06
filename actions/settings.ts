@@ -44,12 +44,19 @@ export async function updateSiteSettingsAction(
     youtube: String(formData.get("youtube") ?? "").trim() || undefined,
   };
 
+  const defaultLocale =
+    String(formData.get("default_locale") ?? "bn").trim() === "en" ? "en" : "bn";
+
   const payload: Partial<SiteSettings> = {
     foundation_name: String(formData.get("foundation_name") ?? "").trim(),
+    foundation_name_en:
+      String(formData.get("foundation_name_en") ?? "").trim() || null,
     logo_url: String(formData.get("logo_url") ?? "").trim() || null,
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     contact_phone: String(formData.get("contact_phone") ?? "").trim() || null,
     address: String(formData.get("address") ?? "").trim() || null,
+    address_en: String(formData.get("address_en") ?? "").trim() || null,
+    default_locale: defaultLocale,
     social_links: socialLinks,
     sslcommerz_store_id:
       String(formData.get("sslcommerz_store_id") ?? "").trim() || null,
@@ -68,8 +75,11 @@ export async function updateSiteSettingsAction(
       String(formData.get("google_site_verification_code") ?? "").trim() ||
       null,
     meta_title: String(formData.get("meta_title") ?? "").trim() || null,
+    meta_title_en: String(formData.get("meta_title_en") ?? "").trim() || null,
     meta_description:
       String(formData.get("meta_description") ?? "").trim() || null,
+    meta_description_en:
+      String(formData.get("meta_description_en") ?? "").trim() || null,
   };
 
   if (!payload.foundation_name) {

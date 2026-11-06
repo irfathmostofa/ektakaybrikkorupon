@@ -51,9 +51,14 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Field
-            label="Foundation name"
+            label="Foundation name (Bangla)"
             name="foundation_name"
             defaultValue={settings.foundation_name}
+          />
+          <Field
+            label="Foundation name (English)"
+            name="foundation_name_en"
+            defaultValue={settings.foundation_name_en}
           />
           <Field
             label="Contact email"
@@ -66,7 +71,24 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             name="contact_phone"
             defaultValue={settings.contact_phone}
           />
-          <Field label="Address" name="address" defaultValue={settings.address} />
+          <Field label="Address (Bangla)" name="address" defaultValue={settings.address} />
+          <Field
+            label="Address (English)"
+            name="address_en"
+            defaultValue={settings.address_en}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="default_locale">Default locale</Label>
+            <select
+              id="default_locale"
+              name="default_locale"
+              defaultValue={settings.default_locale ?? "bn"}
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+            >
+              <option value="bn">Bangla (bn)</option>
+              <option value="en">English (en)</option>
+            </select>
+          </div>
           <div className="md:col-span-2">
             <ImageField
               name="logo_url"
@@ -108,16 +130,29 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         </CardHeader>
         <CardContent className="grid gap-4">
           <Field
-            label="Meta title"
+            label="Meta title (Bangla)"
             name="meta_title"
             defaultValue={settings.meta_title}
           />
+          <Field
+            label="Meta title (English)"
+            name="meta_title_en"
+            defaultValue={settings.meta_title_en}
+          />
           <div className="space-y-2">
-            <Label htmlFor="meta_description">Meta description</Label>
+            <Label htmlFor="meta_description">Meta description (Bangla)</Label>
             <Textarea
               id="meta_description"
               name="meta_description"
               defaultValue={settings.meta_description ?? ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="meta_description_en">Meta description (English)</Label>
+            <Textarea
+              id="meta_description_en"
+              name="meta_description_en"
+              defaultValue={settings.meta_description_en ?? ""}
             />
           </div>
           <Field

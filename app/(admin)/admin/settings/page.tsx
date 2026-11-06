@@ -20,6 +20,7 @@ export default async function AdminSettingsPage() {
           settings ?? {
             id: 1,
             ...FALLBACK_SITE_SETTINGS,
+            default_locale: "bn",
             sslcommerz_store_id: null,
             sslcommerz_store_password: null,
             sslcommerz_is_live: false,

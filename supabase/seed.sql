@@ -1,5 +1,5 @@
 -- Demo seed: current public website content (Bangla-first, English second).
--- Safe to re-run. Run after schema.sql, phase4.sql, and phase5.sql.
+-- Safe to re-run. Run after supabase/schema.sql.
 
 -- ---------------------------------------------------------------------------
 -- Site settings

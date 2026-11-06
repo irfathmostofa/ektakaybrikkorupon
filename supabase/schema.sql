@@ -1,5 +1,7 @@
--- Phase 2: Database Schema & Row Level Security
--- Run this in the Supabase SQL Editor.
+-- Complete database schema for Hope Foundation.
+-- Run this in the Supabase SQL Editor on a new project.
+-- Covers all dynamic CMS, i18n, donation, finance, membership, and career fields.
+-- Safe to re-run. Additive ALTER statements upgrade older databases in place.
 
 create extension if not exists "pgcrypto";
 
@@ -9,26 +11,53 @@ create extension if not exists "pgcrypto";
 
 do $$ begin
   create type public.user_role as enum ('super_admin', 'admin', 'editor');
-exception
-  when duplicate_object then null;
+exception when duplicate_object then null;
 end $$;
 
 do $$ begin
   create type public.cause_status as enum ('draft', 'active', 'completed', 'archived');
-exception
-  when duplicate_object then null;
+exception when duplicate_object then null;
 end $$;
 
 do $$ begin
   create type public.donation_status as enum ('pending', 'success', 'failed', 'cancelled');
-exception
-  when duplicate_object then null;
+exception when duplicate_object then null;
 end $$;
 
 do $$ begin
   create type public.blog_status as enum ('draft', 'published', 'archived');
-exception
-  when duplicate_object then null;
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.about_section_type as enum (
+    'story', 'mission', 'vision', 'values', 'timeline', 'custom'
+  );
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.finance_kind as enum ('collection', 'expense');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.membership_status as enum ('pending', 'approved', 'rejected');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.employment_type as enum (
+    'full_time', 'part_time', 'contract', 'volunteer'
+  );
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.job_application_status as enum (
+    'pending', 'reviewed', 'shortlisted', 'rejected'
+  );
+exception when duplicate_object then null;
 end $$;
 
 -- ---------------------------------------------------------------------------
@@ -90,14 +119,18 @@ for each row execute function public.handle_new_auth_user();
 
 -- ---------------------------------------------------------------------------
 -- causes_projects
+-- Canonical copy is Bangla. *_en columns are the English overlay.
 -- ---------------------------------------------------------------------------
 
 create table if not exists public.causes_projects (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  title_en text,
   slug text not null unique,
   description text,
+  description_en text,
   short_description text,
+  short_description_en text,
   goal_amount numeric(12, 2) not null default 0 check (goal_amount >= 0),
   raised_amount numeric(12, 2) not null default 0 check (raised_amount >= 0),
   image_url text,
@@ -107,8 +140,14 @@ create table if not exists public.causes_projects (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.causes_projects
+  add column if not exists title_en text,
+  add column if not exists description_en text,
+  add column if not exists short_description_en text;
+
 create index if not exists causes_projects_status_idx on public.causes_projects (status);
 create index if not exists causes_projects_slug_idx on public.causes_projects (slug);
+create index if not exists causes_projects_featured_idx on public.causes_projects (featured, created_at desc);
 
 drop trigger if exists causes_projects_set_updated_at on public.causes_projects;
 create trigger causes_projects_set_updated_at
@@ -123,6 +162,10 @@ create table if not exists public.donations (
   id uuid primary key default gen_random_uuid(),
   donor_name text not null,
   donor_email text not null,
+  donor_phone text,
+  donor_address text,
+  message text,
+  locale text not null default 'bn' check (locale in ('bn', 'en')),
   amount numeric(12, 2) not null check (amount > 0),
   transaction_id text unique,
   cause_id uuid references public.causes_projects (id) on delete set null,
@@ -132,9 +175,16 @@ create table if not exists public.donations (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.donations
+  add column if not exists donor_phone text,
+  add column if not exists donor_address text,
+  add column if not exists message text,
+  add column if not exists locale text default 'bn';
+
 create index if not exists donations_cause_id_idx on public.donations (cause_id);
 create index if not exists donations_status_idx on public.donations (status);
 create index if not exists donations_transaction_id_idx on public.donations (transaction_id);
+create index if not exists donations_locale_idx on public.donations (locale);
 
 drop trigger if exists donations_set_updated_at on public.donations;
 create trigger donations_set_updated_at
@@ -148,9 +198,12 @@ for each row execute function public.set_updated_at();
 create table if not exists public.blog_posts (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  title_en text,
   slug text not null unique,
   excerpt text,
+  excerpt_en text,
   content text,
+  content_en text,
   cover_image_url text,
   status public.blog_status not null default 'draft',
   published_at timestamptz,
@@ -158,8 +211,14 @@ create table if not exists public.blog_posts (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.blog_posts
+  add column if not exists title_en text,
+  add column if not exists excerpt_en text,
+  add column if not exists content_en text;
+
 create index if not exists blog_posts_status_idx on public.blog_posts (status);
 create index if not exists blog_posts_slug_idx on public.blog_posts (slug);
+create index if not exists blog_posts_published_at_idx on public.blog_posts (published_at desc);
 
 drop trigger if exists blog_posts_set_updated_at on public.blog_posts;
 create trigger blog_posts_set_updated_at
@@ -167,60 +226,167 @@ before update on public.blog_posts
 for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
--- page_content (global public pages)
+-- page_content (CMS rows for every public page)
+-- Seed keys: home, about, contact, gallery, achievements, transparency,
+-- membership, careers.
 -- ---------------------------------------------------------------------------
 
 create table if not exists public.page_content (
   id uuid primary key default gen_random_uuid(),
   page_key text not null unique,
   title text not null,
+  title_en text,
   subtitle text,
+  subtitle_en text,
   body text,
+  body_en text,
   hero_image_url text,
   meta_title text,
+  meta_title_en text,
   meta_description text,
+  meta_description_en text,
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.page_content
+  add column if not exists title_en text,
+  add column if not exists subtitle_en text,
+  add column if not exists body_en text,
+  add column if not exists meta_title_en text,
+  add column if not exists meta_description_en text;
 
 drop trigger if exists page_content_set_updated_at on public.page_content;
 create trigger page_content_set_updated_at
 before update on public.page_content
 for each row execute function public.set_updated_at();
 
-insert into public.page_content (page_key, title, subtitle, body)
+insert into public.page_content (
+  page_key, title, title_en, subtitle, subtitle_en, body, body_en,
+  meta_title, meta_title_en, meta_description, meta_description_en
+)
 values
   (
     'home',
-    'Hope starts here',
-    'Support causes that change lives.',
-    'We partner with communities to deliver education, healthcare, and emergency relief.'
+    '১টাকায় সবুজের বিপ্লব! প্রতিদিন এক টাকা, মাসে একটি গাছ।',
+    'A green revolution for 1 taka! One taka a day, one tree a month.',
+    'আসুন, প্রতিদিন মাত্র ১ টাকা সঞ্চয় করে আমরা গড়ে তুলি সবুজ বাংলাদেশ।',
+    'Let us save just 1 taka a day and grow a greener Bangladesh.',
+    'শুধু গাছ লাগানো নয়, আমরা গড়ছি ভবিষ্যৎ।',
+    'We are not only planting trees—we are building the future.',
+    '১টাকায় বৃক্ষরোপণ',
+    '1 Taka Tree Plantation',
+    'প্রতিদিন এক টাকা, মাসে একটি গাছ। ২০১৯ সাল থেকে পরিবেশ ও মানবতার সেবায় নিয়োজিত।',
+    'One taka a day, one tree a month. Serving the environment and humanity since 2019.'
   ),
   (
     'about',
-    'About the foundation',
-    'Our mission and values',
-    'We are a non-profit foundation focused on transparent giving and measurable impact.'
+    'যে ভাবনা থেকে আমাদের যাত্রা',
+    'The idea that started our journey',
+    '১টাকায় বৃক্ষরোপণ — পরিবেশবাদী ও স্বেচ্ছাসেবী সংগঠন।',
+    '1 Taka Tree Plantation — an environmental volunteer organization.',
+    'লক্ষ্য, দৃষ্টি, মূল্যবোধ ও দল—সবই সম্পাদকীয় কন্টেন্ট থেকে।',
+    'Mission, vision, values, and team assembled from the CMS.',
+    'আমাদের কথা',
+    'About',
+    'লক্ষ্য, দৃষ্টি, মূল্যবোধ ও দল—সবই সম্পাদকীয় কন্টেন্ট থেকে।',
+    'Mission, vision, values, and team assembled from the CMS.'
   ),
   (
     'contact',
-    'Contact us',
-    'We would love to hear from you',
-    'Reach the team for partnerships, volunteering, or media inquiries.'
+    'আমাদের খুঁজুন',
+    'Find us',
+    'অংশীদারিত্ব, স্বেচ্ছাসেবা বা মাঠ সফর—লিখুন।',
+    'Partnerships, volunteering, or a field visit—write to us.',
+    'সকালের কুয়াশার মতো শান্ত উত্তর পাবেন।',
+    'You will hear back calmly. Even when we are in the field, messages are not lost.',
+    'যোগাযোগ',
+    'Contact',
+    '১টাকায় বৃক্ষরোপণের সাথে যোগাযোগ করুন।',
+    'Get in touch with 1 Taka Tree Plantation.'
+  ),
+  (
+    'gallery',
+    'মাঠের আলো',
+    'Light from the field',
+    'অ্যালবাম খুলুন। প্রতিটি ছবি একটি আবাস।',
+    'Open an album. Every photograph is a habitat.',
+    'আমরা স্টক ছবি নয়, মাঠের নোট রাখি।',
+    'These are field notes, not stock photos.',
+    'ছবিঘর',
+    'Gallery',
+    'সংরক্ষণের অ্যালবাম ও লাইটবক্স।',
+    'Conservation albums and lightbox viewing.'
+  ),
+  (
+    'achievements',
+    'যা বেড়েছে, যা ফিরেছে',
+    'What has grown, what has returned',
+    'মাইলফলক নয়, জীবন্ত হিসাব।',
+    'Not trophies—living accounts of impact.',
+    'গাছ, আবাস, মানুষ—প্রতিটি সংখ্যার পেছনে মাঠ আছে।',
+    'Trees, habitat, people—every number has a field behind it.',
+    'অর্জন',
+    'Achievements',
+    'প্রভাবের মাইলফলক ও তারিখ।',
+    'Impact milestones and dates.'
+  ),
+  (
+    'transparency',
+    'খোলা খাতা',
+    'An open ledger',
+    'সংগ্রহ সবুজ, ব্যয় মাটির রঙে।',
+    'Collections in leaf green, expenses in soil.',
+    'প্রকাশিত হিসাবই দেখবেন। খসড়া কখনো সামনে আসে না।',
+    'Only published entries appear. Drafts never reach the public.',
+    'স্বচ্ছতা',
+    'Transparency',
+    'সংগ্রহ ও ব্যয়ের প্রকাশিত ইতিহাস।',
+    'Published collection and expense history.'
+  ),
+  (
+    'membership',
+    'শিকড় গাড়ুন',
+    'Put down roots',
+    'সদস্য হওয়া মানে একবার দান নয়, স্থায়ী অঙ্গীকার।',
+    'Membership is not a one-time gift. It is a long allegiance.',
+    'চাঁদায় চারা, প্রহরা ও শিক্ষা চলে। অনুমোদন ম্যানুয়াল।',
+    'Fees grow saplings, patrols, and education. Approval is manual.',
+    'সদস্যপদ',
+    'Membership',
+    'সদস্য পরিকল্পনা ও আবেদন।',
+    'Membership plans and application.'
+  ),
+  (
+    'careers',
+    'মাঠে জায়গা আছে',
+    'There is room in the field',
+    'গবেষণা, প্রহরা, শিক্ষা—যেখানে হাত লাগে।',
+    'Research, patrol, education—where hands are needed.',
+    'আমরা সিটি অফিসের চেয়ে নদীর ধারে বেশি সময় কাটাই।',
+    'We spend more time on riverbanks than in city offices.',
+    'কর্মসংস্থান',
+    'Careers',
+    'খালি পদ ও আবেদন।',
+    'Open roles and applications.'
   )
 on conflict (page_key) do nothing;
 
 -- ---------------------------------------------------------------------------
 -- site_settings (single-row configuration)
+-- Secrets stay on this table. Public visitors read site_settings_public.
 -- ---------------------------------------------------------------------------
 
 create table if not exists public.site_settings (
   id integer primary key default 1 check (id = 1),
   logo_url text,
-  foundation_name text not null default 'Hope Foundation',
+  foundation_name text not null default '১টাকায় বৃক্ষরোপণ',
+  foundation_name_en text,
   contact_email text,
   contact_phone text,
   address text,
+  address_en text,
   social_links jsonb not null default '{}'::jsonb,
+  default_locale text not null default 'bn' check (default_locale in ('bn', 'en')),
   sslcommerz_store_id text,
   sslcommerz_store_password text,
   sslcommerz_is_live boolean not null default false,
@@ -230,43 +396,307 @@ create table if not exists public.site_settings (
   emailjs_private_key text,
   google_site_verification_code text,
   meta_title text,
+  meta_title_en text,
   meta_description text,
+  meta_description_en text,
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.site_settings
+  add column if not exists foundation_name_en text,
+  add column if not exists address_en text,
+  add column if not exists default_locale text default 'bn',
+  add column if not exists meta_title_en text,
+  add column if not exists meta_description_en text;
 
 drop trigger if exists site_settings_set_updated_at on public.site_settings;
 create trigger site_settings_set_updated_at
 before update on public.site_settings
 for each row execute function public.set_updated_at();
 
-insert into public.site_settings (id, foundation_name, meta_title, meta_description)
+insert into public.site_settings (
+  id,
+  foundation_name,
+  foundation_name_en,
+  default_locale,
+  meta_title,
+  meta_title_en,
+  meta_description,
+  meta_description_en
+)
 values (
   1,
-  'Hope Foundation',
-  'Hope Foundation',
-  'A professional foundation website for causes, donations, and community impact.'
+  '১টাকায় বৃক্ষরোপণ',
+  '1 Taka Tree Plantation',
+  'bn',
+  '১টাকায় বৃক্ষরোপণ',
+  '1 Taka Tree Plantation',
+  'প্রতিদিন এক টাকা, মাসে একটি গাছ। ২০১৯ সাল থেকে পরিবেশ ও মানবতার সেবায় নিয়োজিত।',
+  'One taka a day, one tree a month. Serving the environment and humanity since 2019.'
 )
 on conflict (id) do nothing;
 
--- Public-safe view: never expose payment or email secrets.
--- security_invoker is off so anonymous visitors can read public fields
--- without gaining SELECT on secret columns in site_settings.
 create or replace view public.site_settings_public as
 select
   logo_url,
   foundation_name,
+  foundation_name_en,
   contact_email,
   contact_phone,
   address,
+  address_en,
   social_links,
   google_site_verification_code,
   meta_title,
-  meta_description
+  meta_title_en,
+  meta_description,
+  meta_description_en
 from public.site_settings
 where id = 1;
 
 alter view public.site_settings_public set (security_invoker = false);
 grant select on public.site_settings_public to anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- about_sections
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.about_sections (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  title_en text,
+  slug text not null unique,
+  section_type public.about_section_type not null default 'custom',
+  body text,
+  body_en text,
+  image_url text,
+  sort_order integer not null default 0,
+  is_published boolean not null default false,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists about_sections_published_idx
+  on public.about_sections (is_published, sort_order);
+
+drop trigger if exists about_sections_set_updated_at on public.about_sections;
+create trigger about_sections_set_updated_at
+before update on public.about_sections
+for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- team_members
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.team_members (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  full_name_en text,
+  role_title text not null,
+  role_title_en text,
+  bio text,
+  bio_en text,
+  photo_url text,
+  sort_order integer not null default 0,
+  is_published boolean not null default false,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists team_members_published_idx
+  on public.team_members (is_published, sort_order);
+
+drop trigger if exists team_members_set_updated_at on public.team_members;
+create trigger team_members_set_updated_at
+before update on public.team_members
+for each row execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- gallery_albums / gallery_images
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.gallery_albums (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  title_en text,
+  slug text not null unique,
+  description text,
+  description_en text,
+  cover_image_url text,
+  event_date date,
+  sort_order integer not null default 0,
+  is_published boolean not null default false,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists gallery_albums_published_idx
+  on public.gallery_albums (is_published, sort_order);
+
+drop trigger if exists gallery_albums_set_updated_at on public.gallery_albums;
+create trigger gallery_albums_set_updated_at
+before update on public.gallery_albums
+for each row execute function public.set_updated_at();
+
+create table if not exists public.gallery_images (
+  id uuid primary key default gen_random_uuid(),
+  album_id uuid not null references public.gallery_albums (id) on delete cascade,
+  image_url text not null,
+  caption text,
+  caption_en text,
+  alt_text text,
+  alt_text_en text,
+  sort_order integer not null default 0,
+  is_published boolean not null default false
+);
+
+create index if not exists gallery_images_album_idx
+  on public.gallery_images (album_id, sort_order);
+
+-- ---------------------------------------------------------------------------
+-- achievements
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.achievements (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  title_en text,
+  slug text not null unique,
+  description text,
+  description_en text,
+  metric_value numeric,
+  metric_label text,
+  metric_label_en text,
+  achieved_on date,
+  image_url text,
+  sort_order integer not null default 0,
+  is_published boolean not null default false
+);
+
+create index if not exists achievements_published_idx
+  on public.achievements (is_published, sort_order);
+
+-- ---------------------------------------------------------------------------
+-- finance_categories / finance_entries
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.finance_categories (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  name_en text,
+  kind public.finance_kind not null,
+  is_active boolean not null default true
+);
+
+create index if not exists finance_categories_kind_idx
+  on public.finance_categories (kind, is_active);
+
+create table if not exists public.finance_entries (
+  id uuid primary key default gen_random_uuid(),
+  kind public.finance_kind not null,
+  category_id uuid references public.finance_categories (id) on delete set null,
+  title text not null,
+  title_en text,
+  description text,
+  description_en text,
+  amount numeric(12, 2) not null check (amount >= 0),
+  entry_date date not null,
+  source_or_payee text,
+  receipt_url text,
+  is_published boolean not null default false,
+  transaction_id text
+);
+
+alter table public.finance_entries
+  add column if not exists transaction_id text;
+
+create unique index if not exists finance_entries_transaction_id_key
+  on public.finance_entries (transaction_id)
+  where transaction_id is not null;
+
+create index if not exists finance_entries_published_idx
+  on public.finance_entries (is_published, kind, entry_date desc);
+
+-- ---------------------------------------------------------------------------
+-- membership_plans / membership_applications
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.membership_plans (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  name_en text,
+  slug text not null unique,
+  description text,
+  description_en text,
+  fee_amount numeric(12, 2) not null default 0 check (fee_amount >= 0),
+  duration_label text,
+  duration_label_en text,
+  benefits text,
+  benefits_en text,
+  is_active boolean not null default true,
+  sort_order integer not null default 0
+);
+
+create index if not exists membership_plans_active_idx
+  on public.membership_plans (is_active, sort_order);
+
+create table if not exists public.membership_applications (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  email text not null,
+  phone text,
+  address text,
+  plan_id uuid references public.membership_plans (id) on delete set null,
+  motivation text,
+  status public.membership_status not null default 'pending',
+  admin_notes text,
+  locale text default 'bn' check (locale in ('bn', 'en')),
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists membership_applications_status_idx
+  on public.membership_applications (status, created_at desc);
+
+-- ---------------------------------------------------------------------------
+-- job_postings / job_applications
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.job_postings (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  title_en text,
+  slug text not null unique,
+  department text,
+  department_en text,
+  location text,
+  location_en text,
+  employment_type public.employment_type not null default 'full_time',
+  description text,
+  description_en text,
+  requirements text,
+  requirements_en text,
+  deadline date,
+  is_published boolean not null default false
+);
+
+create index if not exists job_postings_published_idx
+  on public.job_postings (is_published, deadline);
+
+create table if not exists public.job_applications (
+  id uuid primary key default gen_random_uuid(),
+  job_id uuid not null references public.job_postings (id) on delete cascade,
+  full_name text not null,
+  email text not null,
+  phone text,
+  cover_letter text,
+  resume_url text,
+  status public.job_application_status not null default 'pending',
+  locale text default 'bn' check (locale in ('bn', 'en')),
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists job_applications_job_idx
+  on public.job_applications (job_id, status, created_at desc);
 
 -- ---------------------------------------------------------------------------
 -- Role helpers
@@ -312,6 +742,17 @@ alter table public.donations enable row level security;
 alter table public.blog_posts enable row level security;
 alter table public.page_content enable row level security;
 alter table public.site_settings enable row level security;
+alter table public.about_sections enable row level security;
+alter table public.team_members enable row level security;
+alter table public.gallery_albums enable row level security;
+alter table public.gallery_images enable row level security;
+alter table public.achievements enable row level security;
+alter table public.finance_categories enable row level security;
+alter table public.finance_entries enable row level security;
+alter table public.membership_plans enable row level security;
+alter table public.membership_applications enable row level security;
+alter table public.job_postings enable row level security;
+alter table public.job_applications enable row level security;
 
 -- users
 drop policy if exists "users_select_own_or_staff" on public.users;
@@ -348,7 +789,7 @@ to authenticated
 using (public.is_staff())
 with check (public.is_staff());
 
--- donations
+-- donations: public may insert pending rows; staff read; admins update.
 drop policy if exists "donations_staff_read" on public.donations;
 create policy "donations_staff_read"
 on public.donations for select
@@ -410,8 +851,174 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
+-- about_sections
+drop policy if exists "about_public_read" on public.about_sections;
+create policy "about_public_read"
+on public.about_sections for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "about_staff_write" on public.about_sections;
+create policy "about_staff_write"
+on public.about_sections for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- team_members
+drop policy if exists "team_public_read" on public.team_members;
+create policy "team_public_read"
+on public.team_members for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "team_staff_write" on public.team_members;
+create policy "team_staff_write"
+on public.team_members for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- gallery_albums
+drop policy if exists "albums_public_read" on public.gallery_albums;
+create policy "albums_public_read"
+on public.gallery_albums for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "albums_staff_write" on public.gallery_albums;
+create policy "albums_staff_write"
+on public.gallery_albums for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- gallery_images
+drop policy if exists "images_public_read" on public.gallery_images;
+create policy "images_public_read"
+on public.gallery_images for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "images_staff_write" on public.gallery_images;
+create policy "images_staff_write"
+on public.gallery_images for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- achievements
+drop policy if exists "achievements_public_read" on public.achievements;
+create policy "achievements_public_read"
+on public.achievements for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "achievements_staff_write" on public.achievements;
+create policy "achievements_staff_write"
+on public.achievements for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- finance_categories
+drop policy if exists "finance_cat_public_read" on public.finance_categories;
+create policy "finance_cat_public_read"
+on public.finance_categories for select
+to anon, authenticated
+using (is_active = true or public.is_staff());
+
+drop policy if exists "finance_cat_staff_write" on public.finance_categories;
+create policy "finance_cat_staff_write"
+on public.finance_categories for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- finance_entries: unpublished drafts never leak to the public.
+drop policy if exists "finance_public_read" on public.finance_entries;
+create policy "finance_public_read"
+on public.finance_entries for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "finance_staff_write" on public.finance_entries;
+create policy "finance_staff_write"
+on public.finance_entries for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- membership_plans
+drop policy if exists "plans_public_read" on public.membership_plans;
+create policy "plans_public_read"
+on public.membership_plans for select
+to anon, authenticated
+using (is_active = true or public.is_staff());
+
+drop policy if exists "plans_staff_write" on public.membership_plans;
+create policy "plans_staff_write"
+on public.membership_plans for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- membership_applications: public insert pending only; PII is staff-only.
+drop policy if exists "membership_public_insert" on public.membership_applications;
+create policy "membership_public_insert"
+on public.membership_applications for insert
+to anon, authenticated
+with check (status = 'pending');
+
+drop policy if exists "membership_staff_read" on public.membership_applications;
+create policy "membership_staff_read"
+on public.membership_applications for select
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "membership_admin_update" on public.membership_applications;
+create policy "membership_admin_update"
+on public.membership_applications for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+-- job_postings
+drop policy if exists "jobs_public_read" on public.job_postings;
+create policy "jobs_public_read"
+on public.job_postings for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "jobs_staff_write" on public.job_postings;
+create policy "jobs_staff_write"
+on public.job_postings for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+-- job_applications: public insert pending only; applicant PII is staff-only.
+drop policy if exists "job_apps_public_insert" on public.job_applications;
+create policy "job_apps_public_insert"
+on public.job_applications for insert
+to anon, authenticated
+with check (status = 'pending');
+
+drop policy if exists "job_apps_staff_read" on public.job_applications;
+create policy "job_apps_staff_read"
+on public.job_applications for select
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "job_apps_admin_update" on public.job_applications;
+create policy "job_apps_admin_update"
+on public.job_applications for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
 -- ---------------------------------------------------------------------------
--- Storage: media bucket
+-- Storage: media bucket (gallery, about/team, achievements, receipts, resumes)
 -- ---------------------------------------------------------------------------
 
 insert into storage.buckets (id, name, public)
@@ -442,6 +1049,16 @@ create policy "media_staff_delete"
 on storage.objects for delete
 to authenticated
 using (bucket_id = 'media' and public.is_staff());
+
+-- Public resume uploads for career applications.
+drop policy if exists "media_public_resume_insert" on storage.objects;
+create policy "media_public_resume_insert"
+on storage.objects for insert
+to anon, authenticated
+with check (
+  bucket_id = 'media'
+  and (storage.foldername(name))[1] = 'resumes'
+);
 
 -- After the first admin signs up, promote that user:
 -- update public.users set role = 'super_admin' where email = 'you@example.com';

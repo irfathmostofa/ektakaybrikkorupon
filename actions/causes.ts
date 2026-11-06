@@ -65,10 +65,15 @@ export async function createCauseAction(
     .from("causes_projects")
     .insert({
       title,
+      title_en: String(formData.get("title_en") ?? "").trim() || null,
       slug,
       short_description:
         String(formData.get("short_description") ?? "").trim() || null,
+      short_description_en:
+        String(formData.get("short_description_en") ?? "").trim() || null,
       description: String(formData.get("description") ?? "").trim() || null,
+      description_en:
+        String(formData.get("description_en") ?? "").trim() || null,
       goal_amount: Number(formData.get("goal_amount") ?? 0) || 0,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       status: parseCauseStatus(String(formData.get("status") ?? "draft")),
@@ -104,10 +109,15 @@ export async function updateCauseAction(
     .from("causes_projects")
     .update({
       title,
+      title_en: String(formData.get("title_en") ?? "").trim() || null,
       slug,
       short_description:
         String(formData.get("short_description") ?? "").trim() || null,
+      short_description_en:
+        String(formData.get("short_description_en") ?? "").trim() || null,
       description: String(formData.get("description") ?? "").trim() || null,
+      description_en:
+        String(formData.get("description_en") ?? "").trim() || null,
       goal_amount: Number(formData.get("goal_amount") ?? 0) || 0,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       status: parseCauseStatus(String(formData.get("status") ?? "draft")),

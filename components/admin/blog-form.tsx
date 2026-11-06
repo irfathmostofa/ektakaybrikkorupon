@@ -28,15 +28,23 @@ export function BlogForm({ post }: { post?: BlogPost }) {
       <form action={formAction} className="grid max-w-3xl gap-4">
         {post ? <input type="hidden" name="id" value={post.id} /> : null}
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Title (Bangla)</Label>
           <Input id="title" name="title" defaultValue={post?.title} required />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="title_en">Title (English)</Label>
+          <Input
+            id="title_en"
+            name="title_en"
+            defaultValue={post?.title_en ?? ""}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="slug">Slug</Label>
           <Input id="slug" name="slug" defaultValue={post?.slug} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="excerpt">Excerpt</Label>
+          <Label htmlFor="excerpt">Excerpt (Bangla)</Label>
           <Textarea
             id="excerpt"
             name="excerpt"
@@ -44,11 +52,27 @@ export function BlogForm({ post }: { post?: BlogPost }) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="content">Content</Label>
+          <Label htmlFor="excerpt_en">Excerpt (English)</Label>
+          <Textarea
+            id="excerpt_en"
+            name="excerpt_en"
+            defaultValue={post?.excerpt_en ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="content">Content (Bangla)</Label>
           <Textarea
             id="content"
             name="content"
             defaultValue={post?.content ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="content_en">Content (English)</Label>
+          <Textarea
+            id="content_en"
+            name="content_en"
+            defaultValue={post?.content_en ?? ""}
           />
         </div>
         <div className="space-y-2">

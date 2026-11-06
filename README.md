@@ -42,18 +42,14 @@ npm run dev
 Run these in the Supabase SQL Editor after creating the project, in order:
 
 ```bash
-# Core schema
+# Complete schema: all CMS, i18n, donation, finance, membership, and career tables
 supabase/schema.sql
-
-# Public CMS tables
-supabase/phase4.sql
-
-# Donation extra fields and finance transaction index
-supabase/phase5.sql
 
 # Demo content matching the current public site
 supabase/seed.sql
 ```
+
+`supabase/phase4.sql` and `supabase/phase5.sql` are legacy no-ops. Fresh installs only need `schema.sql`.
 
 Then promote the first authenticated user to `super_admin` in `public.users`.
 
