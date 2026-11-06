@@ -1,7 +1,8 @@
+import { AdminPage } from "@/components/admin/admin-page";
 import { CauseForm } from "@/components/admin/cause-form";
 import { requireStaff } from "@/lib/auth";
 
-export default async function NewCausePage() {
+async function NewCause() {
   await requireStaff();
 
   return (
@@ -9,5 +10,13 @@ export default async function NewCausePage() {
       <h1 className="text-2xl font-semibold tracking-tight">New cause</h1>
       <CauseForm />
     </section>
+  );
+}
+
+export default function NewCausePage() {
+  return (
+    <AdminPage>
+      <NewCause />
+    </AdminPage>
   );
 }

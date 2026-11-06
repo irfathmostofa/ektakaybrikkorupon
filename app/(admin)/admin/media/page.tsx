@@ -1,8 +1,9 @@
 import { listMedia } from "@/actions/media";
+import { AdminPage } from "@/components/admin/admin-page";
 import { MediaLibrary } from "@/components/admin/media-library";
 import { requireStaff } from "@/lib/auth";
 
-export default async function AdminMediaPage() {
+async function AdminMedia() {
   await requireStaff();
   const items = await listMedia();
 
@@ -16,5 +17,13 @@ export default async function AdminMediaPage() {
       </div>
       <MediaLibrary items={items} />
     </section>
+  );
+}
+
+export default function AdminMediaPage() {
+  return (
+    <AdminPage>
+      <AdminMedia />
+    </AdminPage>
   );
 }

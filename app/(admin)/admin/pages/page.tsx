@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listPages } from "@/actions/pages";
+import { AdminPage } from "@/components/admin/admin-page";
 import {
   Table,
   TableBody,
@@ -9,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function AdminPagesPage() {
+async function AdminPages() {
   const pages = await listPages();
 
   return (
@@ -41,5 +42,13 @@ export default async function AdminPagesPage() {
         </TableBody>
       </Table>
     </section>
+  );
+}
+
+export default function AdminPagesPage() {
+  return (
+    <AdminPage>
+      <AdminPages />
+    </AdminPage>
   );
 }

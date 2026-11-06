@@ -1,9 +1,10 @@
+import { AdminPage } from "@/components/admin/admin-page";
 import { StatCard } from "@/components/admin/stat-card";
 import { requireStaff } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function AdminDashboardPage() {
+async function AdminDashboard() {
   await requireStaff();
 
   if (!isSupabaseConfigured()) {
@@ -56,5 +57,13 @@ export default async function AdminDashboardPage() {
         />
       </div>
     </section>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <AdminPage>
+      <AdminDashboard />
+    </AdminPage>
   );
 }

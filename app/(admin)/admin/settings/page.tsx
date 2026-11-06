@@ -1,9 +1,10 @@
-import { SettingsForm } from "@/components/admin/settings-form";
 import { getSiteSettings } from "@/actions/settings";
+import { AdminPage } from "@/components/admin/admin-page";
+import { SettingsForm } from "@/components/admin/settings-form";
 import { requireStaff } from "@/lib/auth";
 import { FALLBACK_SITE_SETTINGS } from "@/lib/cache";
 
-export default async function AdminSettingsPage() {
+async function AdminSettings() {
   await requireStaff();
   const settings = await getSiteSettings();
 
@@ -33,5 +34,13 @@ export default async function AdminSettingsPage() {
         }
       />
     </section>
+  );
+}
+
+export default function AdminSettingsPage() {
+  return (
+    <AdminPage>
+      <AdminSettings />
+    </AdminPage>
   );
 }

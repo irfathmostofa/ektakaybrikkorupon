@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listBlogPosts } from "@/actions/blog";
+import { AdminPage } from "@/components/admin/admin-page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function AdminBlogPage() {
+async function AdminBlog() {
   const posts = await listBlogPosts();
 
   return (
@@ -56,5 +57,13 @@ export default async function AdminBlogPage() {
         </TableBody>
       </Table>
     </section>
+  );
+}
+
+export default function AdminBlogPage() {
+  return (
+    <AdminPage>
+      <AdminBlog />
+    </AdminPage>
   );
 }

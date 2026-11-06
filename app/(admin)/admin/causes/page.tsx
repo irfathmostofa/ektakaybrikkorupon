@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listCauses } from "@/actions/causes";
+import { AdminPage } from "@/components/admin/admin-page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function AdminCausesPage() {
+async function AdminCauses() {
   const causes = await listCauses();
 
   return (
@@ -54,5 +55,13 @@ export default async function AdminCausesPage() {
         </TableBody>
       </Table>
     </section>
+  );
+}
+
+export default function AdminCausesPage() {
+  return (
+    <AdminPage>
+      <AdminCauses />
+    </AdminPage>
   );
 }

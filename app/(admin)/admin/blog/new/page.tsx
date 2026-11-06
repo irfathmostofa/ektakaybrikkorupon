@@ -1,7 +1,8 @@
+import { AdminPage } from "@/components/admin/admin-page";
 import { BlogForm } from "@/components/admin/blog-form";
 import { requireStaff } from "@/lib/auth";
 
-export default async function NewBlogPostPage() {
+async function NewBlogPost() {
   await requireStaff();
 
   return (
@@ -9,5 +10,13 @@ export default async function NewBlogPostPage() {
       <h1 className="text-2xl font-semibold tracking-tight">New post</h1>
       <BlogForm />
     </section>
+  );
+}
+
+export default function NewBlogPostPage() {
+  return (
+    <AdminPage>
+      <NewBlogPost />
+    </AdminPage>
   );
 }
