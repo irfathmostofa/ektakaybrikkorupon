@@ -823,16 +823,16 @@
 }
 .tj-hand-idle {
   transform-box: fill-box;
-  transform-origin: 88% 70%;
-  animation: tj-hand 3.4s ease-in-out infinite;
+  transform-origin: 50% 0%;
+  animation: tj-hand 3.2s ease-in-out infinite;
 }
 @keyframes tj-hand {
   0%,
   100% {
-    transform: rotate(-2deg) translate(0, 0);
+    transform: translateY(0);
   }
   50% {
-    transform: rotate(2.4deg) translate(-4px, 3px);
+    transform: translateY(5px);
   }
 }
 @keyframes tj-bounce {

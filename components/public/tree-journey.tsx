@@ -168,62 +168,16 @@ function Branch({ d, w, grp }: { d: string; w: number; grp: string }) {
 
 function DonateHand() {
   return (
-    <g id="tj-hand">
+    <g id="tj-hand" aria-hidden="true">
       <g className="tj-hand-idle">
-        <path
-          d="M268 18 C330 -8 430 8 520 78 C504 102 412 62 292 52 C274 36 258 22 268 18Z"
-          fill="#5a8a56"
-        />
-        <path
-          d="M276 24 C336 4 424 28 500 78 C488 90 416 52 286 46Z"
-          fill="#3d6843"
-          opacity={0.35}
-        />
-        <path
-          d="M248 8 C276 -8 296 22 284 52 C258 64 236 34 248 8Z"
-          fill="#eef5dc"
-        />
-        <path
-          d="M256 16 C276 6 284 34 276 50"
-          fill="none"
-          stroke="#c5d6a8"
-          strokeWidth={3}
-          strokeLinecap="round"
-        />
-        <path
-          d="M154 42 C148 22 166 6 190 12 C204 28 238 34 262 28 C284 24 304 40 306 62 C312 86 296 108 270 116 C236 126 188 118 164 100 C144 86 148 62 154 42Z"
-          fill="#f2cbb0"
-        />
-        <path
-          d="M186 48 C204 58 236 62 260 52 C266 72 252 94 224 100 C194 104 176 86 186 48Z"
-          fill="#e2b08a"
-          opacity={0.4}
-        />
-        <path
-          d="M158 36 C138 28 122 14 128 0 C134 -14 154 -12 166 0 C176 12 176 30 162 40Z"
-          fill="#f4d0b6"
-        />
-        <ellipse cx="140" cy="-2" rx="6" ry="7.6" fill="#f7e0d0" transform="rotate(-24 140 -2)" />
-        <path
-          d="M176 20 C166 4 158 -14 168 -18 C180 -22 192 -10 194 4 C196 18 188 30 178 34Z"
-          fill="#f4d0b6"
-        />
-        <ellipse cx="174" cy="-12" rx="5.4" ry="7" fill="#f7e0d0" />
-        <path
-          d="M198 18 C192 -2 192 -20 204 -20 C216 -24 228 -10 226 6 C224 20 212 30 202 32Z"
-          fill="#f2cbb0"
-        />
-        <ellipse cx="210" cy="-14" rx="5.4" ry="7.2" fill="#f7e0d0" />
-        <path
-          d="M222 28 C218 10 224 -8 236 -10 C248 -12 258 2 256 18 C254 30 240 38 228 40Z"
-          fill="#efc4a6"
-        />
-        <ellipse cx="242" cy="-4" rx="5" ry="6.6" fill="#f7e0d0" />
-        <path
-          d="M246 50 C248 36 256 24 268 24 C280 24 286 38 282 50 C278 62 264 68 250 64Z"
-          fill="#e8b898"
-        />
-        <ellipse cx="274" cy="30" rx="4.4" ry="5.8" fill="#f7e0d0" />
+        <g fill="#f3c4a0" stroke="#f3c4a0" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M206 -88 L206 8" strokeWidth={34} />
+          <circle cx={200} cy={24} r={24} stroke="none" />
+          <path d="M176 20 C162 26 154 42 160 58" fill="none" strokeWidth={13} />
+          <path d="M188 24 C176 34 172 52 178 66" fill="none" strokeWidth={14} />
+          <path d="M200 26 C192 38 192 56 198 70" fill="none" strokeWidth={14} />
+          <path d="M222 12 C238 18 244 34 236 48" fill="none" strokeWidth={16} />
+        </g>
       </g>
     </g>
   );
@@ -632,11 +586,8 @@ export function TreeJourney({
       if (hand) {
         const release = clamp(g / (d1 * 0.3));
         const recede = ease.in(release);
-        const op = 1 - smooth(g, d1 * 0.1, d1 * 0.42);
-        hand.setAttribute(
-          "transform",
-          `translate(${(42 * recede).toFixed(1)} ${(-10 * recede).toFixed(1)}) rotate(${(16 * recede).toFixed(2)} 268 78)`,
-        );
+        const op = 1 - smooth(g, d1 * 0.06, d1 * 0.36);
+        hand.setAttribute("transform", `translate(0 ${(-52 * recede).toFixed(1)})`);
         hand.setAttribute("opacity", op.toFixed(3));
         hand.setAttribute("visibility", op <= 0.01 ? "hidden" : "visible");
       }
