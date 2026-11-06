@@ -154,28 +154,36 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-16">
-        <h2 className="font-heading text-3xl">{dict.about.team}</h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {team.map((member) => (
-            <article key={member.id} className="overflow-hidden rounded-2xl border border-border bg-card">
-              <NatureImage
-                src={member.photo_url}
-                alt={pickLocalized(locale, member.full_name, member.full_name_en)}
-              />
-              <div className="border-t border-border bg-secondary/50 px-5 py-4">
-                <h3 className="font-heading text-lg">
-                  {pickLocalized(locale, member.full_name, member.full_name_en)}
-                </h3>
-                <p className="text-sm text-primary">
-                  {pickLocalized(locale, member.role_title, member.role_title_en)}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {pickLocalized(locale, member.bio, member.bio_en)}
-                </p>
-              </div>
-            </article>
-          ))}
+      <section className="overflow-x-hidden py-12 sm:py-16">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <h2 className="font-heading text-2xl sm:text-3xl">{dict.about.team}</h2>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
+            {team.map((member) => (
+              <article
+                key={member.id}
+                className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card"
+              >
+                <NatureImage
+                  src={member.photo_url}
+                  alt={pickLocalized(locale, member.full_name, member.full_name_en)}
+                  className="aspect-[4/5] rounded-none"
+                  imageClassName="object-top"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                />
+                <div className="flex min-w-0 flex-1 flex-col px-4 py-4 sm:px-5">
+                  <h3 className="font-heading text-lg break-words">
+                    {pickLocalized(locale, member.full_name, member.full_name_en)}
+                  </h3>
+                  <p className="mt-1 text-sm break-words text-primary">
+                    {pickLocalized(locale, member.role_title, member.role_title_en)}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 break-words text-muted-foreground">
+                    {pickLocalized(locale, member.bio, member.bio_en)}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
     </>

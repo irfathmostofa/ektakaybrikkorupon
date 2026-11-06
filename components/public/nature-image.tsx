@@ -6,12 +6,14 @@ export function NatureImage({
   src,
   alt,
   className,
+  imageClassName,
   sizes = "(min-width: 1024px) 33vw, 100vw",
   priority = false,
 }: {
   src?: string | null;
   alt: string;
   className?: string;
+  imageClassName?: string;
   sizes?: string;
   priority?: boolean;
 }) {
@@ -37,7 +39,7 @@ export function NatureImage({
         fill
         sizes={sizes}
         priority={priority}
-        className="object-cover"
+        className={cn("object-cover", imageClassName)}
       />
     </div>
   );
