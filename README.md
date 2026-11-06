@@ -50,6 +50,9 @@ supabase/phase4.sql
 
 # Donation extra fields and finance transaction index
 supabase/phase5.sql
+
+# Demo content matching the current public site
+supabase/seed.sql
 ```
 
 Then promote the first authenticated user to `super_admin` in `public.users`.
