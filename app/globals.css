@@ -152,6 +152,11 @@
   html {
     @apply font-sans;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
   h1,
   h2,
   h3,
@@ -232,7 +237,7 @@
   --tj-ground: 3.25rem;
   --tj-top: 6.6rem;
   --tj-h: max(30rem, calc(100svh - 4.25rem));
-  --tj-run: 270svh;
+  --tj-run: 320svh;
   position: relative;
 }
 
@@ -261,6 +266,7 @@
 
 .tj-track {
   height: calc(var(--tj-h) + var(--tj-run));
+  overflow-anchor: none;
 }
 /* hero info layer: centered over the animated sky first, then fades out to reveal the tree */
 .tj-hero {
@@ -269,13 +275,17 @@
   z-index: 20;
   overflow: hidden;
   background: linear-gradient(var(--tj-sky1), var(--tj-sky2) 55%, var(--tj-sky3));
+  will-change: opacity, transform;
+  transform-origin: 50% 42%;
+  backface-visibility: hidden;
 }
 /* until the hero info fades, keep the tree, HUD, chips and story cards out of sight */
 .tj-stage[data-hero] .tj-tree,
 .tj-stage[data-hero] .tj-top,
 .tj-stage[data-hero] .tj-cards,
 .tj-stage[data-hero] .tj-burst-layer {
-  opacity: calc(1 - var(--tj-intro, 0));
+  opacity: var(--tj-scene, 0);
+  will-change: opacity;
 }
 @media (min-width: 900px) {
   /* desktop: the real scene (sun, clouds, birds, hills) shows through behind the centered text */
@@ -673,7 +683,7 @@
   .tj {
     --tj-ground: 4rem;
     --tj-top: 4.5rem;
-    --tj-run: 310svh;
+    --tj-run: 360svh;
   }
   .tj-stage {
     display: block;
@@ -809,6 +819,20 @@
   }
   50% {
     transform: translateY(-4px);
+  }
+}
+.tj-hand-idle {
+  transform-box: fill-box;
+  transform-origin: 88% 70%;
+  animation: tj-hand 3.4s ease-in-out infinite;
+}
+@keyframes tj-hand {
+  0%,
+  100% {
+    transform: rotate(-2deg) translate(0, 0);
+  }
+  50% {
+    transform: rotate(2.4deg) translate(-4px, 3px);
   }
 }
 @keyframes tj-bounce {

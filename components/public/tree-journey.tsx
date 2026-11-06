@@ -25,7 +25,11 @@ const END = 0.88;
 const F1 = 0.26;
 const F2 = 0.58;
 /** Share of the pinned scroll used to show the hero info before the tree starts growing. */
-const INTRO = 0.12;
+const INTRO = 0.22;
+/** Scene (tree, HUD, cards) starts fading in while the hero is still dissolving. */
+const SCENE_IN = 0.08;
+/** Scene is fully visible at this share of the pinned scroll. */
+const SCENE_READY = 0.26;
 /** Scroll targets (growth progress) for the stage buttons. */
 const STAGE_GOALS = [0.2, 0.5, 1] as const;
 /** Desktop tree offset per stage, as a share of the stage width. */
@@ -159,6 +163,69 @@ function Branch({ d, w, grp }: { d: string; w: number; grp: string }) {
       strokeDashoffset={1}
       visibility="hidden"
     />
+  );
+}
+
+function DonateHand() {
+  return (
+    <g id="tj-hand">
+      <g className="tj-hand-idle">
+        <path
+          d="M268 18 C330 -8 430 8 520 78 C504 102 412 62 292 52 C274 36 258 22 268 18Z"
+          fill="#5a8a56"
+        />
+        <path
+          d="M276 24 C336 4 424 28 500 78 C488 90 416 52 286 46Z"
+          fill="#3d6843"
+          opacity={0.35}
+        />
+        <path
+          d="M248 8 C276 -8 296 22 284 52 C258 64 236 34 248 8Z"
+          fill="#eef5dc"
+        />
+        <path
+          d="M256 16 C276 6 284 34 276 50"
+          fill="none"
+          stroke="#c5d6a8"
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+        <path
+          d="M154 42 C148 22 166 6 190 12 C204 28 238 34 262 28 C284 24 304 40 306 62 C312 86 296 108 270 116 C236 126 188 118 164 100 C144 86 148 62 154 42Z"
+          fill="#f2cbb0"
+        />
+        <path
+          d="M186 48 C204 58 236 62 260 52 C266 72 252 94 224 100 C194 104 176 86 186 48Z"
+          fill="#e2b08a"
+          opacity={0.4}
+        />
+        <path
+          d="M158 36 C138 28 122 14 128 0 C134 -14 154 -12 166 0 C176 12 176 30 162 40Z"
+          fill="#f4d0b6"
+        />
+        <ellipse cx="140" cy="-2" rx="6" ry="7.6" fill="#f7e0d0" transform="rotate(-24 140 -2)" />
+        <path
+          d="M176 20 C166 4 158 -14 168 -18 C180 -22 192 -10 194 4 C196 18 188 30 178 34Z"
+          fill="#f4d0b6"
+        />
+        <ellipse cx="174" cy="-12" rx="5.4" ry="7" fill="#f7e0d0" />
+        <path
+          d="M198 18 C192 -2 192 -20 204 -20 C216 -24 228 -10 226 6 C224 20 212 30 202 32Z"
+          fill="#f2cbb0"
+        />
+        <ellipse cx="210" cy="-14" rx="5.4" ry="7.2" fill="#f7e0d0" />
+        <path
+          d="M222 28 C218 10 224 -8 236 -10 C248 -12 258 2 256 18 C254 30 240 38 228 40Z"
+          fill="#efc4a6"
+        />
+        <ellipse cx="242" cy="-4" rx="5" ry="6.6" fill="#f7e0d0" />
+        <path
+          d="M246 50 C248 36 256 24 268 24 C280 24 286 38 282 50 C278 62 264 68 250 64Z"
+          fill="#e8b898"
+        />
+        <ellipse cx="274" cy="30" rx="4.4" ry="5.8" fill="#f7e0d0" />
+      </g>
+    </g>
   );
 }
 
@@ -343,7 +410,7 @@ const TreeArt = memo(function TreeArt({ label }: { label: string }) {
         ))}
       </g>
 
-      {/* the 1 taka coin that becomes the seed */}
+      <DonateHand />
       <g id="tj-coin">
         <circle cx="200" cy="30" r="34" fill="url(#tj-fg)" />
         <circle cx="200" cy="30" r="15" fill="#e6c071" stroke="#c99a45" strokeWidth={2.5} />
@@ -483,24 +550,35 @@ export function TreeJourney({
     const trunk = tree.querySelector<SVGRectElement>("#tj-tr");
     const group = tree.querySelector<SVGGElement>("#tj-tg");
     const coin = tree.querySelector<SVGGElement>("#tj-coin");
+    const hand = tree.querySelector<SVGGElement>("#tj-hand");
 
     let topPx = 0;
     let stageW = 0;
     let wide = wideMq.matches;
     let target = 0;
     let cur = 0;
+    let scrollP = 0;
+    let curP = 0;
     let raf = 0;
     let lastStage = -1;
     let lastHud = "";
+    let lastHeroVis = true;
 
     const heroEl = heroRef.current;
-    const applyHero = (h: number) => {
+    const applyHero = (p: number) => {
       if (!heroEl) return;
-      const o = 1 - smooth(h, 0, 1);
+      const o = 1 - smooth(p, 0, INTRO);
+      const lift = smooth(p, 0, INTRO);
       heroEl.style.opacity = o.toFixed(3);
-      heroEl.style.visibility = o <= 0.01 ? "hidden" : "visible";
-      heroEl.style.pointerEvents = o < 0.6 ? "none" : "auto";
+      heroEl.style.transform = `translate3d(0, ${(-18 * lift).toFixed(2)}px, 0) scale(${(1 - 0.035 * lift).toFixed(4)})`;
+      const vis = o > 0.01;
+      if (vis !== lastHeroVis) {
+        lastHeroVis = vis;
+        heroEl.style.visibility = vis ? "visible" : "hidden";
+      }
+      heroEl.style.pointerEvents = o < 0.55 ? "none" : "auto";
       stageEl.style.setProperty("--tj-intro", o.toFixed(3));
+      stageEl.style.setProperty("--tj-scene", smooth(p, SCENE_IN, SCENE_READY).toFixed(3));
     };
 
     const readTarget = () => {
@@ -508,9 +586,8 @@ export function TreeJourney({
       const sh = stageEl.offsetHeight;
       const run = Math.max(1, r.height - sh);
       if (heroEl) {
-        const sp = clamp((topPx - r.top) / run);
-        applyHero(clamp(sp / INTRO));
-        target = clamp(clamp((sp - INTRO) / (1 - INTRO)) / END);
+        scrollP = clamp((topPx - r.top) / run);
+        target = clamp(clamp((scrollP - INTRO) / (1 - INTRO)) / END);
         return;
       }
       const lead = sh * 0.3;
@@ -552,6 +629,18 @@ export function TreeJourney({
         coin.setAttribute("opacity", String(1 - fade));
       }
 
+      if (hand) {
+        const release = clamp(g / (d1 * 0.3));
+        const recede = ease.in(release);
+        const op = 1 - smooth(g, d1 * 0.1, d1 * 0.42);
+        hand.setAttribute(
+          "transform",
+          `translate(${(42 * recede).toFixed(1)} ${(-10 * recede).toFixed(1)}) rotate(${(16 * recede).toFixed(2)} 268 78)`,
+        );
+        hand.setAttribute("opacity", op.toFixed(3));
+        hand.setAttribute("visibility", op <= 0.01 ? "hidden" : "visible");
+      }
+
       if (wide) {
         const o =
           OFFSETS[0] +
@@ -580,9 +669,14 @@ export function TreeJourney({
     const tick = () => {
       raf = 0;
       const d = target - cur;
-      cur = reduce || Math.abs(d) < 0.0004 ? target : cur + d * 0.14;
+      cur = reduce || Math.abs(d) < 0.00025 ? target : cur + d * 0.085;
+      if (heroEl) {
+        const dp = scrollP - curP;
+        curP = reduce || Math.abs(dp) < 0.00025 ? scrollP : curP + dp * 0.1;
+        applyHero(curP);
+      }
       render(cur);
-      if (cur !== target) raf = requestAnimationFrame(tick);
+      if (cur !== target || (heroEl && curP !== scrollP)) raf = requestAnimationFrame(tick);
     };
     const kick = () => {
       if (!raf) raf = requestAnimationFrame(tick);
@@ -594,6 +688,8 @@ export function TreeJourney({
       wide = wideMq.matches;
       readTarget();
       cur = target;
+      curP = scrollP;
+      if (heroEl) applyHero(curP);
       render(cur);
     };
 
@@ -743,7 +839,11 @@ export function TreeJourney({
           className="tj-stage"
           data-stage={stage}
           data-hero={embedded ? "" : undefined}
-          style={embedded ? ({ "--tj-intro": 1 } as CSSProperties) : undefined}
+          style={
+            embedded
+              ? ({ "--tj-intro": 1, "--tj-scene": 0 } as CSSProperties)
+              : undefined
+          }
         >
           {hero ? (
             <div ref={heroRef} className="tj-hero">
