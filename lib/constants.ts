@@ -83,7 +83,7 @@ export const PUBLIC_NAV = [
   { href: "/achievements", key: "achievements" },
   { href: "/transparency", key: "transparency" },
   { href: "/membership", key: "membership" },
-  { href: "/careers", key: "careers" },
+  // { href: "/careers", key: "careers" },
   { href: "/blog", key: "blog" },
   { href: "/contact", key: "contact" },
 ] as const;
