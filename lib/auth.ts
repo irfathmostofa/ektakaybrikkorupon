@@ -47,3 +47,7 @@ export async function requireStaff() {
 export function isAdminRole(role: User["role"]) {
   return role === "super_admin" || role === "admin";
 }
+
+export function isSuperAdmin(role: User["role"]) {
+  return role === "super_admin";
+}

@@ -3,8 +3,10 @@ import { listJobApplications, listJobPostings } from "@/actions/careers";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { CareerManager } from "@/components/admin/career-manager";
+import { requireMenu } from "@/lib/admin/access";
 
 async function AdminCareers() {
+  await requireMenu("careers");
   const [jobs, applications] = await Promise.all([
     listJobPostings(),
     listJobApplications(),

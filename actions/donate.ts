@@ -11,6 +11,7 @@ import {
   donationInputSchema,
   parseCauseId,
 } from "@/lib/payments/schema";
+import { FALLBACK_PACKAGES } from "@/lib/content/packages";
 import {
   createSslcommerzSession,
 } from "@/lib/payments/sslcommerz";
@@ -83,6 +84,27 @@ export async function initiateDonationAction(
     causeTitle = pickLocalized(locale, cause.title, cause.title_en);
   }
 
+  let packageId = parseCauseId(values.package_id);
+  if (values.package_id && !packageId) {
+    const fallback = FALLBACK_PACKAGES.find((item) => item.id === values.package_id);
+    if (fallback) {
+      packageId = null;
+    }
+  }
+  if (packageId) {
+    const publicClient = createPublicClient();
+    const { data: pack } = await publicClient
+      .from("donation_packages")
+      .select("id, name, name_en, is_active")
+      .eq("id", packageId)
+      .maybeSingle();
+    if (!pack || !pack.is_active) {
+      packageId = null;
+    } else {
+      causeTitle = pickLocalized(locale, pack.name, pack.name_en) || causeTitle;
+    }
+  }
+
   const transactionId = createTransactionId();
   const admin = createAdminClient();
   const { data: donation, error } = await admin
@@ -96,6 +118,7 @@ export async function initiateDonationAction(
       amount: values.amount,
       transaction_id: transactionId,
       cause_id: causeId,
+      package_id: packageId,
       status: "pending",
       locale,
     })

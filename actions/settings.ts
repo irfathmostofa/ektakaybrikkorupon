@@ -2,11 +2,14 @@
 
 import { revalidateTag } from "next/cache";
 import { CACHE_TAGS, VISIBILITY_KEYS } from "@/lib/constants";
-import { requireStaff, isAdminRole } from "@/lib/auth";
+import { requireMenu } from "@/lib/admin/access";
+import { parseRoleMenus } from "@/lib/admin/access";
+import { isAdminRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import {
   DEFAULT_SITE_THEME,
   DEFAULT_SITE_VISIBILITY,
+  type RoleMenus,
   type SiteSettings,
   type SiteTheme,
   type SiteVisibility,
@@ -18,6 +21,25 @@ export type ActionState = {
   error?: string;
   success?: string;
 };
+
+function asSettings(data: SiteSettings | null): SiteSettings | null {
+  if (!data) {
+    return null;
+  }
+  return {
+    ...data,
+    social_links: data.social_links ?? {},
+    visibility: {
+      ...DEFAULT_SITE_VISIBILITY,
+      ...(data.visibility ?? {}),
+    },
+    theme: {
+      ...DEFAULT_SITE_THEME,
+      ...(data.theme ?? {}),
+    },
+    role_menus: parseRoleMenus(data.role_menus),
+  };
+}
 
 export async function getSiteSettings() {
   const supabase = await createClient();
@@ -31,21 +53,7 @@ export async function getSiteSettings() {
     throw new Error(error.message);
   }
 
-  if (!data) {
-    return null;
-  }
-
-  return {
-    ...data,
-    visibility: {
-      ...DEFAULT_SITE_VISIBILITY,
-      ...(data.visibility ?? {}),
-    },
-    theme: {
-      ...DEFAULT_SITE_THEME,
-      ...(data.theme ?? {}),
-    },
-  } as SiteSettings;
+  return asSettings(data as SiteSettings | null);
 }
 
 function parseVisibility(formData: FormData): SiteVisibility {
@@ -77,7 +85,7 @@ export async function updateSiteSettingsAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireStaff();
+  const user = await requireMenu("settings");
 
   if (!isAdminRole(user.role)) {
     return { error: "Only admins can update site settings." };
@@ -148,6 +156,34 @@ export async function updateSiteSettingsAction(
 
   revalidateTag(CACHE_TAGS.siteSettings, "max");
   return { success: "Settings saved." };
+}
+
+export async function updateRoleMenusAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireMenu("users");
+  if (user.role !== "super_admin") {
+    return { error: "Only super admins can set role menus." };
+  }
+
+  const menus: RoleMenus = {
+    admin: formData.getAll("admin_menus").map(String),
+    editor: formData.getAll("editor_menus").map(String),
+  };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .update({ role_menus: menus })
+    .eq("id", 1);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidateTag(CACHE_TAGS.siteSettings, "max");
+  return { success: "Role access saved." };
 }
 
 export type SiteSettingsRow = SiteSettings;

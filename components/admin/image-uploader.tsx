@@ -20,10 +20,12 @@ export function ImageUploader({
   name,
   label,
   defaultValue,
+  library = true,
 }: {
   name: string;
   label: string;
   defaultValue?: string | null;
+  library?: boolean;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue ?? "");
@@ -108,17 +110,19 @@ export function ImageUploader({
         >
           {pending ? "Uploading..." : "Upload from device"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setLibraryOpen(true);
-            void loadLibrary();
-          }}
-        >
-          Choose from Media Library
-        </Button>
+        {library ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLibraryOpen(true);
+              void loadLibrary();
+            }}
+          >
+            Choose from library
+          </Button>
+        ) : null}
         {url ? (
           <Button
             type="button"

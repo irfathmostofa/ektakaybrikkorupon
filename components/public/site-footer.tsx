@@ -25,10 +25,14 @@ export function SiteFooter({
   const socials = Object.entries(settings.social_links ?? {}).filter(
     ([, url]) => Boolean(url),
   );
+  const links = PUBLIC_NAV.filter((item) => settings.visibility[item.key] !== false);
+  const mid = Math.ceil(links.length / 2);
+  const leftLinks = links.slice(0, mid);
+  const rightLinks = links.slice(mid);
 
   return (
     <footer className="mt-auto bg-canopy text-canopy-foreground">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
           <p className="flex items-center gap-2 font-heading text-lg">
             <Leaf className="size-4 text-accent" />
@@ -37,16 +41,13 @@ export function SiteFooter({
           <p className="max-w-sm text-sm leading-7 text-canopy-foreground/80">
             {dict.brand.conservation}
           </p>
-          {address ? (
-            <p className="text-sm text-canopy-foreground/70">{address}</p>
-          ) : null}
         </div>
         <div>
           <p className="text-xs font-medium tracking-[0.18em] uppercase opacity-70">
-            {dict.nav.home}
+            {dict.footer.explore}
           </p>
           <nav className="mt-4 grid gap-2 text-sm">
-            {PUBLIC_NAV.filter((item) => settings.visibility[item.key] !== false).map((item) => (
+            {leftLinks.map((item) => (
               <Link
                 key={item.href}
                 href={localizeHref(locale, item.href)}
@@ -59,9 +60,28 @@ export function SiteFooter({
         </div>
         <div>
           <p className="text-xs font-medium tracking-[0.18em] uppercase opacity-70">
-            {dict.footer.follow}
+            {dict.footer.pages}
+          </p>
+          <nav className="mt-4 grid gap-2 text-sm">
+            {rightLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={localizeHref(locale, item.href)}
+                className="text-canopy-foreground/80 hover:text-canopy-foreground"
+              >
+                {dict.nav[item.key]}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div>
+          <p className="text-xs font-medium tracking-[0.18em] uppercase opacity-70">
+            {dict.nav.contact}
           </p>
           <div className="mt-4 flex flex-col gap-2 text-sm">
+            {address ? (
+              <p className="text-canopy-foreground/80">{address}</p>
+            ) : null}
             {settings.contact_email ? (
               <a
                 href={`mailto:${settings.contact_email}`}

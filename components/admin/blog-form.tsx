@@ -132,6 +132,7 @@ export function BlogForm({
         name="cover_image_url"
         label="Featured image"
         defaultValue={post?.cover_image_url}
+        library={false}
       />
       <FormMessage state={state} />
       <SubmitButton>{post ? "Update post" : "Create post"}</SubmitButton>

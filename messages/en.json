@@ -22,7 +22,9 @@
   },
   "footer": {
     "rights": "All rights reserved",
-    "follow": "Follow our work"
+    "follow": "Follow our work",
+    "explore": "Explore",
+    "pages": "Pages"
   },
   "actions": {
     "readMore": "Read more",

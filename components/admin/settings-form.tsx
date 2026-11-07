@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { THEME_FONTS, VISIBILITY_KEYS } from "@/lib/constants";
-import type { SiteSettings } from "@/lib/types/database";
+import { DEFAULT_SITE_THEME, DEFAULT_SITE_VISIBILITY, type SiteSettings } from "@/lib/types/database";
 
 const initialState: ActionState = {};
 
@@ -44,6 +44,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
     updateSiteSettingsAction,
     initialState,
   );
+  const social = settings.social_links ?? {};
+  const visibility = { ...DEFAULT_SITE_VISIBILITY, ...(settings.visibility ?? {}) };
+  const theme = { ...DEFAULT_SITE_THEME, ...(settings.theme ?? {}) };
 
   return (
     <form action={formAction} className="space-y-6">
@@ -114,31 +117,11 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                   defaultValue={settings.favicon_url}
                 />
               </div>
-              <Field
-                label="Facebook"
-                name="facebook"
-                defaultValue={settings.social_links.facebook}
-              />
-              <Field
-                label="Twitter"
-                name="twitter"
-                defaultValue={settings.social_links.twitter}
-              />
-              <Field
-                label="Instagram"
-                name="instagram"
-                defaultValue={settings.social_links.instagram}
-              />
-              <Field
-                label="LinkedIn"
-                name="linkedin"
-                defaultValue={settings.social_links.linkedin}
-              />
-              <Field
-                label="YouTube"
-                name="youtube"
-                defaultValue={settings.social_links.youtube}
-              />
+              <Field label="Facebook" name="facebook" defaultValue={social.facebook} />
+              <Field label="Twitter" name="twitter" defaultValue={social.twitter} />
+              <Field label="Instagram" name="instagram" defaultValue={social.instagram} />
+              <Field label="LinkedIn" name="linkedin" defaultValue={social.linkedin} />
+              <Field label="YouTube" name="youtube" defaultValue={social.youtube} />
               <Field
                 label="Meta title (Bangla)"
                 name="meta_title"
@@ -180,7 +163,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                   <input
                     type="checkbox"
                     name={`visibility_${key}`}
-                    defaultChecked={settings.visibility[key]}
+                    defaultChecked={visibility[key]}
                   />
                   Show {key}
                 </label>
@@ -200,7 +183,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Input
                   id="theme_primary"
                   name="theme_primary"
-                  defaultValue={settings.theme.primary}
+                  defaultValue={theme.primary}
                 />
               </div>
               <div className="space-y-2">
@@ -208,7 +191,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Input
                   id="theme_secondary"
                   name="theme_secondary"
-                  defaultValue={settings.theme.secondary}
+                  defaultValue={theme.secondary}
                 />
               </div>
               <div className="space-y-2">
@@ -216,7 +199,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <select
                   id="theme_heading_font"
                   name="theme_heading_font"
-                  defaultValue={settings.theme.heading_font}
+                  defaultValue={theme.heading_font}
                   className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
                 >
                   {THEME_FONTS.map((font) => (
@@ -231,7 +214,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <select
                   id="theme_body_font"
                   name="theme_body_font"
-                  defaultValue={settings.theme.body_font}
+                  defaultValue={theme.body_font}
                   className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
                 >
                   {THEME_FONTS.map((font) => (
@@ -246,7 +229,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <select
                   id="theme_mode"
                   name="theme_mode"
-                  defaultValue={settings.theme.mode}
+                  defaultValue={theme.mode}
                   className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
                 >
                   <option value="light">Light</option>

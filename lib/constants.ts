@@ -9,6 +9,10 @@ export const CACHE_TAGS = {
   finance: "finance",
   membership: "membership",
   careers: "careers",
+  donations: "donations",
+  packages: "packages",
+  campaigns: "campaigns",
+  subscribers: "subscribers",
 } as const;
 
 export const REVALIDATE_SECONDS = {
@@ -73,6 +77,15 @@ export const JOB_APPLICATION_STATUSES = [
   "shortlisted",
   "rejected",
 ] as const;
+
+export const CAMPAIGN_STATUSES = [
+  "draft",
+  "sending",
+  "sent",
+  "partially_failed",
+] as const;
+
+export const CAMPAIGN_AUDIENCES = ["subscribers", "members", "both"] as const;
 
 export const MEDIA_BUCKET = "media";
 

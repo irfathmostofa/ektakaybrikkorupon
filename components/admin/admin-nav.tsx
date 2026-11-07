@@ -7,44 +7,57 @@ import {
   Briefcase,
   FileText,
   FolderOpen,
+  Gift,
   HeartHandshake,
-  ImageIcon,
   Images,
   LayoutDashboard,
+  Mail,
+  Package,
   Settings,
+  UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
+import {
+  ADMIN_MENU_HREFS,
+  ADMIN_MENU_LABELS,
+  type AdminMenuKey,
+} from "@/lib/admin/menus";
 
-const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/causes", label: "Causes", icon: HeartHandshake },
-  { href: "/admin/blog", label: "Blog", icon: FileText },
-  { href: "/admin/pages", label: "Pages", icon: FolderOpen },
-  { href: "/admin/gallery", label: "Gallery", icon: Images },
-  { href: "/admin/achievements", label: "Achievements", icon: Award },
-  { href: "/admin/finance", label: "Finance", icon: Wallet },
-  { href: "/admin/membership", label: "Membership", icon: Users },
-  { href: "/admin/careers", label: "Careers", icon: Briefcase },
-  { href: "/admin/media", label: "Media", icon: ImageIcon },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
-] as const;
+const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
+  dashboard: LayoutDashboard,
+  causes: HeartHandshake,
+  blog: FileText,
+  pages: FolderOpen,
+  gallery: Images,
+  achievements: Award,
+  finance: Wallet,
+  membership: Users,
+  careers: Briefcase,
+  donations: Gift,
+  packages: Package,
+  campaigns: Mail,
+  subscribers: UserPlus,
+  users: Users,
+  settings: Settings,
+};
 
-export function AdminNav() {
+export function AdminNav({ menus }: { menus: AdminMenuKey[] }) {
   const pathname = usePathname() || "/admin";
 
   return (
     <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-      {NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
+      {menus.map((key) => {
+        const href = ADMIN_MENU_HREFS[key];
+        const Icon = ICONS[key];
         const active =
-          item.href === "/admin"
+          href === "/admin"
             ? pathname === "/admin"
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
-            key={item.href}
-            href={item.href}
+            key={href}
+            href={href}
             prefetch
             className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
               active
@@ -53,7 +66,7 @@ export function AdminNav() {
             }`}
           >
             <Icon className="size-4" />
-            {item.label}
+            {ADMIN_MENU_LABELS[key]}
           </Link>
         );
       })}

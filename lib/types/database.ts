@@ -22,6 +22,8 @@ export type JobApplicationStatus =
   | "shortlisted"
   | "rejected";
 export type ContentLocale = "bn" | "en";
+export type CampaignStatus = "draft" | "sending" | "sent" | "partially_failed";
+export type CampaignAudience = "subscribers" | "members" | "both";
 
 export type SocialLinks = {
   facebook?: string;
@@ -101,6 +103,19 @@ export type CauseProject = {
   updated_at: string;
 };
 
+export type DonationPackage = {
+  id: string;
+  name: string;
+  name_en: string | null;
+  amount: number;
+  description: string | null;
+  description_en: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Donation = {
   id: string;
   donor_name: string;
@@ -112,10 +127,13 @@ export type Donation = {
   amount: number;
   transaction_id: string | null;
   cause_id: string | null;
+  package_id: string | null;
   status: DonationStatus;
   payment_method: string | null;
   created_at: string;
   updated_at: string;
+  cause?: Pick<CauseProject, "id" | "title" | "title_en"> | null;
+  package?: Pick<DonationPackage, "id" | "name" | "name_en" | "amount"> | null;
 };
 
 export type SiteSettings = {
@@ -145,8 +163,11 @@ export type SiteSettings = {
   visitor_count: number;
   visibility: SiteVisibility;
   theme: SiteTheme;
+  role_menus: RoleMenus;
   updated_at: string;
 };
+
+export type RoleMenus = Partial<Record<UserRole, string[]>>;
 
 export type PublicSiteSettings = Pick<
   SiteSettings,
@@ -381,6 +402,29 @@ export type JobApplication = {
   created_at: string;
 };
 
+export type EmailSubscriber = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type EmailCampaign = {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  audience: CampaignAudience;
+  status: CampaignStatus;
+  sent_at: string | null;
+  recipient_count: number;
+  sent_count: number;
+  failed_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
 type Table<TRow, TInsert, TUpdate> = {
   Row: TRow;
   Insert: TInsert;
@@ -401,6 +445,11 @@ export type Database = {
         Donation,
         Partial<Donation> & Pick<Donation, "donor_name" | "donor_email" | "amount">,
         Partial<Donation>
+      >;
+      donation_packages: Table<
+        DonationPackage,
+        Partial<DonationPackage> & Pick<DonationPackage, "name" | "amount">,
+        Partial<DonationPackage>
       >;
       site_settings: Table<SiteSettings, Partial<SiteSettings>, Partial<SiteSettings>>;
       blog_posts: Table<
@@ -491,6 +540,16 @@ export type Database = {
           Pick<JobApplication, "job_id" | "full_name" | "email">,
         Partial<Pick<JobApplication, "status">>
       >;
+      email_subscribers: Table<
+        EmailSubscriber,
+        Partial<EmailSubscriber> & Pick<EmailSubscriber, "email">,
+        Partial<EmailSubscriber>
+      >;
+      email_campaigns: Table<
+        EmailCampaign,
+        Partial<EmailCampaign> & Pick<EmailCampaign, "name" | "subject">,
+        Partial<EmailCampaign>
+      >;
     };
     Views: {
       site_settings_public: {
@@ -518,6 +577,8 @@ export type Database = {
       membership_status: MembershipStatus;
       employment_type: EmploymentType;
       job_application_status: JobApplicationStatus;
+      campaign_status: CampaignStatus;
+      campaign_audience: CampaignAudience;
     };
     CompositeTypes: Record<string, never>;
   };

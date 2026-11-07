@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireMenu } from "@/lib/admin/access";
 import { requireStaff } from "@/lib/auth";
 import { formIdList, formOptional, formString } from "@/lib/admin/form";
 import { BLOG_STATUSES, CACHE_TAGS } from "@/lib/constants";
@@ -37,7 +38,7 @@ async function syncPostRelations(
 }
 
 export async function listBlogCategories(): Promise<BlogCategory[]> {
-  await requireStaff();
+  await requireMenu("blog");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("blog_categories")
@@ -50,7 +51,7 @@ export async function listBlogCategories(): Promise<BlogCategory[]> {
 }
 
 export async function listBlogTags(): Promise<BlogTag[]> {
-  await requireStaff();
+  await requireMenu("blog");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("blog_tags")
@@ -63,7 +64,7 @@ export async function listBlogTags(): Promise<BlogTag[]> {
 }
 
 export async function listBlogPosts(): Promise<BlogPost[]> {
-  await requireStaff();
+  await requireMenu("blog");
   const supabase = await createClient();
   const [{ data, error }, categories, tags] = await Promise.all([
     supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
@@ -124,7 +125,7 @@ export async function createBlogPostAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const title = formString(formData, "title");
   const slug = slugify(formString(formData, "slug")) || slugify(title);
   const status = parseBlogStatus(formString(formData, "status") || "draft");
@@ -170,7 +171,7 @@ export async function updateBlogPostAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const title = formString(formData, "title");
   const slug = slugify(formString(formData, "slug")) || slugify(title);
@@ -202,7 +203,7 @@ export async function updateBlogPostAction(
       published_at:
         status === "published"
           ? existing?.published_at ?? new Date().toISOString()
-          : existing?.published_at ?? null,
+          : null,
     })
     .eq("id", id);
 
@@ -221,8 +222,41 @@ export async function updateBlogPostAction(
   return { success: "Post updated." };
 }
 
+export async function toggleBlogPostStatusAction(formData: FormData) {
+  await requireMenu("blog");
+  const id = formString(formData, "id");
+  if (!id) {
+    return;
+  }
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("blog_posts")
+    .select("status, published_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (!existing) {
+    return;
+  }
+  const nextStatus: BlogStatus = existing.status === "published" ? "draft" : "published";
+  const { error } = await supabase
+    .from("blog_posts")
+    .update({
+      status: nextStatus,
+      published_at:
+        nextStatus === "published"
+          ? existing.published_at ?? new Date().toISOString()
+          : null,
+    })
+    .eq("id", id);
+  if (error) {
+    throw new Error(error.message);
+  }
+  revalidateTag(CACHE_TAGS.blog, "max");
+  revalidatePath("/admin/blog");
+}
+
 export async function deleteBlogPostAction(formData: FormData) {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const supabase = await createClient();
   const { error } = await supabase.from("blog_posts").delete().eq("id", id);
@@ -237,7 +271,7 @@ export async function createBlogCategoryAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const name = formString(formData, "name");
   const slug = slugify(formString(formData, "slug")) || slugify(name);
   if (!name || !slug) {
@@ -261,7 +295,7 @@ export async function updateBlogCategoryAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const name = formString(formData, "name");
   const slug = slugify(formString(formData, "slug")) || slugify(name);
@@ -282,7 +316,7 @@ export async function updateBlogCategoryAction(
 }
 
 export async function deleteBlogCategoryAction(formData: FormData) {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const supabase = await createClient();
   const { error } = await supabase.from("blog_categories").delete().eq("id", id);
@@ -297,7 +331,7 @@ export async function createBlogTagAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const name = formString(formData, "name");
   const slug = slugify(formString(formData, "slug")) || slugify(name);
   if (!name || !slug) {
@@ -321,7 +355,7 @@ export async function updateBlogTagAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const name = formString(formData, "name");
   const slug = slugify(formString(formData, "slug")) || slugify(name);
@@ -342,7 +376,7 @@ export async function updateBlogTagAction(
 }
 
 export async function deleteBlogTagAction(formData: FormData) {
-  await requireStaff();
+  await requireMenu("blog");
   const id = formString(formData, "id");
   const supabase = await createClient();
   const { error } = await supabase.from("blog_tags").delete().eq("id", id);

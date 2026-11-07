@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   createBlogCategoryAction,
   createBlogTagAction,
   deleteBlogCategoryAction,
   deleteBlogPostAction,
   deleteBlogTagAction,
+  toggleBlogPostStatusAction,
   updateBlogCategoryAction,
   updateBlogTagAction,
 } from "@/actions/blog";
@@ -68,6 +69,8 @@ export function BlogManager({
 }) {
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [creating, setCreating] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   return (
     <Tabs defaultValue="posts">
@@ -90,7 +93,7 @@ export function BlogManager({
               <TableHead>Status</TableHead>
               <TableHead>Reads</TableHead>
               <TableHead>Categories</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -117,6 +120,33 @@ export function BlogManager({
                     <Button type="button" variant="outline" size="sm" onClick={() => setEditing(post)}>
                       Edit
                     </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={pending && pendingId === post.id}
+                      onClick={() => {
+                        setPendingId(post.id);
+                        startTransition(async () => {
+                          const formData = new FormData();
+                          formData.set("id", post.id);
+                          await toggleBlogPostStatusAction(formData);
+                          setPendingId(null);
+                        });
+                      }}
+                    >
+                      {post.status === "published" ? "Unpublish" : "Publish"}
+                    </Button>
+                    {post.status === "published" ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/blog/${post.slug}`, "_blank", "noopener,noreferrer")}
+                      >
+                        View
+                      </Button>
+                    ) : null}
                     <ConfirmDelete
                       onConfirm={async () => {
                         const formData = new FormData();
@@ -141,7 +171,7 @@ export function BlogManager({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -178,7 +208,7 @@ export function BlogManager({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

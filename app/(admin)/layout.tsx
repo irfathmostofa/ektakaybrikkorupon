@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { getAccessibleMenus } from "@/lib/admin/access";
 import { requireStaff } from "@/lib/auth";
 import { noIndexMetadata } from "@/lib/seo";
 
@@ -21,10 +22,11 @@ function AdminShellFallback() {
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
+  const menus = await getAccessibleMenus(user);
 
   return (
     <div className="flex min-h-full flex-1">
-      <AdminSidebar user={user} />
+      <AdminSidebar user={user} menus={menus} />
       <div className="flex min-w-0 flex-1 flex-col bg-muted/30">
         <header className="flex h-14 items-center justify-end border-b border-border bg-background/80 px-6">
           <a

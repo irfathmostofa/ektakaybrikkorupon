@@ -8,8 +8,10 @@ import { AdminPage } from "@/components/admin/admin-page";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { BlogManager } from "@/components/admin/blog-manager";
 import { StatCard } from "@/components/admin/stat-card";
+import { requireMenu } from "@/lib/admin/access";
 
 async function AdminBlog() {
+  await requireMenu("blog");
   const [posts, categories, tags, analytics] = await Promise.all([
     listBlogPosts(),
     listBlogCategories(),

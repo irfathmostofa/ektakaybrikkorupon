@@ -3,9 +3,10 @@ import { listMembershipApplications, listMembershipPlans } from "@/actions/membe
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { MembershipManager } from "@/components/admin/membership-manager";
-
+import { requireMenu } from "@/lib/admin/access";
 
 async function AdminMembership() {
+  await requireMenu("membership");
   const [plans, applications] = await Promise.all([
     listMembershipPlans(),
     listMembershipApplications(),

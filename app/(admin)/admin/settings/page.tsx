@@ -2,11 +2,11 @@ import { getSiteSettings } from "@/actions/settings";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { SettingsForm } from "@/components/admin/settings-form";
-import { requireStaff } from "@/lib/auth";
+import { requireMenu } from "@/lib/admin/access";
 import { FALLBACK_SITE_SETTINGS } from "@/lib/cache";
 
 async function AdminSettings() {
-  await requireStaff();
+  await requireMenu("settings");
   const settings = await getSiteSettings();
 
   return (
@@ -28,6 +28,7 @@ async function AdminSettings() {
             emailjs_template_id: null,
             emailjs_public_key: null,
             emailjs_private_key: null,
+            role_menus: {},
             updated_at: "1970-01-01T00:00:00.000Z",
           }
         }
