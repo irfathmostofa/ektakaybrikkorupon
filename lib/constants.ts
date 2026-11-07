@@ -13,6 +13,7 @@ export const CACHE_TAGS = {
   packages: "packages",
   campaigns: "campaigns",
   subscribers: "subscribers",
+  magazines: "magazines",
 } as const;
 
 export const REVALIDATE_SECONDS = {
@@ -49,6 +50,7 @@ export const PAGE_KEYS = [
   "transparency",
   "membership",
   "careers",
+  "magazines",
 ] as const;
 
 export const ABOUT_SECTION_TYPES = [
@@ -99,6 +101,7 @@ export const VISIBILITY_KEYS = [
   "careers",
   "blog",
   "contact",
+  "magazines",
 ] as const;
 
 export const PUBLIC_NAV = [
@@ -110,6 +113,7 @@ export const PUBLIC_NAV = [
   { href: "/membership", key: "membership" },
   // { href: "/careers", key: "careers" },
   { href: "/blog", key: "blog" },
+  { href: "/magazines", key: "magazines" },
   { href: "/contact", key: "contact" },
 ] as const;
 

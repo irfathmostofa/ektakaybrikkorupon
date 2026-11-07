@@ -3,6 +3,7 @@ import {
   getGalleryAlbums,
   getJobPostings,
   getPublishedCauses,
+  getPublishedMagazines,
   getPublishedPosts,
 } from "@/lib/content/public";
 import { locales, localizeHref, type Locale } from "@/lib/i18n/config";
@@ -18,6 +19,7 @@ const STATIC_PATHS = [
   "/membership",
   "/careers",
   "/blog",
+  "/magazines",
   "/contact",
   "/donate",
 ] as const;
@@ -51,11 +53,12 @@ function localizedEntries(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [causes, posts, albums, jobs] = await Promise.all([
+  const [causes, posts, albums, jobs, magazines] = await Promise.all([
     getPublishedCauses(),
     getPublishedPosts(),
     getGalleryAlbums(),
     getJobPostings(),
+    getPublishedMagazines(),
   ]);
 
   return [
@@ -91,6 +94,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly",
         priority: 0.6,
         lastModified: job.deadline,
+      }),
+    ),
+    ...magazines.flatMap((magazine) =>
+      localizedEntries(`/magazines/${magazine.slug}`, {
+        changeFrequency: "monthly",
+        priority: 0.6,
+        lastModified: magazine.updated_at ?? magazine.issue_date,
       }),
     ),
   ];

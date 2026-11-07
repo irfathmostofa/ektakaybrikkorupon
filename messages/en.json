@@ -13,6 +13,7 @@
     "membership": "Membership",
     "careers": "Careers",
     "blog": "Blog",
+    "magazines": "Magazines",
     "contact": "Contact",
     "donate": "Donate",
     "becomeMember": "Become a member",
@@ -39,7 +40,10 @@
     "backToCareers": "Back to careers",
     "backToGallery": "Back to gallery",
     "backToCauses": "Back to causes",
-    "backToBlog": "Back to blog"
+    "backToBlog": "Back to blog",
+    "backToMagazines": "Back to magazines",
+    "readOnline": "Read online",
+    "downloadPdf": "Download PDF"
   },
   "home": {
     "eyebrow": "1 Taka Tree Plantation",
@@ -201,6 +205,13 @@
   "blog": {
     "eyebrow": "Field notes",
     "empty": "No published posts yet."
+  },
+  "magazines": {
+    "eyebrow": "Field journal",
+    "empty": "No magazines have been published yet.",
+    "issue": "Issue",
+    "readTitle": "Read this issue",
+    "downloadHint": "You can read every page here, or save the PDF to your device."
   },
   "contact": {
     "eyebrow": "Say hello",

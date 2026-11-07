@@ -14,6 +14,7 @@ export const ADMIN_MENU_KEYS = [
   "packages",
   "campaigns",
   "subscribers",
+  "magazines",
   "users",
   "settings",
 ] as const;
@@ -34,6 +35,7 @@ export const ADMIN_MENU_LABELS: Record<AdminMenuKey, string> = {
   packages: "Packages",
   campaigns: "Campaigns",
   subscribers: "Subscribers",
+  magazines: "Magazines",
   users: "Users",
   settings: "Settings",
 };
@@ -52,6 +54,7 @@ export const ADMIN_MENU_HREFS: Record<AdminMenuKey, string> = {
   packages: "/admin/packages",
   campaigns: "/admin/campaigns",
   subscribers: "/admin/subscribers",
+  magazines: "/admin/magazines",
   users: "/admin/users",
   settings: "/admin/settings",
 };
@@ -72,6 +75,7 @@ export const DEFAULT_ROLE_MENUS: Record<UserRole, AdminMenuKey[]> = {
     "packages",
     "campaigns",
     "subscribers",
+    "magazines",
     "users",
     "settings",
   ],
@@ -84,6 +88,7 @@ export const DEFAULT_ROLE_MENUS: Record<UserRole, AdminMenuKey[]> = {
     "achievements",
     "membership",
     "careers",
+    "magazines",
   ],
 };
 

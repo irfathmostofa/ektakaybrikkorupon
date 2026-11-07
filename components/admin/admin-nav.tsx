@@ -11,6 +11,7 @@ import {
   HeartHandshake,
   Images,
   LayoutDashboard,
+  BookOpen,
   Mail,
   Package,
   Settings,
@@ -38,6 +39,7 @@ const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
   packages: Package,
   campaigns: Mail,
   subscribers: UserPlus,
+  magazines: BookOpen,
   users: Users,
   settings: Settings,
 };

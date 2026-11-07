@@ -141,6 +141,20 @@ values
     'Careers',
     'খালি পদ ও আবেদন।',
     'Open roles and applications.'
+  ),
+  (
+    'magazines',
+    'মাঠের পত্রিকা',
+    'Field journals',
+    'প্রতিটি সংখ্যা অনলাইনে পড়ুন, অথবা পিডিএফ নামিয়ে রাখুন।',
+    'Read every issue online, or download the PDF to keep.',
+    'আমাদের ম্যাগাজিন মাঠের গল্প, অর্জন ও শিক্ষা একসাথে রাখে।',
+    'Our magazines keep field stories, impact, and learning in one place.',
+    'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+    'ম্যাগাজিন',
+    'Magazines',
+    'অনলাইনে পড়ুন ও পিডিএফ ডাউনলোড করুন।',
+    'Read online and download the PDF.'
   )
 on conflict (page_key) do update set
   title = excluded.title,

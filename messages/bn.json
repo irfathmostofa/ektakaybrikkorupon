@@ -13,6 +13,7 @@
     "membership": "সদস্যপদ",
     "careers": "কর্মসংস্থান",
     "blog": "ব্লগ",
+    "magazines": "ম্যাগাজিন",
     "contact": "যোগাযোগ",
     "donate": "দান করুন",
     "becomeMember": "সদস্য হোন",
@@ -39,7 +40,10 @@
     "backToCareers": "সব পদে ফিরুন",
     "backToGallery": "ছবিঘরে ফিরুন",
     "backToCauses": "উদ্যোগে ফিরুন",
-    "backToBlog": "ব্লগে ফিরুন"
+    "backToBlog": "ব্লগে ফিরুন",
+    "backToMagazines": "ম্যাগাজিনে ফিরুন",
+    "readOnline": "অনলাইনে পড়ুন",
+    "downloadPdf": "পিডিএফ ডাউনলোড"
   },
   "home": {
     "eyebrow": "১টাকায় বৃক্ষরোপণ",
@@ -201,6 +205,13 @@
   "blog": {
     "eyebrow": "মাঠ নোট",
     "empty": "এখন কোনো প্রকাশিত লেখা নেই."
+  },
+  "magazines": {
+    "eyebrow": "মাঠের পত্রিকা",
+    "empty": "এখন কোনো প্রকাশিত ম্যাগাজিন নেই।",
+    "issue": "সংখ্যা",
+    "readTitle": "এই সংখ্যা পড়ুন",
+    "downloadHint": "এখানে প্রতিটি পাতা পড়তে পারেন, অথবা পিডিএফ সংরক্ষণ করতে পারেন।"
   },
   "contact": {
     "eyebrow": "কথা বলুন",

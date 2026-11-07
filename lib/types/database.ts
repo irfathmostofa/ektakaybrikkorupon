@@ -43,6 +43,7 @@ export type SiteVisibility = {
   careers: boolean;
   blog: boolean;
   contact: boolean;
+  magazines: boolean;
 };
 
 export type ThemeMode = "light" | "dark" | "system";
@@ -65,6 +66,7 @@ export const DEFAULT_SITE_VISIBILITY: SiteVisibility = {
   careers: false,
   blog: true,
   contact: true,
+  magazines: true,
 };
 
 export const DEFAULT_SITE_THEME: SiteTheme = {
@@ -425,6 +427,22 @@ export type EmailCampaign = {
   updated_at: string;
 };
 
+export type Magazine = {
+  id: string;
+  title: string;
+  title_en: string | null;
+  slug: string;
+  description: string | null;
+  description_en: string | null;
+  cover_image_url: string | null;
+  pdf_url: string;
+  issue_date: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
 type Table<TRow, TInsert, TUpdate> = {
   Row: TRow;
   Insert: TInsert;
@@ -549,6 +567,11 @@ export type Database = {
         EmailCampaign,
         Partial<EmailCampaign> & Pick<EmailCampaign, "name" | "subject">,
         Partial<EmailCampaign>
+      >;
+      magazines: Table<
+        Magazine,
+        Partial<Magazine> & Pick<Magazine, "title" | "slug" | "pdf_url">,
+        Partial<Magazine>
       >;
     };
     Views: {

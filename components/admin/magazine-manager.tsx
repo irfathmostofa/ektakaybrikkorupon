@@ -1,0 +1,150 @@
+"use client";
+
+import { useState } from "react";
+import { deleteMagazineAction, saveMagazineAction } from "@/actions/magazines";
+import { asFormAction } from "@/lib/admin/form-action";
+import { ConfirmDelete } from "@/components/admin/confirm-delete";
+import { FormDialog } from "@/components/admin/form-dialog";
+import { ImageField } from "@/components/admin/image-field";
+import { PdfField } from "@/components/admin/pdf-field";
+import { SubmitButton } from "@/components/admin/submit-button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { Magazine } from "@/lib/types/database";
+
+function MagazineForm({ item }: { item?: Magazine }) {
+  return (
+    <form action={asFormAction(saveMagazineAction)} className="grid gap-3">
+      {item ? <input type="hidden" name="id" value={item.id} /> : null}
+      <div className="space-y-2">
+        <Label htmlFor="title">Title (Bangla)</Label>
+        <Input id="title" name="title" defaultValue={item?.title} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="title_en">Title (English)</Label>
+        <Input id="title_en" name="title_en" defaultValue={item?.title_en ?? ""} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="slug">Slug</Label>
+        <Input id="slug" name="slug" defaultValue={item?.slug} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description (Bangla)</Label>
+        <Textarea
+          id="description"
+          name="description"
+          defaultValue={item?.description ?? ""}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description_en">Description (English)</Label>
+        <Textarea
+          id="description_en"
+          name="description_en"
+          defaultValue={item?.description_en ?? ""}
+        />
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="issue_date">Issue date</Label>
+          <Input
+            id="issue_date"
+            name="issue_date"
+            type="date"
+            defaultValue={item?.issue_date ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="sort_order">Sort order</Label>
+          <Input
+            id="sort_order"
+            name="sort_order"
+            type="number"
+            defaultValue={item?.sort_order ?? 0}
+          />
+        </div>
+      </div>
+      <ImageField name="cover_image_url" label="Cover image" defaultValue={item?.cover_image_url} />
+      <PdfField name="pdf_url" label="Magazine PDF" defaultValue={item?.pdf_url} />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="is_published" defaultChecked={item?.is_published} />
+        Published
+      </label>
+      <SubmitButton>{item ? "Save" : "Create"}</SubmitButton>
+    </form>
+  );
+}
+
+export function MagazineManager({ items }: { items: Magazine[] }) {
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<Magazine | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button type="button" onClick={() => setCreating(true)}>
+          Add magazine
+        </Button>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Issue</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>{item.title}</TableCell>
+              <TableCell>{item.issue_date ?? "—"}</TableCell>
+              <TableCell>
+                <Badge variant="secondary">{item.is_published ? "published" : "draft"}</Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setEditing(item)}>
+                    Edit
+                  </Button>
+                  <ConfirmDelete
+                    onConfirm={async () => {
+                      const formData = new FormData();
+                      formData.set("id", item.id);
+                      await deleteMagazineAction(formData);
+                    }}
+                  />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <FormDialog
+        title={editing ? "Edit magazine" : "Add magazine"}
+        open={creating || Boolean(editing)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreating(false);
+            setEditing(null);
+          }
+        }}
+        size="lg"
+      >
+        <MagazineForm item={editing ?? undefined} />
+      </FormDialog>
+    </div>
+  );
+}

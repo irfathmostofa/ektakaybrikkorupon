@@ -9,6 +9,7 @@ import type {
   GalleryAlbum,
   GalleryImage,
   JobPosting,
+  Magazine,
   MembershipPlan,
   PageContent,
   TeamMember,
@@ -147,6 +148,22 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Careers",
     meta_description: "খালি পদ ও আবেদন।",
     meta_description_en: "Open roles and applications.",
+    updated_at: new Date().toISOString(),
+  },
+  magazines: {
+    id: "magazines",
+    page_key: "magazines",
+    title: "মাঠের পত্রিকা",
+    title_en: "Field journals",
+    subtitle: "প্রতিটি সংখ্যা অনলাইনে পড়ুন, অথবা পিডিএফ নামিয়ে রাখুন।",
+    subtitle_en: "Read every issue online, or download the PDF to keep.",
+    body: "আমাদের ম্যাগাজিন মাঠের গল্প, অর্জন ও শিক্ষা একসাথে রাখে।",
+    body_en: "Our magazines keep field stories, impact, and learning in one place.",
+    hero_image_url: NATURE_IMAGES.leaf,
+    meta_title: "ম্যাগাজিন",
+    meta_title_en: "Magazines",
+    meta_description: "অনলাইনে পড়ুন ও পিডিএফ ডাউনলোড করুন।",
+    meta_description_en: "Read online and download the PDF.",
     updated_at: new Date().toISOString(),
   },
 };
@@ -806,3 +823,5 @@ export const FALLBACK_POSTS: BlogPost[] = [
     updated_at: "2025-12-02T00:00:00.000Z",
   },
 ];
+
+export const FALLBACK_MAGAZINES: Magazine[] = [];

@@ -431,6 +431,19 @@ values
     'Careers',
     'খালি পদ ও আবেদন।',
     'Open roles and applications.'
+  ),
+  (
+    'magazines',
+    'মাঠের পত্রিকা',
+    'Field journals',
+    'প্রতিটি সংখ্যা অনলাইনে পড়ুন, অথবা পিডিএফ নামিয়ে রাখুন।',
+    'Read every issue online, or download the PDF to keep.',
+    'আমাদের ম্যাগাজিন মাঠের গল্প, অর্জন ও শিক্ষা একসাথে রাখে।',
+    'Our magazines keep field stories, impact, and learning in one place.',
+    'ম্যাগাজিন',
+    'Magazines',
+    'অনলাইনে পড়ুন ও পিডিএফ ডাউনলোড করুন।',
+    'Read online and download the PDF.'
   )
 on conflict (page_key) do nothing;
 
@@ -473,7 +486,8 @@ create table if not exists public.site_settings (
     "membership": true,
     "careers": false,
     "blog": true,
-    "contact": true
+    "contact": true,
+    "magazines": true
   }'::jsonb,
   theme jsonb not null default '{
     "primary": "oklch(0.48 0.12 145)",
@@ -507,7 +521,8 @@ set
     "membership": true,
     "careers": false,
     "blog": true,
-    "contact": true
+    "contact": true,
+    "magazines": true
   }'::jsonb),
   theme = coalesce(theme, '{
     "primary": "oklch(0.48 0.12 145)",
@@ -517,6 +532,11 @@ set
     "mode": "light"
   }'::jsonb)
 where id = 1;
+
+update public.site_settings
+set visibility = coalesce(visibility, '{}'::jsonb) || '{"magazines": true}'::jsonb
+where id = 1
+  and (visibility is null or not (visibility ? 'magazines'));
 
 drop trigger if exists site_settings_set_updated_at on public.site_settings;
 create trigger site_settings_set_updated_at
@@ -665,6 +685,34 @@ create table if not exists public.gallery_images (
 
 create index if not exists gallery_images_album_idx
   on public.gallery_images (album_id, sort_order);
+
+-- ---------------------------------------------------------------------------
+-- magazines
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.magazines (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  title_en text,
+  slug text not null unique,
+  description text,
+  description_en text,
+  cover_image_url text,
+  pdf_url text not null,
+  issue_date date,
+  sort_order integer not null default 0,
+  is_published boolean not null default false,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists magazines_published_idx
+  on public.magazines (is_published, sort_order, issue_date desc);
+
+drop trigger if exists magazines_set_updated_at on public.magazines;
+create trigger magazines_set_updated_at
+before update on public.magazines
+for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- achievements
@@ -870,6 +918,7 @@ alter table public.membership_plans enable row level security;
 alter table public.membership_applications enable row level security;
 alter table public.job_postings enable row level security;
 alter table public.job_applications enable row level security;
+alter table public.magazines enable row level security;
 
 -- users
 drop policy if exists "users_select_own_or_staff" on public.users;
@@ -1191,6 +1240,20 @@ on public.job_applications for update
 to authenticated
 using (public.is_admin())
 with check (public.is_admin());
+
+-- magazines
+drop policy if exists "magazines_public_read" on public.magazines;
+create policy "magazines_public_read"
+on public.magazines for select
+to anon, authenticated
+using (is_published = true or public.is_staff());
+
+drop policy if exists "magazines_staff_write" on public.magazines;
+create policy "magazines_staff_write"
+on public.magazines for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
 
 -- ---------------------------------------------------------------------------
 -- Storage: media bucket (gallery, about/team, achievements, receipts, resumes)

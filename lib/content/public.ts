@@ -8,6 +8,7 @@ import {
   FALLBACK_FINANCE,
   FALLBACK_GALLERY_IMAGES,
   FALLBACK_JOBS,
+  FALLBACK_MAGAZINES,
   FALLBACK_PAGES,
   FALLBACK_PLANS,
   FALLBACK_POSTS,
@@ -24,6 +25,7 @@ import type {
   GalleryAlbum,
   GalleryImage,
   JobPosting,
+  Magazine,
   MembershipPlan,
   PageContent,
   TeamMember,
@@ -301,4 +303,29 @@ export async function getJobPostings(): Promise<JobPosting[]> {
 export async function getJobBySlug(slug: string): Promise<JobPosting | null> {
   const jobs = await getJobPostings();
   return jobs.find((item) => item.slug === slug) ?? null;
+}
+
+export async function getPublishedMagazines(): Promise<Magazine[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.magazines);
+  cacheLife("minutes");
+
+  return safeQuery(FALLBACK_MAGAZINES, async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("magazines")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("issue_date", { ascending: false });
+    return {
+      data: data && data.length > 0 ? (data as Magazine[]) : FALLBACK_MAGAZINES,
+      error,
+    };
+  });
+}
+
+export async function getMagazineBySlug(slug: string): Promise<Magazine | null> {
+  const magazines = await getPublishedMagazines();
+  return magazines.find((item) => item.slug === slug) ?? null;
 }

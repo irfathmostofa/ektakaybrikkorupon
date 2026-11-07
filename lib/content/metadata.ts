@@ -13,6 +13,7 @@ const PAGE_PATHS: Record<string, string> = {
   transparency: "/transparency",
   membership: "/membership",
   careers: "/careers",
+  magazines: "/magazines",
 };
 
 export async function pageMetadata(pageKey: string): Promise<Metadata> {

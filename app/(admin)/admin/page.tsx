@@ -26,6 +26,7 @@ async function AdminDashboard() {
     { count: causesCount },
     { count: postsCount },
     { count: galleryCount },
+    { count: magazinesCount },
     { count: pendingMembers },
     { count: openJobs },
     analytics,
@@ -34,6 +35,7 @@ async function AdminDashboard() {
     supabase.from("causes_projects").select("*", { count: "exact", head: true }),
     supabase.from("blog_posts").select("*", { count: "exact", head: true }),
     supabase.from("gallery_images").select("*", { count: "exact", head: true }),
+    supabase.from("magazines").select("*", { count: "exact", head: true }),
     supabase
       .from("membership_applications")
       .select("*", { count: "exact", head: true })
@@ -65,6 +67,7 @@ async function AdminDashboard() {
         <StatCard title="Total reads" value={analytics.totalReads} />
         <StatCard title="Total visitors" value={analytics.totalVisitors} />
         <StatCard title="Gallery images" value={galleryCount ?? 0} />
+        <StatCard title="Magazines" value={magazinesCount ?? 0} />
         <StatCard title="Pending members" value={pendingMembers ?? 0} />
         <StatCard title="Open jobs" value={openJobs ?? 0} />
         <StatCard
