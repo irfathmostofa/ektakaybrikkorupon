@@ -13,8 +13,8 @@ export function AdminSidebar({
   return (
     <aside className="hidden h-svh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex">
       <div className="border-b border-sidebar-border px-5 py-4">
-        <p className="text-sm font-semibold tracking-tight">Hope Admin</p>
-        <p className="mt-1 text-xs text-muted-foreground">Content &amp; operations</p>
+        <p className="text-sm font-bold tracking-tight">Admin</p>
+        {/* <p className="mt-1 text-xs text-muted-foreground">Content &amp; operations</p> */}
       </div>
       <AdminNav menus={menus} />
       <div className="border-t border-sidebar-border p-3">
