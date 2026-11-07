@@ -5,6 +5,7 @@ import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getSiteUrl } from "@/lib/payments/site-url";
+import { stripHtml } from "@/lib/sanitize-html";
 import type { PublicSiteSettings } from "@/lib/types/database";
 
 export const OG_LOCALE: Record<Locale, string> = {
@@ -54,7 +55,7 @@ export function sitemapLanguageAlternates(path: string) {
 }
 
 export function clipDescription(text: string | null | undefined, max = 160) {
-  const value = text?.replace(/\s+/g, " ").trim() ?? "";
+  const value = stripHtml(text).replace(/\s+/g, " ").trim();
   if (!value) {
     return undefined;
   }

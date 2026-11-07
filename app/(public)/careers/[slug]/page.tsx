@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JobForm } from "@/components/public/job-form";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getJobBySlug } from "@/lib/content/public";
 import { localizeHref } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -67,13 +68,15 @@ export default async function CareerDetailPage({
           >
             {dict.actions.backToCareers}
           </Link>
-          <p className="mt-8 whitespace-pre-line leading-8">
-            {pickLocalized(locale, job.description, job.description_en)}
-          </p>
+          <RichHtml
+            className="mt-8 text-base leading-8"
+            html={pickLocalized(locale, job.description, job.description_en)}
+          />
           <h2 className="mt-10 font-heading text-2xl">{dict.careers.requirements}</h2>
-          <p className="mt-4 whitespace-pre-line leading-8">
-            {pickLocalized(locale, job.requirements, job.requirements_en)}
-          </p>
+          <RichHtml
+            className="mt-4 text-base leading-8"
+            html={pickLocalized(locale, job.requirements, job.requirements_en)}
+          />
         </article>
         <div>
           <h2 className="mb-4 font-heading text-2xl">{dict.careers.applyTitle}</h2>

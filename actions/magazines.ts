@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
-import { formChecked, formNumber, formOptional, formString } from "@/lib/admin/form";
+import { formChecked, formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, MEDIA_BUCKET } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
@@ -45,8 +45,8 @@ export async function saveMagazineAction(
     title,
     title_en: formOptional(formData, "title_en"),
     slug,
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
     cover_image_url: formOptional(formData, "cover_image_url"),
     pdf_url: pdfUrl,
     issue_date: formOptional(formData, "issue_date"),

@@ -2,6 +2,7 @@ import { CountUp } from "@/components/public/count-up";
 import { EmptyState } from "@/components/public/empty-state";
 import { NatureImage } from "@/components/public/nature-image";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getAchievements, getPageContent } from "@/lib/content/public";
 import { localizePage } from "@/lib/content/localize";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -63,9 +64,10 @@ export default async function AchievementsPage() {
                   <h2 className="mt-1 font-heading text-2xl">
                     {pickLocalized(locale, item.title, item.title_en)}
                   </h2>
-                  <p className="mt-2 max-w-2xl text-muted-foreground">
-                    {pickLocalized(locale, item.description, item.description_en)}
-                  </p>
+                  <RichHtml
+                    className="mt-2 max-w-2xl text-muted-foreground"
+                    html={pickLocalized(locale, item.description, item.description_en)}
+                  />
                   {item.image_url ? (
                     <NatureImage
                       src={item.image_url}

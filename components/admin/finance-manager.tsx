@@ -102,8 +102,13 @@ function EntryForm({
       </div>
       <RichTextEditor
         name="description"
-        label="Note"
+        label="Note (Bangla)"
         defaultValue={entry?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Note (English)"
+        defaultValue={entry?.description_en}
       />
       <ImageField
         name="receipt_url"
@@ -351,7 +356,12 @@ export function FinanceManager({
         }}
         size="lg"
       >
-        <EntryForm kind={editing?.kind ?? kind} entry={editing ?? undefined} categories={categories} />
+        <EntryForm
+          key={editing?.id ?? `new-${kind}`}
+          kind={editing?.kind ?? kind}
+          entry={editing ?? undefined}
+          categories={categories}
+        />
       </FormDialog>
     </div>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NatureImage } from "@/components/public/nature-image";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { buttonVariants } from "@/components/ui/button";
 import { getCauseBySlug } from "@/lib/content/public";
 import { localizeHref } from "@/lib/i18n/config";
@@ -69,9 +70,10 @@ export default async function CauseDetailPage({
               className="aspect-[16/9]"
             />
           </div>
-          <p className="mt-8 whitespace-pre-line leading-8">
-            {pickLocalized(locale, cause.description, cause.description_en)}
-          </p>
+          <RichHtml
+            className="mt-8 text-base leading-8"
+            html={pickLocalized(locale, cause.description, cause.description_en)}
+          />
         </article>
         <aside className="h-fit rounded-2xl border border-border bg-card p-6">
           <p className="text-sm text-muted-foreground">{dict.causes.raised}</p>

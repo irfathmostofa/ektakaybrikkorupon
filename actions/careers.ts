@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
-import { formChecked, formOptional, formString } from "@/lib/admin/form";
+import { formChecked, formHtml, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, EMPLOYMENT_TYPES, JOB_APPLICATION_STATUSES } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
@@ -64,10 +64,10 @@ export async function saveJobPostingAction(
     employment_type: EMPLOYMENT_TYPES.includes(employmentType)
       ? employmentType
       : "full_time",
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
-    requirements: formOptional(formData, "requirements"),
-    requirements_en: formOptional(formData, "requirements_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
+    requirements: formHtml(formData, "requirements"),
+    requirements_en: formHtml(formData, "requirements_en"),
     deadline: formOptional(formData, "deadline"),
     is_published: formChecked(formData, "is_published"),
   };

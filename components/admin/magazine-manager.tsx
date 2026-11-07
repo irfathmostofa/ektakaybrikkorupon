@@ -137,7 +137,7 @@ export function MagazineManager({ items }: { items: Magazine[] }) {
         }}
         size="lg"
       >
-        <MagazineForm item={editing ?? undefined} />
+        <MagazineForm key={editing?.id ?? "new"} item={editing ?? undefined} />
       </FormDialog>
     </div>
   );

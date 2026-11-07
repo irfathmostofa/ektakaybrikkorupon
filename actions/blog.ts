@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireMenu } from "@/lib/admin/access";
 import { requireStaff } from "@/lib/auth";
-import { formIdList, formOptional, formString } from "@/lib/admin/form";
+import { formHtml, formIdList, formOptional, formString } from "@/lib/admin/form";
 import { BLOG_STATUSES, CACHE_TAGS } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
@@ -175,8 +175,8 @@ export async function createBlogPostAction(
       slug,
       excerpt: formOptional(formData, "excerpt"),
       excerpt_en: formOptional(formData, "excerpt_en"),
-      content: formOptional(formData, "content"),
-      content_en: formOptional(formData, "content_en"),
+      content: formHtml(formData, "content"),
+      content_en: formHtml(formData, "content_en"),
       cover_image_url: formOptional(formData, "cover_image_url"),
       status,
       published_at: status === "published" ? new Date().toISOString() : null,
@@ -228,8 +228,8 @@ export async function updateBlogPostAction(
       slug,
       excerpt: formOptional(formData, "excerpt"),
       excerpt_en: formOptional(formData, "excerpt_en"),
-      content: formOptional(formData, "content"),
-      content_en: formOptional(formData, "content_en"),
+      content: formHtml(formData, "content"),
+      content_en: formHtml(formData, "content_en"),
       cover_image_url: formOptional(formData, "cover_image_url"),
       status,
       published_at:

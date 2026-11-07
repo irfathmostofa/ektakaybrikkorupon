@@ -59,7 +59,16 @@ function PackageForm({ item }: { item?: DonationPackage }) {
           />
         </div>
       </div>
-      <RichTextEditor name="description" label="Description" defaultValue={item?.description} />
+      <RichTextEditor
+        name="description"
+        label="Description (Bangla)"
+        defaultValue={item?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={item?.description_en}
+      />
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="is_active" defaultChecked={item?.is_active ?? true} />
         Active
@@ -126,7 +135,7 @@ export function PackageManager({ packages }: { packages: DonationPackage[] }) {
         }}
         size="lg"
       >
-        <PackageForm item={editing ?? undefined} />
+        <PackageForm key={editing?.id ?? "new"} item={editing ?? undefined} />
       </FormDialog>
     </div>
   );

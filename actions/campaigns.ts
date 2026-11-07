@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireMenu } from "@/lib/admin/access";
-import { formOptional, formString } from "@/lib/admin/form";
+import { formHtml, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, CAMPAIGN_AUDIENCES, CAMPAIGN_STATUSES } from "@/lib/constants";
 import { loadEmailjsCredentials } from "@/lib/email/emailjs";
 import { getSiteUrl } from "@/lib/payments/site-url";
@@ -144,7 +144,7 @@ export async function saveCampaignAction(
   const payload = {
     name,
     subject,
-    body: formString(formData, "body"),
+    body: formHtml(formData, "body") ?? "",
     audience: parseAudience(formString(formData, "audience")),
     status: parseStatus(formString(formData, "status") || "draft"),
   };

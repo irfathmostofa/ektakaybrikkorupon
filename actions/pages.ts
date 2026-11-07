@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { formHtml } from "@/lib/admin/form";
 import { requireStaff } from "@/lib/auth";
 import { CACHE_TAGS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
@@ -57,8 +58,8 @@ export async function updatePageAction(
       title_en: String(formData.get("title_en") ?? "").trim() || null,
       subtitle: String(formData.get("subtitle") ?? "").trim() || null,
       subtitle_en: String(formData.get("subtitle_en") ?? "").trim() || null,
-      body: String(formData.get("body") ?? "").trim() || null,
-      body_en: String(formData.get("body_en") ?? "").trim() || null,
+      body: formHtml(formData, "body"),
+      body_en: formHtml(formData, "body_en"),
       hero_image_url:
         String(formData.get("hero_image_url") ?? "").trim() || null,
       meta_title: String(formData.get("meta_title") ?? "").trim() || null,

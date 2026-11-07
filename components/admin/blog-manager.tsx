@@ -248,6 +248,7 @@ export function BlogManager({
         size="lg"
       >
         <BlogForm
+          key={editing?.id ?? "new"}
           post={editing ?? undefined}
           categories={categories}
           tags={tags}

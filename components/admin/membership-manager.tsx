@@ -48,13 +48,17 @@ function PlanForm({ plan }: { plan?: MembershipPlan }) {
         <Label htmlFor="slug">Slug</Label>
         <Input id="slug" name="slug" defaultValue={plan?.slug ?? ""} />
       </div>
-      <RichTextEditor name="description" label="Description" defaultValue={plan?.description} />
+      <RichTextEditor
+        name="description"
+        label="Description (Bangla)"
+        defaultValue={plan?.description}
+      />
       <RichTextEditor
         name="description_en"
         label="Description (English)"
         defaultValue={plan?.description_en}
       />
-      <RichTextEditor name="benefits" label="Benefits" defaultValue={plan?.benefits} />
+      <RichTextEditor name="benefits" label="Benefits (Bangla)" defaultValue={plan?.benefits} />
       <RichTextEditor
         name="benefits_en"
         label="Benefits (English)"

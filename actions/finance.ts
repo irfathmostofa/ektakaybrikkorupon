@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
-import { formChecked, formNumber, formOptional, formString } from "@/lib/admin/form";
+import { formChecked, formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, FINANCE_KINDS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { FinanceCategory, FinanceEntry, FinanceKind } from "@/lib/types/database";
@@ -102,8 +102,8 @@ export async function saveFinanceEntryAction(
     category_id: formOptional(formData, "category_id"),
     title,
     title_en: formOptional(formData, "title_en"),
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
     amount,
     entry_date: entryDate,
     source_or_payee: formOptional(formData, "source_or_payee"),

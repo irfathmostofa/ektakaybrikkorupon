@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { formHtml } from "@/lib/admin/form";
 import { requireStaff } from "@/lib/auth";
 import { CACHE_TAGS, CAUSE_STATUSES } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
@@ -70,9 +71,8 @@ export async function createCauseAction(
         String(formData.get("short_description") ?? "").trim() || null,
       short_description_en:
         String(formData.get("short_description_en") ?? "").trim() || null,
-      description: String(formData.get("description") ?? "").trim() || null,
-      description_en:
-        String(formData.get("description_en") ?? "").trim() || null,
+      description: formHtml(formData, "description"),
+      description_en: formHtml(formData, "description_en"),
       goal_amount: Number(formData.get("goal_amount") ?? 0) || 0,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       status: parseCauseStatus(String(formData.get("status") ?? "draft")),
@@ -113,9 +113,8 @@ export async function updateCauseAction(
         String(formData.get("short_description") ?? "").trim() || null,
       short_description_en:
         String(formData.get("short_description_en") ?? "").trim() || null,
-      description: String(formData.get("description") ?? "").trim() || null,
-      description_en:
-        String(formData.get("description_en") ?? "").trim() || null,
+      description: formHtml(formData, "description"),
+      description_en: formHtml(formData, "description_en"),
       goal_amount: Number(formData.get("goal_amount") ?? 0) || 0,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       status: parseCauseStatus(String(formData.get("status") ?? "draft")),

@@ -64,7 +64,8 @@ export function RichTextEditor({
   required?: boolean;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [html, setHtml] = useState(defaultValue ?? "");
+  const initialHtml = defaultValue ?? "";
+  const [html, setHtml] = useState(initialHtml);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
@@ -73,6 +74,7 @@ export function RichTextEditor({
 
   const editor = useEditor({
     immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
@@ -93,7 +95,7 @@ export function RichTextEditor({
         placeholder: "Write here…",
       }),
     ],
-    content: defaultValue ?? "",
+    content: initialHtml,
     editorProps: {
       attributes: {
         class: "prose-html min-h-36 px-3 py-2 text-sm outline-none",
@@ -109,10 +111,14 @@ export function RichTextEditor({
       return;
     }
     const next = defaultValue ?? "";
-    if (editor.getHTML() !== next) {
-      editor.commands.setContent(next, { emitUpdate: false });
-      setHtml(next);
+    const current = editor.getHTML();
+    const empty = (value: string) =>
+      !value.trim() || /^<p>(<br\s*\/?>|&nbsp;|\s)*<\/p>$/i.test(value.trim());
+    if (current === next || (empty(current) && empty(next))) {
+      return;
     }
+    editor.commands.setContent(next, { emitUpdate: false });
+    setHtml(next);
   }, [defaultValue, editor]);
 
   async function insertImage(file: File) {
@@ -282,7 +288,7 @@ export function RichTextEditor({
             </button>
           </div>
         ) : null}
-        <EditorContent editor={editor} id={name} />
+         <EditorContent editor={editor} id={name} />
       </div>
       <input
         ref={fileRef}
@@ -297,7 +303,7 @@ export function RichTextEditor({
           }
         }}
       />
-      <input type="hidden" name={name} value={html} required={required} />
+      <input type="hidden" name={name} value={html} required={required} readOnly />
     </div>
   );
 }

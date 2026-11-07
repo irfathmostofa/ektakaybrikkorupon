@@ -40,8 +40,13 @@ function AlbumForm({ album }: { album?: GalleryAlbum }) {
       </div>
       <RichTextEditor
         name="description"
-        label="Description"
+        label="Description (Bangla)"
         defaultValue={album?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={album?.description_en}
       />
       <div className="space-y-2">
         <Label htmlFor="event_date">Event date</Label>
@@ -127,7 +132,7 @@ export function GalleryManager({
     <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
       <aside className="space-y-3">
         <FormDialog triggerLabel="Add category" title="Add gallery category">
-          <AlbumForm />
+          <AlbumForm key="new-album" />
         </FormDialog>
         <div className="space-y-1">
           {albums.map((album) => (
@@ -164,7 +169,7 @@ export function GalleryManager({
             </div>
             <div className="flex gap-2">
               <FormDialog triggerLabel="Edit category" title="Edit gallery category">
-                <AlbumForm album={selected} />
+                <AlbumForm key={selected.id} album={selected} />
               </FormDialog>
               <FormDialog triggerLabel="Upload images" title="Upload images" size="md">
                 <MultiImageForm albumId={selected.id} />

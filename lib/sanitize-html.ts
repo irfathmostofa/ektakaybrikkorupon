@@ -40,6 +40,33 @@ function safeUrl(value: string) {
   return "";
 }
 
+const EMPTY_HTML = /^<p>(<br\s*\/?>|&nbsp;|\s)*<\/p>$/i;
+
+export function isEmptyHtml(value?: string | null) {
+  const html = (value ?? "").trim();
+  return !html || EMPTY_HTML.test(html);
+}
+
+export function stripHtml(value?: string | null) {
+  const html = (value ?? "").trim();
+  if (!html) {
+    return "";
+  }
+  return html
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/p>/gi, " ")
+    .replace(/<\/h[2-3]>/gi, " ")
+    .replace(/<\/li>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function sanitizeHtml(input: string) {
   return input
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")

@@ -82,6 +82,7 @@ export function CauseManager({ causes }: { causes: CauseProject[] }) {
         size="lg"
       >
         <CauseForm
+          key={editing?.id ?? "new"}
           cause={editing ?? undefined}
           onSuccess={() => {
             setCreating(false);

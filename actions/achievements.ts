@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
-import { formChecked, formNumber, formOptional, formString } from "@/lib/admin/form";
+import { formChecked, formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
@@ -38,8 +38,8 @@ export async function saveAchievementAction(
     title,
     title_en: formOptional(formData, "title_en"),
     slug,
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
     metric_value: formNumber(formData, "metric_value"),
     metric_label: formOptional(formData, "metric_label"),
     metric_label_en: formOptional(formData, "metric_label_en"),

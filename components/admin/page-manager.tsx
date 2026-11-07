@@ -56,7 +56,7 @@ export function PageManager({ pages }: { pages: PageContent[] }) {
         }}
         size="lg"
       >
-        {editing ? <PageForm page={editing} /> : null}
+        {editing ? <PageForm key={editing.id} page={editing} /> : null}
       </FormDialog>
     </>
   );

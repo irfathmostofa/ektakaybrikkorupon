@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
-import { formChecked, formNumber, formOptional, formString } from "@/lib/admin/form";
+import { formChecked, formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, MEMBERSHIP_STATUSES } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
@@ -68,13 +68,13 @@ export async function saveMembershipPlanAction(
     name,
     name_en: nameEn,
     slug,
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
     fee_amount: formNumber(formData, "fee_amount"),
     duration_label: formOptional(formData, "duration_label"),
     duration_label_en: formOptional(formData, "duration_label_en"),
-    benefits: formOptional(formData, "benefits"),
-    benefits_en: formOptional(formData, "benefits_en"),
+    benefits: formHtml(formData, "benefits"),
+    benefits_en: formHtml(formData, "benefits_en"),
     is_active: formChecked(formData, "is_active"),
     sort_order: formNumber(formData, "sort_order"),
   };

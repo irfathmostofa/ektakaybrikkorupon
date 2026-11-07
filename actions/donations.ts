@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireMenu } from "@/lib/admin/access";
 import { requireStaff } from "@/lib/auth";
-import { formNumber, formOptional, formString } from "@/lib/admin/form";
+import { formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, DONATION_STATUSES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { Donation, DonationPackage, DonationStatus } from "@/lib/types/database";
@@ -103,8 +103,8 @@ export async function saveDonationPackageAction(
     name,
     name_en: formOptional(formData, "name_en"),
     amount,
-    description: formOptional(formData, "description"),
-    description_en: formOptional(formData, "description_en"),
+    description: formHtml(formData, "description"),
+    description_en: formHtml(formData, "description_en"),
     is_active: formData.get("is_active") === "on" || formData.get("is_active") === "true",
     sort_order: formNumber(formData, "sort_order"),
   };

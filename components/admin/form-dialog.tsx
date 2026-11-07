@@ -52,7 +52,11 @@ export function FormDialog({
             <DialogTitle>{title}</DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
-          {typeof children === "function" ? children(() => setOpen(false)) : children}
+          {open
+            ? typeof children === "function"
+              ? children(() => setOpen(false))
+              : children
+            : null}
         </DialogContent>
       </Dialog>
     </>

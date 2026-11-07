@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CountUp } from "@/components/public/count-up";
 import { NatureImage } from "@/components/public/nature-image";
 import { Reveal } from "@/components/public/reveal";
+import { RichHtml } from "@/components/public/rich-html";
 import { TreeJourney } from "@/components/public/tree-journey";
 import { buttonVariants } from "@/components/ui/button";
 import { NATURE_IMAGES } from "@/lib/content/images";
@@ -17,6 +18,7 @@ import { pickLocalized } from "@/lib/i18n/dictionary";
 import { formatCurrency } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { pageMetadata } from "@/lib/content/metadata";
+import { stripHtml } from "@/lib/sanitize-html";
 
 export async function generateMetadata() {
   return pageMetadata("home");
@@ -199,7 +201,7 @@ export default async function HomePage() {
                 <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
                   {dict.home.featuredCauses}
                 </p>
-                <h2 className="mt-3 font-heading text-3xl">{copy.body}</h2>
+                <h2 className="mt-3 font-heading text-3xl">{stripHtml(copy.body) || copy.body}</h2>
               </div>
               <Link href={localizeHref(locale, "/causes")} className="text-sm text-primary">
                 {dict.actions.viewAll}

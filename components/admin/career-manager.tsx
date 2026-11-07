@@ -70,8 +70,26 @@ function JobForm({ job }: { job?: JobPosting }) {
           <Input id="deadline" name="deadline" type="date" defaultValue={job?.deadline ?? ""} />
         </div>
       </div>
-      <RichTextEditor name="description" label="Description" defaultValue={job?.description} />
-      <RichTextEditor name="requirements" label="Requirements" defaultValue={job?.requirements} />
+      <RichTextEditor
+        name="description"
+        label="Description (Bangla)"
+        defaultValue={job?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={job?.description_en}
+      />
+      <RichTextEditor
+        name="requirements"
+        label="Requirements (Bangla)"
+        defaultValue={job?.requirements}
+      />
+      <RichTextEditor
+        name="requirements_en"
+        label="Requirements (English)"
+        defaultValue={job?.requirements_en}
+      />
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="is_published" defaultChecked={job?.is_published} />
         Published
@@ -192,7 +210,7 @@ export function CareerManager({
         }}
         size="lg"
       >
-        <JobForm job={editing ?? undefined} />
+        <JobForm key={editing?.id ?? "new"} job={editing ?? undefined} />
       </FormDialog>
     </Tabs>
   );

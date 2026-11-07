@@ -274,7 +274,7 @@ export function CampaignManager({
         }}
         size="lg"
       >
-        <CampaignForm campaign={editing ?? undefined} />
+        <CampaignForm key={editing?.id ?? "new"} campaign={editing ?? undefined} />
       </FormDialog>
 
       <FormDialog

@@ -2,6 +2,7 @@ import { CountUp } from "@/components/public/count-up";
 import { NatureImage } from "@/components/public/nature-image";
 import { PageHero } from "@/components/public/page-hero";
 import { Reveal } from "@/components/public/reveal";
+import { RichHtml } from "@/components/public/rich-html";
 import {
   getAboutSections,
   getAchievements,
@@ -52,9 +53,10 @@ export default async function AboutPage() {
               <h2 className="mt-3 font-heading text-2xl">
                 {pickLocalized(locale, section.title, section.title_en)}
               </h2>
-              <p className="mt-4 leading-8 text-foreground/80">
-                {pickLocalized(locale, section.body, section.body_en)}
-              </p>
+              <RichHtml
+                className="mt-4 leading-8 text-foreground/80"
+                html={pickLocalized(locale, section.body, section.body_en)}
+              />
             </article>
           </Reveal>
         ))}
@@ -66,9 +68,10 @@ export default async function AboutPage() {
             <h2 className="font-heading text-3xl">
               {pickLocalized(locale, section.title, section.title_en)}
             </h2>
-            <p className="mt-5 max-w-3xl whitespace-pre-line leading-8">
-              {pickLocalized(locale, section.body, section.body_en)}
-            </p>
+            <RichHtml
+              className="mt-5 max-w-3xl leading-8"
+              html={pickLocalized(locale, section.body, section.body_en)}
+            />
           </div>
         </section>
       ))}
@@ -93,9 +96,10 @@ export default async function AboutPage() {
             <h2 className="mt-3 font-heading text-2xl break-words sm:text-3xl">
               {pickLocalized(locale, section.title, section.title_en)}
             </h2>
-            <p className="mt-5 whitespace-pre-line text-[0.95rem] leading-7 break-words text-foreground/85 sm:text-base sm:leading-8">
-              {pickLocalized(locale, section.body, section.body_en)}
-            </p>
+            <RichHtml
+              className="mt-5 text-[0.95rem] leading-7 break-words text-foreground/85 sm:text-base sm:leading-8"
+              html={pickLocalized(locale, section.body, section.body_en)}
+            />
           </div>
         </section>
       ))}
@@ -106,17 +110,13 @@ export default async function AboutPage() {
             <h2 className="font-heading text-3xl">
               {pickLocalized(locale, section.title, section.title_en)}
             </h2>
-            <ol className="mt-8 border-l-2 border-primary/30 pl-6">
-              {pickLocalized(locale, section.body, section.body_en)
-                .split("\n")
-                .filter(Boolean)
-                .map((line) => (
-                  <li key={line} className="relative mb-6 leading-7">
-                    <span className="absolute top-1.5 -left-[1.95rem] size-3 rounded-full bg-primary" />
-                    {line}
-                  </li>
-                ))}
-            </ol>
+            <div className="relative mt-8 border-l-2 border-primary/30 pl-6">
+              <span className="absolute top-1.5 -left-[0.42rem] size-3 rounded-full bg-primary" />
+              <RichHtml
+                className="leading-7"
+                html={pickLocalized(locale, section.body, section.body_en)}
+              />
+            </div>
           </div>
         </section>
       ))}
@@ -126,9 +126,10 @@ export default async function AboutPage() {
           <h2 className="font-heading text-2xl">
             {pickLocalized(locale, section.title, section.title_en)}
           </h2>
-          <p className="mt-4 max-w-3xl leading-8">
-            {pickLocalized(locale, section.body, section.body_en)}
-          </p>
+          <RichHtml
+            className="mt-4 max-w-3xl leading-8"
+            html={pickLocalized(locale, section.body, section.body_en)}
+          />
         </section>
       ))}
 
@@ -177,9 +178,10 @@ export default async function AboutPage() {
                   <p className="mt-1 text-sm break-words text-primary">
                     {pickLocalized(locale, member.role_title, member.role_title_en)}
                   </p>
-                  <p className="mt-2 text-sm leading-6 break-words text-muted-foreground">
-                    {pickLocalized(locale, member.bio, member.bio_en)}
-                  </p>
+                  <RichHtml
+                    className="mt-2 text-sm leading-6 break-words text-muted-foreground"
+                    html={pickLocalized(locale, member.bio, member.bio_en)}
+                  />
                 </div>
               </article>
             ))}

@@ -1,4 +1,6 @@
 import { Reveal } from "@/components/public/reveal";
+import { RichHtml } from "@/components/public/rich-html";
+import { stripHtml } from "@/lib/sanitize-html";
 
 export function PageHero({
   eyebrow,
@@ -20,18 +22,16 @@ export function PageHero({
             {eyebrow}
           </p>
           <h1 className="mt-4 max-w-3xl font-heading text-4xl leading-tight text-balance md:text-5xl">
-            {title}
+            {stripHtml(title) || title}
           </h1>
-          {subtitle ? (
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              {subtitle}
-            </p>
-          ) : null}
-          {body ? (
-            <p className="mt-4 max-w-2xl text-base leading-8 text-foreground/80">
-              {body}
-            </p>
-          ) : null}
+          <RichHtml
+            className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground"
+            html={subtitle}
+          />
+          <RichHtml
+            className="mt-4 max-w-2xl text-base leading-8 text-foreground/80"
+            html={body}
+          />
         </Reveal>
       </div>
     </section>

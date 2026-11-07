@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/public/empty-state";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getFinanceEntries, getPageContent } from "@/lib/content/public";
 import { localizePage } from "@/lib/content/localize";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -42,6 +43,10 @@ function Ledger({
                 </td>
                 <td className="px-4 py-3">
                   <p>{pickLocalized(locale, row.title, row.title_en)}</p>
+                  <RichHtml
+                    className="mt-1 text-xs text-muted-foreground"
+                    html={pickLocalized(locale, row.description, row.description_en)}
+                  />
                   {row.receipt_url ? (
                     <a href={row.receipt_url} className="text-xs text-primary">
                       {dict.transparency.receipt}

@@ -38,7 +38,16 @@ function AchievementForm({ item }: { item?: Achievement }) {
         <Label htmlFor="slug">Slug</Label>
         <Input id="slug" name="slug" defaultValue={item?.slug} />
       </div>
-      <RichTextEditor name="description" label="Description" defaultValue={item?.description} />
+      <RichTextEditor
+        name="description"
+        label="Description (Bangla)"
+        defaultValue={item?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={item?.description_en}
+      />
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="metric_value">Metric value</Label>
@@ -127,7 +136,7 @@ export function AchievementManager({ items }: { items: Achievement[] }) {
         }}
         size="lg"
       >
-        <AchievementForm item={editing ?? undefined} />
+        <AchievementForm key={editing?.id ?? "new"} item={editing ?? undefined} />
       </FormDialog>
     </div>
   );
