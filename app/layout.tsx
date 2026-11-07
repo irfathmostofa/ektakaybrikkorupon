@@ -96,6 +96,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: seo.twitter,
     robots: { index: true, follow: true },
+    icons: settings.favicon_url
+      ? { icon: settings.favicon_url, shortcut: settings.favicon_url }
+      : undefined,
   };
 }
 

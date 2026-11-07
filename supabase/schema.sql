@@ -214,7 +214,70 @@ create table if not exists public.blog_posts (
 alter table public.blog_posts
   add column if not exists title_en text,
   add column if not exists excerpt_en text,
-  add column if not exists content_en text;
+  add column if not exists content_en text,
+  add column if not exists view_count integer not null default 0;
+
+create table if not exists public.blog_categories (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  name_en text,
+  slug text not null unique,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.blog_tags (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  name_en text,
+  slug text not null unique,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.blog_post_categories (
+  post_id uuid not null references public.blog_posts (id) on delete cascade,
+  category_id uuid not null references public.blog_categories (id) on delete cascade,
+  primary key (post_id, category_id)
+);
+
+create table if not exists public.blog_post_tags (
+  post_id uuid not null references public.blog_posts (id) on delete cascade,
+  tag_id uuid not null references public.blog_tags (id) on delete cascade,
+  primary key (post_id, tag_id)
+);
+
+create index if not exists blog_categories_slug_idx on public.blog_categories (slug);
+create index if not exists blog_tags_slug_idx on public.blog_tags (slug);
+
+create or replace function public.increment_blog_view(post_slug text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.blog_posts
+  set view_count = coalesce(view_count, 0) + 1
+  where slug = post_slug
+    and status = 'published';
+end;
+$$;
+
+grant execute on function public.increment_blog_view(text) to anon, authenticated;
+
+create or replace function public.increment_site_visitors()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.site_settings
+  set visitor_count = coalesce(visitor_count, 0) + 1
+  where id = 1;
+end;
+$$;
+
+grant execute on function public.increment_site_visitors() to anon, authenticated;
 
 create index if not exists blog_posts_status_idx on public.blog_posts (status);
 create index if not exists blog_posts_slug_idx on public.blog_posts (slug);
@@ -399,6 +462,26 @@ create table if not exists public.site_settings (
   meta_title_en text,
   meta_description text,
   meta_description_en text,
+  favicon_url text,
+  visitor_count integer not null default 0,
+  visibility jsonb not null default '{
+    "about": true,
+    "causes": true,
+    "gallery": true,
+    "achievements": true,
+    "transparency": true,
+    "membership": true,
+    "careers": false,
+    "blog": true,
+    "contact": true
+  }'::jsonb,
+  theme jsonb not null default '{
+    "primary": "oklch(0.48 0.12 145)",
+    "secondary": "oklch(0.9 0.04 145)",
+    "heading_font": "Fraunces",
+    "body_font": "Source Sans 3",
+    "mode": "light"
+  }'::jsonb,
   updated_at timestamptz not null default timezone('utc', now())
 );
 
@@ -407,7 +490,33 @@ alter table public.site_settings
   add column if not exists address_en text,
   add column if not exists default_locale text default 'bn',
   add column if not exists meta_title_en text,
-  add column if not exists meta_description_en text;
+  add column if not exists meta_description_en text,
+  add column if not exists favicon_url text,
+  add column if not exists visitor_count integer not null default 0,
+  add column if not exists visibility jsonb,
+  add column if not exists theme jsonb;
+
+update public.site_settings
+set
+  visibility = coalesce(visibility, '{
+    "about": true,
+    "causes": true,
+    "gallery": true,
+    "achievements": true,
+    "transparency": true,
+    "membership": true,
+    "careers": false,
+    "blog": true,
+    "contact": true
+  }'::jsonb),
+  theme = coalesce(theme, '{
+    "primary": "oklch(0.48 0.12 145)",
+    "secondary": "oklch(0.9 0.04 145)",
+    "heading_font": "Fraunces",
+    "body_font": "Source Sans 3",
+    "mode": "light"
+  }'::jsonb)
+where id = 1;
 
 drop trigger if exists site_settings_set_updated_at on public.site_settings;
 create trigger site_settings_set_updated_at
@@ -450,7 +559,11 @@ select
   meta_title,
   meta_title_en,
   meta_description,
-  meta_description_en
+  meta_description_en,
+  favicon_url,
+  visitor_count,
+  visibility,
+  theme
 from public.site_settings
 where id = 1;
 
@@ -740,6 +853,10 @@ alter table public.users enable row level security;
 alter table public.causes_projects enable row level security;
 alter table public.donations enable row level security;
 alter table public.blog_posts enable row level security;
+alter table public.blog_categories enable row level security;
+alter table public.blog_tags enable row level security;
+alter table public.blog_post_categories enable row level security;
+alter table public.blog_post_tags enable row level security;
 alter table public.page_content enable row level security;
 alter table public.site_settings enable row level security;
 alter table public.about_sections enable row level security;
@@ -819,6 +936,58 @@ using (status = 'published' or public.is_staff());
 drop policy if exists "blog_staff_write" on public.blog_posts;
 create policy "blog_staff_write"
 on public.blog_posts for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+drop policy if exists "blog_categories_public_read" on public.blog_categories;
+create policy "blog_categories_public_read"
+on public.blog_categories for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "blog_categories_staff_write" on public.blog_categories;
+create policy "blog_categories_staff_write"
+on public.blog_categories for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+drop policy if exists "blog_tags_public_read" on public.blog_tags;
+create policy "blog_tags_public_read"
+on public.blog_tags for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "blog_tags_staff_write" on public.blog_tags;
+create policy "blog_tags_staff_write"
+on public.blog_tags for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+drop policy if exists "blog_post_categories_public_read" on public.blog_post_categories;
+create policy "blog_post_categories_public_read"
+on public.blog_post_categories for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "blog_post_categories_staff_write" on public.blog_post_categories;
+create policy "blog_post_categories_staff_write"
+on public.blog_post_categories for all
+to authenticated
+using (public.is_staff())
+with check (public.is_staff());
+
+drop policy if exists "blog_post_tags_public_read" on public.blog_post_tags;
+create policy "blog_post_tags_public_read"
+on public.blog_post_tags for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "blog_post_tags_staff_write" on public.blog_post_tags;
+create policy "blog_post_tags_staff_write"
+on public.blog_post_tags for all
 to authenticated
 using (public.is_staff())
 with check (public.is_staff());

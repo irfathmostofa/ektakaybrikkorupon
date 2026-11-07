@@ -5,6 +5,7 @@ import { updatePageAction } from "@/actions/pages";
 import type { ActionState } from "@/actions/settings";
 import { FormMessage } from "@/components/admin/form-message";
 import { ImageField } from "@/components/admin/image-field";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,7 @@ export function PageForm({ page }: { page: PageContent }) {
   const [state, formAction] = useActionState(updatePageAction, initialState);
 
   return (
-    <form action={formAction} className="grid max-w-3xl gap-4">
+    <form action={formAction} className="grid gap-4">
       <input type="hidden" name="id" value={page.id} />
       <p className="text-sm text-muted-foreground">Page key: {page.page_key}</p>
       <div className="space-y-2">
@@ -40,14 +41,8 @@ export function PageForm({ page }: { page: PageContent }) {
           defaultValue={page.subtitle_en ?? ""}
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="body">Body (Bangla)</Label>
-        <Textarea id="body" name="body" defaultValue={page.body ?? ""} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="body_en">Body (English)</Label>
-        <Textarea id="body_en" name="body_en" defaultValue={page.body_en ?? ""} />
-      </div>
+      <RichTextEditor name="body" label="Body (Bangla)" defaultValue={page.body} />
+      <RichTextEditor name="body_en" label="Body (English)" defaultValue={page.body_en} />
       <div className="space-y-2">
         <Label htmlFor="meta_title">Meta title (Bangla)</Label>
         <Input

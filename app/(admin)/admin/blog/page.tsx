@@ -1,61 +1,34 @@
-import Link from "next/link";
-import { listBlogPosts } from "@/actions/blog";
-import { AdminPage } from "@/components/admin/admin-page";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  getBlogAnalytics,
+  listBlogCategories,
+  listBlogPosts,
+  listBlogTags,
+} from "@/actions/blog";
+import { AdminPage } from "@/components/admin/admin-page";
+import { AdminHeader } from "@/components/admin/admin-header";
+import { BlogManager } from "@/components/admin/blog-manager";
+import { StatCard } from "@/components/admin/stat-card";
 
 async function AdminBlog() {
-  const posts = await listBlogPosts();
+  const [posts, categories, tags, analytics] = await Promise.all([
+    listBlogPosts(),
+    listBlogCategories(),
+    listBlogTags(),
+    getBlogAnalytics(),
+  ]);
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Blog</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Draft and publish foundation updates.
-          </p>
-        </div>
-        <Button nativeButton={false} render={<Link href="/admin/blog/new" />}>
-          New post
-        </Button>
+      <AdminHeader
+        title="Blog"
+        description="Manage posts, categories, tags, and read analytics."
+      />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard title="Posts" value={posts.length} />
+        <StatCard title="Total reads" value={analytics.totalReads} />
+        <StatCard title="Total visitors" value={analytics.totalVisitors} />
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Published</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {posts.map((post) => (
-            <TableRow key={post.id}>
-              <TableCell>
-                <Link href={`/admin/blog/${post.id}`} className="hover:underline">
-                  {post.title}
-                </Link>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary">{post.status}</Badge>
-              </TableCell>
-              <TableCell>
-                {post.published_at
-                  ? new Date(post.published_at).toLocaleDateString()
-                  : "—"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <BlogManager posts={posts} categories={categories} tags={tags} />
     </section>
   );
 }

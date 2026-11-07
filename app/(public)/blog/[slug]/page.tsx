@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BlogViewTracker } from "@/components/public/analytics-trackers";
 import { NatureImage } from "@/components/public/nature-image";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getPostBySlug } from "@/lib/content/public";
 import { localizeHref } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -62,10 +64,12 @@ export default async function BlogPostPage({
             className="aspect-[16/9]"
           />
         </div>
-        <p className="mt-8 whitespace-pre-line text-lg leading-9">
-          {pickLocalized(locale, post.content, post.content_en)}
-        </p>
+        <RichHtml
+          className="prose mt-8 max-w-none text-lg leading-9"
+          html={pickLocalized(locale, post.content, post.content_en)}
+        />
       </article>
+      <BlogViewTracker slug={post.slug} />
     </>
   );
 }

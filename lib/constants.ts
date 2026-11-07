@@ -76,6 +76,18 @@ export const JOB_APPLICATION_STATUSES = [
 
 export const MEDIA_BUCKET = "media";
 
+export const VISIBILITY_KEYS = [
+  "about",
+  "causes",
+  "gallery",
+  "achievements",
+  "transparency",
+  "membership",
+  "careers",
+  "blog",
+  "contact",
+] as const;
+
 export const PUBLIC_NAV = [
   { href: "/about", key: "about" },
   { href: "/causes", key: "causes" },
@@ -86,4 +98,13 @@ export const PUBLIC_NAV = [
   // { href: "/careers", key: "careers" },
   { href: "/blog", key: "blog" },
   { href: "/contact", key: "contact" },
+] as const;
+
+export const THEME_FONTS = [
+  "Fraunces",
+  "Source Serif 4",
+  "Newsreader",
+  "Source Sans 3",
+  "Figtree",
+  "Nunito Sans",
 ] as const;

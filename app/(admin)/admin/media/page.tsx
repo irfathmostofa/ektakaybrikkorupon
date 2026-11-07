@@ -1,4 +1,5 @@
 import { listMedia } from "@/actions/media";
+import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { MediaLibrary } from "@/components/admin/media-library";
 import { requireStaff } from "@/lib/auth";
@@ -9,12 +10,10 @@ async function AdminMedia() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Media</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Images are compressed in the browser before upload.
-        </p>
-      </div>
+      <AdminHeader
+        title="Media"
+        description="Browse, upload, and delete images used across the site."
+      />
       <MediaLibrary items={items} />
     </section>
   );

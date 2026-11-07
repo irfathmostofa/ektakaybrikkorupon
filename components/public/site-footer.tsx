@@ -46,7 +46,7 @@ export function SiteFooter({
             {dict.nav.home}
           </p>
           <nav className="mt-4 grid gap-2 text-sm">
-            {PUBLIC_NAV.map((item) => (
+            {PUBLIC_NAV.filter((item) => settings.visibility[item.key] !== false).map((item) => (
               <Link
                 key={item.href}
                 href={localizeHref(locale, item.href)}

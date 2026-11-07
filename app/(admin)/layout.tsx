@@ -26,6 +26,16 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-full flex-1">
       <AdminSidebar user={user} />
       <div className="flex min-w-0 flex-1 flex-col bg-muted/30">
+        <header className="flex h-14 items-center justify-end border-b border-border bg-background/80 px-6">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            View Website
+          </a>
+        </header>
         <div className="flex-1 p-6 md:p-8">{children}</div>
       </div>
     </div>

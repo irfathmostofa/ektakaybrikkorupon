@@ -31,6 +31,48 @@ export type SocialLinks = {
   youtube?: string;
 };
 
+export type SiteVisibility = {
+  about: boolean;
+  causes: boolean;
+  gallery: boolean;
+  achievements: boolean;
+  transparency: boolean;
+  membership: boolean;
+  careers: boolean;
+  blog: boolean;
+  contact: boolean;
+};
+
+export type ThemeMode = "light" | "dark" | "system";
+
+export type SiteTheme = {
+  primary: string;
+  secondary: string;
+  heading_font: string;
+  body_font: string;
+  mode: ThemeMode;
+};
+
+export const DEFAULT_SITE_VISIBILITY: SiteVisibility = {
+  about: true,
+  causes: true,
+  gallery: true,
+  achievements: true,
+  transparency: true,
+  membership: true,
+  careers: false,
+  blog: true,
+  contact: true,
+};
+
+export const DEFAULT_SITE_THEME: SiteTheme = {
+  primary: "oklch(0.48 0.12 145)",
+  secondary: "oklch(0.9 0.04 145)",
+  heading_font: "Fraunces",
+  body_font: "Source Sans 3",
+  mode: "light",
+};
+
 export type User = {
   id: string;
   email: string;
@@ -99,6 +141,10 @@ export type SiteSettings = {
   meta_title_en: string | null;
   meta_description: string | null;
   meta_description_en: string | null;
+  favicon_url: string | null;
+  visitor_count: number;
+  visibility: SiteVisibility;
+  theme: SiteTheme;
   updated_at: string;
 };
 
@@ -117,7 +163,27 @@ export type PublicSiteSettings = Pick<
   | "meta_title_en"
   | "meta_description"
   | "meta_description_en"
+  | "favicon_url"
+  | "visitor_count"
+  | "visibility"
+  | "theme"
 >;
+
+export type BlogCategory = {
+  id: string;
+  name: string;
+  name_en: string | null;
+  slug: string;
+  created_at: string;
+};
+
+export type BlogTag = {
+  id: string;
+  name: string;
+  name_en: string | null;
+  slug: string;
+  created_at: string;
+};
 
 export type BlogPost = {
   id: string;
@@ -131,8 +197,11 @@ export type BlogPost = {
   cover_image_url: string | null;
   status: BlogStatus;
   published_at: string | null;
+  view_count: number;
   created_at: string;
   updated_at: string;
+  categories?: BlogCategory[];
+  tags?: BlogTag[];
 };
 
 export type PageContent = {
@@ -339,6 +408,26 @@ export type Database = {
         Partial<BlogPost> & Pick<BlogPost, "title" | "slug">,
         Partial<BlogPost>
       >;
+      blog_categories: Table<
+        BlogCategory,
+        Partial<BlogCategory> & Pick<BlogCategory, "name" | "slug">,
+        Partial<BlogCategory>
+      >;
+      blog_tags: Table<
+        BlogTag,
+        Partial<BlogTag> & Pick<BlogTag, "name" | "slug">,
+        Partial<BlogTag>
+      >;
+      blog_post_categories: Table<
+        { post_id: string; category_id: string },
+        { post_id: string; category_id: string },
+        Partial<{ post_id: string; category_id: string }>
+      >;
+      blog_post_tags: Table<
+        { post_id: string; tag_id: string },
+        { post_id: string; tag_id: string },
+        Partial<{ post_id: string; tag_id: string }>
+      >;
       page_content: Table<
         PageContent,
         Partial<PageContent> & Pick<PageContent, "page_key" | "title">,
@@ -409,7 +498,16 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      increment_blog_view: {
+        Args: { post_slug: string };
+        Returns: undefined;
+      };
+      increment_site_visitors: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+    };
     Enums: {
       user_role: UserRole;
       cause_status: CauseStatus;

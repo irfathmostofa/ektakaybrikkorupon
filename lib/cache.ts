@@ -2,7 +2,11 @@ import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createPublicClient } from "@/lib/supabase/public";
-import type { PublicSiteSettings } from "@/lib/types/database";
+import {
+  DEFAULT_SITE_THEME,
+  DEFAULT_SITE_VISIBILITY,
+  type PublicSiteSettings,
+} from "@/lib/types/database";
 
 export const FALLBACK_SITE_SETTINGS: PublicSiteSettings = {
   logo_url: null,
@@ -26,6 +30,10 @@ export const FALLBACK_SITE_SETTINGS: PublicSiteSettings = {
     "প্রতিদিন এক টাকা, মাসে একটি গাছ। ২০১৯ সাল থেকে পরিবেশ ও মানবতার সেবায় নিয়োজিত।",
   meta_description_en:
     "One taka a day, one tree a month. Serving the environment and humanity since 2019.",
+  favicon_url: null,
+  visitor_count: 0,
+  visibility: DEFAULT_SITE_VISIBILITY,
+  theme: DEFAULT_SITE_THEME,
 };
 
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
@@ -41,7 +49,7 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   const { data, error } = await supabase
     .from("site_settings_public")
     .select(
-      "logo_url, foundation_name, foundation_name_en, contact_email, contact_phone, address, address_en, social_links, google_site_verification_code, meta_title, meta_title_en, meta_description, meta_description_en",
+      "logo_url, foundation_name, foundation_name_en, contact_email, contact_phone, address, address_en, social_links, google_site_verification_code, meta_title, meta_title_en, meta_description, meta_description_en, favicon_url, visitor_count, visibility, theme",
     )
     .maybeSingle();
 
@@ -49,5 +57,16 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
     return FALLBACK_SITE_SETTINGS;
   }
 
-  return { ...FALLBACK_SITE_SETTINGS, ...data };
+  return {
+    ...FALLBACK_SITE_SETTINGS,
+    ...data,
+    visibility: {
+      ...DEFAULT_SITE_VISIBILITY,
+      ...(data.visibility ?? {}),
+    },
+    theme: {
+      ...DEFAULT_SITE_THEME,
+      ...(data.theme ?? {}),
+    },
+  };
 }

@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/actions/settings";
+import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { requireStaff } from "@/lib/auth";
@@ -10,12 +11,10 @@ async function AdminSettings() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Store SSL Commerz, Email.js, and Google verification values here.
-        </p>
-      </div>
+      <AdminHeader
+        title="Settings"
+        description="General, visibility, theme, and integration credentials."
+      />
       <SettingsForm
         settings={
           settings ?? {

@@ -1,8 +1,10 @@
 import { Suspense } from "react";
+import { VisitorTracker } from "@/components/public/analytics-trackers";
 import { JoinCta } from "@/components/public/join-cta";
 import { JsonLd } from "@/components/public/json-ld";
 import { SiteFooter } from "@/components/public/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
+import { SiteThemeStyle } from "@/components/public/site-theme";
 import { getPublicSiteSettings } from "@/lib/cache";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { organizationJsonLd } from "@/lib/seo";
@@ -36,6 +38,8 @@ async function PublicTop() {
 
   return (
     <>
+      <SiteThemeStyle theme={settings.theme} />
+      <VisitorTracker />
       <JsonLd data={organizationJsonLd(locale, settings)} />
       <a href="#main-content" className="skip-link">
         {dict.nav.skipToContent}

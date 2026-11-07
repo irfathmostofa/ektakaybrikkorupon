@@ -76,7 +76,7 @@ export function SiteHeader({
         </Link>
 
         <nav className="hidden items-center gap-4 text-sm lg:flex xl:gap-5">
-          {PUBLIC_NAV.map((item) => {
+          {PUBLIC_NAV.filter((item) => settings.visibility[item.key] !== false).map((item) => {
             const href = localizeHref(locale, item.href);
             const active =
               current === item.href || current.startsWith(`${item.href}/`);
@@ -127,7 +127,7 @@ export function SiteHeader({
       {open ? (
         <nav className="border-t border-border bg-background px-6 py-4 lg:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-2">
-            {PUBLIC_NAV.map((item) => (
+            {PUBLIC_NAV.filter((item) => settings.visibility[item.key] !== false).map((item) => (
               <Link
                 key={item.href}
                 href={localizeHref(locale, item.href)}

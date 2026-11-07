@@ -1,10 +1,18 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/constants";
+import { CACHE_TAGS, VISIBILITY_KEYS } from "@/lib/constants";
 import { requireStaff, isAdminRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import type { SiteSettings, SocialLinks } from "@/lib/types/database";
+import {
+  DEFAULT_SITE_THEME,
+  DEFAULT_SITE_VISIBILITY,
+  type SiteSettings,
+  type SiteTheme,
+  type SiteVisibility,
+  type SocialLinks,
+  type ThemeMode,
+} from "@/lib/types/database";
 
 export type ActionState = {
   error?: string;
@@ -23,7 +31,46 @@ export async function getSiteSettings() {
     throw new Error(error.message);
   }
 
-  return data;
+  if (!data) {
+    return null;
+  }
+
+  return {
+    ...data,
+    visibility: {
+      ...DEFAULT_SITE_VISIBILITY,
+      ...(data.visibility ?? {}),
+    },
+    theme: {
+      ...DEFAULT_SITE_THEME,
+      ...(data.theme ?? {}),
+    },
+  } as SiteSettings;
+}
+
+function parseVisibility(formData: FormData): SiteVisibility {
+  const visibility = { ...DEFAULT_SITE_VISIBILITY };
+  for (const key of VISIBILITY_KEYS) {
+    visibility[key] = formData.get(`visibility_${key}`) === "on";
+  }
+  return visibility;
+}
+
+function parseTheme(formData: FormData): SiteTheme {
+  const modeValue = String(formData.get("theme_mode") ?? "light");
+  const mode: ThemeMode =
+    modeValue === "dark" || modeValue === "system" ? modeValue : "light";
+  return {
+    primary: String(formData.get("theme_primary") ?? "").trim() || DEFAULT_SITE_THEME.primary,
+    secondary:
+      String(formData.get("theme_secondary") ?? "").trim() || DEFAULT_SITE_THEME.secondary,
+    heading_font:
+      String(formData.get("theme_heading_font") ?? "").trim() ||
+      DEFAULT_SITE_THEME.heading_font,
+    body_font:
+      String(formData.get("theme_body_font") ?? "").trim() || DEFAULT_SITE_THEME.body_font,
+    mode,
+  };
 }
 
 export async function updateSiteSettingsAction(
@@ -52,6 +99,7 @@ export async function updateSiteSettingsAction(
     foundation_name_en:
       String(formData.get("foundation_name_en") ?? "").trim() || null,
     logo_url: String(formData.get("logo_url") ?? "").trim() || null,
+    favicon_url: String(formData.get("favicon_url") ?? "").trim() || null,
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     contact_phone: String(formData.get("contact_phone") ?? "").trim() || null,
     address: String(formData.get("address") ?? "").trim() || null,
@@ -80,6 +128,8 @@ export async function updateSiteSettingsAction(
       String(formData.get("meta_description") ?? "").trim() || null,
     meta_description_en:
       String(formData.get("meta_description_en") ?? "").trim() || null,
+    visibility: parseVisibility(formData),
+    theme: parseTheme(formData),
   };
 
   if (!payload.foundation_name) {

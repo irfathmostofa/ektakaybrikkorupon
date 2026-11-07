@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MediaUploader } from "@/components/admin/media-uploader";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 export function ImageField({
   name,
@@ -14,21 +11,7 @@ export function ImageField({
   label: string;
   defaultValue?: string | null;
 }) {
-  const [url, setUrl] = useState(defaultValue ?? "");
-
   return (
-    <div className="space-y-3">
-      <div className="space-y-2">
-        <Label htmlFor={name}>{label}</Label>
-        <Input
-          id={name}
-          name={name}
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          placeholder="https://..."
-        />
-      </div>
-      <MediaUploader onUploaded={setUrl} />
-    </div>
+    <ImageUploader name={name} label={label} defaultValue={defaultValue} />
   );
 }

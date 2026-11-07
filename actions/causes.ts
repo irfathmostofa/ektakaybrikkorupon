@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import { CACHE_TAGS, CAUSE_STATUSES } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
@@ -61,7 +60,7 @@ export async function createCauseAction(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("causes_projects")
     .insert({
       title,
@@ -78,16 +77,15 @@ export async function createCauseAction(
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       status: parseCauseStatus(String(formData.get("status") ?? "draft")),
       featured: formData.get("featured") === "on",
-    })
-    .select("id")
-    .single();
+    });
 
   if (error) {
     return { error: error.message };
   }
 
   revalidateTag(CACHE_TAGS.causes, "max");
-  redirect(`/admin/causes/${data.id}`);
+  revalidatePath("/admin/causes");
+  return { success: "Cause created." };
 }
 
 export async function updateCauseAction(
@@ -145,5 +143,5 @@ export async function deleteCauseAction(formData: FormData) {
   }
 
   revalidateTag(CACHE_TAGS.causes, "max");
-  redirect("/admin/causes");
+  revalidatePath("/admin/causes");
 }
