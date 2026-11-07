@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import emailjs from "@emailjs/browser";
 import {
   campaignUnsubscribeUrl,
   deleteCampaignAction,
@@ -34,6 +33,25 @@ import type {
 } from "@/lib/types/database";
 
 const EMAILJS_MONTHLY_LIMIT = 200;
+
+async function sendEmailjsBrowser(
+  config: { serviceId: string; templateId: string; publicKey: string },
+  params: Record<string, string>,
+) {
+  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id: config.serviceId,
+      template_id: config.templateId,
+      user_id: config.publicKey,
+      template_params: params,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error("EmailJS send failed.");
+  }
+}
 
 function CampaignForm({
   campaign,
@@ -119,18 +137,13 @@ export function CampaignManager({
     setProgress({ sent: 0, failed: 0, total: list.length });
     for (const recipient of list) {
       try {
-        await emailjs.send(
-          emailConfig.serviceId,
-          emailConfig.templateId,
-          {
-            to_email: recipient.email,
-            to_name: recipient.name,
-            subject: campaign.subject,
-            message_html: campaign.body,
-            unsubscribe_link: campaignUnsubscribeUrl(recipient.email),
-          },
-          { publicKey: emailConfig.publicKey },
-        );
+        await sendEmailjsBrowser(emailConfig, {
+          to_email: recipient.email,
+          to_name: recipient.name,
+          subject: campaign.subject,
+          message_html: campaign.body,
+          unsubscribe_link: await campaignUnsubscribeUrl(recipient.email),
+        });
         sent += 1;
       } catch {
         failed += 1;
@@ -157,18 +170,13 @@ export function CampaignManager({
     }
     setBusy(true);
     try {
-      await emailjs.send(
-        emailConfig.serviceId,
-        emailConfig.templateId,
-        {
-          to_email: senderEmail,
-          to_name: senderName || senderEmail,
-          subject: `[TEST] ${campaign.subject}`,
-          message_html: campaign.body,
-          unsubscribe_link: campaignUnsubscribeUrl(senderEmail),
-        },
-        { publicKey: emailConfig.publicKey },
-      );
+      await sendEmailjsBrowser(emailConfig, {
+        to_email: senderEmail,
+        to_name: senderName || senderEmail,
+        subject: `[TEST] ${campaign.subject}`,
+        message_html: campaign.body,
+        unsubscribe_link: await campaignUnsubscribeUrl(senderEmail),
+      });
       setMessage(`Test email sent to ${senderEmail}.`);
     } catch {
       setMessage("Test email failed.");

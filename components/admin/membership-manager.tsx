@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import {
   deleteMembershipPlanAction,
   saveMembershipPlanAction,
   updateMembershipApplicationAction,
 } from "@/actions/membership";
+import type { ActionState } from "@/actions/settings";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { FormDialog } from "@/components/admin/form-dialog";
+import { FormMessage } from "@/components/admin/form-message";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -23,37 +25,86 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { asFormAction } from "@/lib/admin/form-action";
 import { MEMBERSHIP_STATUSES } from "@/lib/constants";
 import type { MembershipApplication, MembershipPlan } from "@/lib/types/database";
 
+const initialState: ActionState = {};
+
 function PlanForm({ plan }: { plan?: MembershipPlan }) {
+  const [state, formAction] = useActionState(saveMembershipPlanAction, initialState);
+
   return (
-    <form action={asFormAction(saveMembershipPlanAction)} className="grid gap-3">
+    <form action={formAction} className="grid gap-3">
       {plan ? <input type="hidden" name="id" value={plan.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">Name (Bangla)</Label>
         <Input id="name" name="name" defaultValue={plan?.name} required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="name_en">Name (English)</Label>
         <Input id="name_en" name="name_en" defaultValue={plan?.name_en ?? ""} />
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="slug">Slug</Label>
+        <Input id="slug" name="slug" defaultValue={plan?.slug ?? ""} />
+      </div>
       <RichTextEditor name="description" label="Description" defaultValue={plan?.description} />
-      <div className="grid gap-3 md:grid-cols-2">
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={plan?.description_en}
+      />
+      <RichTextEditor name="benefits" label="Benefits" defaultValue={plan?.benefits} />
+      <RichTextEditor
+        name="benefits_en"
+        label="Benefits (English)"
+        defaultValue={plan?.benefits_en}
+      />
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="fee_amount">Fee</Label>
-          <Input id="fee_amount" name="fee_amount" type="number" defaultValue={plan?.fee_amount ?? 0} />
+          <Input
+            id="fee_amount"
+            name="fee_amount"
+            type="number"
+            min="0"
+            step="0.01"
+            defaultValue={plan?.fee_amount ?? 0}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="duration_label">Duration</Label>
-          <Input id="duration_label" name="duration_label" defaultValue={plan?.duration_label ?? ""} />
+          <Input
+            id="duration_label"
+            name="duration_label"
+            defaultValue={plan?.duration_label ?? ""}
+          />
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="duration_label_en">Duration (English)</Label>
+          <Input
+            id="duration_label_en"
+            name="duration_label_en"
+            defaultValue={plan?.duration_label_en ?? ""}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="sort_order">Sort order</Label>
+          <Input
+            id="sort_order"
+            name="sort_order"
+            type="number"
+            defaultValue={plan?.sort_order ?? 0}
+          />
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="is_active" defaultChecked={plan?.is_active ?? true} />
         Active
       </label>
+      <FormMessage state={state} />
       <SubmitButton>{plan ? "Save plan" : "Create plan"}</SubmitButton>
     </form>
   );
@@ -71,7 +122,7 @@ export function MembershipManager({
 
   return (
     <Tabs defaultValue="plans">
-      <TabsList>
+      <TabsList className="w-full overflow-x-auto sm:w-auto">
         <TabsTrigger value="plans">Plans</TabsTrigger>
         <TabsTrigger value="applications">Applications</TabsTrigger>
       </TabsList>
@@ -86,15 +137,17 @@ export function MembershipManager({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Fee</TableHead>
+              <TableHead>Duration</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead />
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {plans.map((plan) => (
               <TableRow key={plan.id}>
                 <TableCell>{plan.name}</TableCell>
-                <TableCell>{plan.fee_amount}</TableCell>
+                <TableCell>{Number(plan.fee_amount).toLocaleString()}</TableCell>
+                <TableCell>{plan.duration_label || "—"}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{plan.is_active ? "active" : "hidden"}</Badge>
                 </TableCell>
@@ -136,7 +189,7 @@ export function MembershipManager({
                   <Badge variant="secondary">{application.status}</Badge>
                 </TableCell>
                 <TableCell>
-                  <form action={updateMembershipApplicationAction} className="flex gap-2">
+                  <form action={updateMembershipApplicationAction} className="flex flex-wrap gap-2">
                     <input type="hidden" name="id" value={application.id} />
                     <select
                       name="status"
@@ -170,7 +223,7 @@ export function MembershipManager({
         }}
         size="lg"
       >
-        <PlanForm plan={editing ?? undefined} />
+        <PlanForm key={editing?.id ?? "new"} plan={editing ?? undefined} />
       </FormDialog>
     </Tabs>
   );

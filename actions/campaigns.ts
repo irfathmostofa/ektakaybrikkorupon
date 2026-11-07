@@ -262,6 +262,6 @@ export async function recordCampaignSendAction(formData: FormData): Promise<Acti
   return { success: "Send results saved." };
 }
 
-export function campaignUnsubscribeUrl(email: string) {
+export async function campaignUnsubscribeUrl(email: string) {
   return `${getSiteUrl()}/contact?unsubscribe=${encodeURIComponent(email)}`;
 }

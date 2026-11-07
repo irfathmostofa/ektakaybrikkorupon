@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/public/empty-state";
 import { MembershipForm } from "@/components/public/membership-form";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getMembershipPlans, getPageContent } from "@/lib/content/public";
 import { localizePage } from "@/lib/content/localize";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -55,10 +56,16 @@ export default async function MembershipPage() {
                       )}
                     </p>
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                    {pickLocalized(locale, plan.description, plan.description_en)}
-                  </p>
-                  <p className="mt-3 text-sm">{pickLocalized(locale, plan.benefits, plan.benefits_en)}</p>
+                  <div className="mt-3 text-sm leading-7 text-muted-foreground">
+                    <RichHtml
+                      html={pickLocalized(locale, plan.description, plan.description_en)}
+                    />
+                  </div>
+                  <div className="mt-3 text-sm">
+                    <RichHtml
+                      html={pickLocalized(locale, plan.benefits, plan.benefits_en)}
+                    />
+                  </div>
                 </article>
               ))}
             </div>

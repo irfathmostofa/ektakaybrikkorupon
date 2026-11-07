@@ -98,13 +98,13 @@ export function sanitizeMenus(value: unknown): AdminMenuKey[] {
 
 export function menusForRole(
   role: UserRole,
-  stored?: Partial<Record<UserRole, AdminMenuKey[]>> | null,
+  stored?: Partial<Record<UserRole, readonly string[]>> | null,
 ) {
   if (role === "super_admin") {
     return [...ADMIN_MENU_KEYS];
   }
-  const fromStore = stored?.[role];
-  if (fromStore && fromStore.length) {
+  const fromStore = sanitizeMenus(stored?.[role]);
+  if (fromStore.length) {
     return fromStore;
   }
   return [...DEFAULT_ROLE_MENUS[role]];
@@ -113,7 +113,7 @@ export function menusForRole(
 export function hasMenuAccess(
   user: Pick<User, "role">,
   menu: AdminMenuKey,
-  stored?: Partial<Record<UserRole, AdminMenuKey[]>> | null,
+  stored?: Partial<Record<UserRole, readonly string[]>> | null,
 ) {
   return menusForRole(user.role, stored).includes(menu);
 }

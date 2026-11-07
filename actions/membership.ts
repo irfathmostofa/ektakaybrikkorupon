@@ -46,14 +46,27 @@ export async function saveMembershipPlanAction(
   await requireStaff();
   const id = formString(formData, "id");
   const name = formString(formData, "name");
-  const slug = slugify(formString(formData, "slug")) || slugify(name);
-  if (!name || !slug) {
+  const nameEn = formOptional(formData, "name_en");
+  if (!name) {
     return { error: "Name is required." };
   }
+  let slug =
+    slugify(formString(formData, "slug")) ||
+    slugify(nameEn ?? "") ||
+    slugify(name) ||
+    (id ? `plan-${id.slice(0, 8)}` : `plan-${Date.now().toString(36)}`);
   const supabase = await createClient();
+  const { data: slugOwner } = await supabase
+    .from("membership_plans")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (slugOwner && slugOwner.id !== id) {
+    slug = `${slug}-${Date.now().toString(36)}`.slice(0, 80);
+  }
   const payload = {
     name,
-    name_en: formOptional(formData, "name_en"),
+    name_en: nameEn,
     slug,
     description: formOptional(formData, "description"),
     description_en: formOptional(formData, "description_en"),
@@ -73,6 +86,7 @@ export async function saveMembershipPlanAction(
   }
   revalidateTag(CACHE_TAGS.membership, "max");
   revalidatePath("/admin/membership");
+  revalidatePath("/membership");
   return { success: id ? "Plan updated." : "Plan created." };
 }
 
@@ -86,6 +100,7 @@ export async function deleteMembershipPlanAction(formData: FormData) {
   }
   revalidateTag(CACHE_TAGS.membership, "max");
   revalidatePath("/admin/membership");
+  revalidatePath("/membership");
 }
 
 export async function updateMembershipApplicationAction(formData: FormData) {

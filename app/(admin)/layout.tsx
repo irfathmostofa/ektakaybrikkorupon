@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { AdminTopBar } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { getAccessibleMenus } from "@/lib/admin/access";
 import { requireStaff } from "@/lib/auth";
@@ -12,7 +13,8 @@ function AdminShellFallback() {
     <div className="flex min-h-full flex-1">
       <div className="hidden w-64 border-r border-border bg-card md:block" />
       <div className="flex min-w-0 flex-1 flex-col bg-muted/30">
-        <div className="flex-1 p-6 md:p-8">
+        <div className="h-14 border-b border-border bg-background" />
+        <div className="flex-1 p-4 sm:p-6 md:p-8">
           <div className="h-40 rounded-xl bg-muted" />
         </div>
       </div>
@@ -25,20 +27,11 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   const menus = await getAccessibleMenus(user);
 
   return (
-    <div className="flex min-h-full flex-1">
+    <div className="flex min-h-full min-w-0 flex-1">
       <AdminSidebar user={user} menus={menus} />
       <div className="flex min-w-0 flex-1 flex-col bg-muted/30">
-        <header className="flex h-14 items-center justify-end border-b border-border bg-background/80 px-6">
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
-          >
-            View Website
-          </a>
-        </header>
-        <div className="flex-1 p-6 md:p-8">{children}</div>
+        <AdminTopBar user={user} menus={menus} />
+        <div className="flex-1 overflow-x-hidden p-4 sm:p-6 md:p-8">{children}</div>
       </div>
     </div>
   );
