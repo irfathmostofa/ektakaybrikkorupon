@@ -16,6 +16,19 @@ function parseBlogStatus(value: string): BlogStatus {
     : "draft";
 }
 
+function isMissingRelation(error: { message?: string; code?: string } | null) {
+  if (!error?.message) {
+    return false;
+  }
+  return (
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    /could not find the table/i.test(error.message) ||
+    /does not exist/i.test(error.message) ||
+    /schema cache/i.test(error.message)
+  );
+}
+
 async function syncPostRelations(
   postId: string,
   categoryIds: string[],
@@ -45,6 +58,9 @@ export async function listBlogCategories(): Promise<BlogCategory[]> {
     .select("*")
     .order("name", { ascending: true });
   if (error) {
+    if (isMissingRelation(error)) {
+      return [];
+    }
     throw new Error(error.message);
   }
   return data ?? [];
@@ -58,6 +74,9 @@ export async function listBlogTags(): Promise<BlogTag[]> {
     .select("*")
     .order("name", { ascending: true });
   if (error) {
+    if (isMissingRelation(error)) {
+      return [];
+    }
     throw new Error(error.message);
   }
   return data ?? [];
@@ -78,10 +97,23 @@ export async function listBlogPosts(): Promise<BlogPost[]> {
 
   const posts = (data ?? []) as BlogPost[];
   const postIds = posts.map((post) => post.id);
-  const [{ data: categoryRows }, { data: tagRows }] = await Promise.all([
-    supabase.from("blog_post_categories").select("post_id, category_id").in("post_id", postIds.length ? postIds : ["00000000-0000-0000-0000-000000000000"]),
-    supabase.from("blog_post_tags").select("post_id, tag_id").in("post_id", postIds.length ? postIds : ["00000000-0000-0000-0000-000000000000"]),
-  ]);
+  const [{ data: categoryRows, error: categoryRelError }, { data: tagRows, error: tagRelError }] =
+    await Promise.all([
+      supabase
+        .from("blog_post_categories")
+        .select("post_id, category_id")
+        .in("post_id", postIds.length ? postIds : ["00000000-0000-0000-0000-000000000000"]),
+      supabase
+        .from("blog_post_tags")
+        .select("post_id, tag_id")
+        .in("post_id", postIds.length ? postIds : ["00000000-0000-0000-0000-000000000000"]),
+    ]);
+  if (categoryRelError && !isMissingRelation(categoryRelError)) {
+    throw new Error(categoryRelError.message);
+  }
+  if (tagRelError && !isMissingRelation(tagRelError)) {
+    throw new Error(tagRelError.message);
+  }
 
   const categoriesById = new Map(categories.map((item) => [item.id, item]));
   const tagsById = new Map(tags.map((item) => [item.id, item]));
@@ -284,6 +316,11 @@ export async function createBlogCategoryAction(
     slug,
   });
   if (error) {
+    if (isMissingRelation(error)) {
+      return {
+        error: "Run supabase/phase7.sql in the Supabase SQL Editor to create blog categories.",
+      };
+    }
     return { error: error.message };
   }
   revalidateTag(CACHE_TAGS.blog, "max");
@@ -308,6 +345,11 @@ export async function updateBlogCategoryAction(
     .update({ name, name_en: formOptional(formData, "name_en"), slug })
     .eq("id", id);
   if (error) {
+    if (isMissingRelation(error)) {
+      return {
+        error: "Run supabase/phase7.sql in the Supabase SQL Editor to create blog categories.",
+      };
+    }
     return { error: error.message };
   }
   revalidateTag(CACHE_TAGS.blog, "max");
@@ -344,6 +386,9 @@ export async function createBlogTagAction(
     slug,
   });
   if (error) {
+    if (isMissingRelation(error)) {
+      return { error: "Run supabase/phase7.sql in the Supabase SQL Editor to create blog_tags." };
+    }
     return { error: error.message };
   }
   revalidateTag(CACHE_TAGS.blog, "max");
@@ -368,6 +413,9 @@ export async function updateBlogTagAction(
     .update({ name, name_en: formOptional(formData, "name_en"), slug })
     .eq("id", id);
   if (error) {
+    if (isMissingRelation(error)) {
+      return { error: "Run supabase/phase7.sql in the Supabase SQL Editor to create blog_tags." };
+    }
     return { error: error.message };
   }
   revalidateTag(CACHE_TAGS.blog, "max");
