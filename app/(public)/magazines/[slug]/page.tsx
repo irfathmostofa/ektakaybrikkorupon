@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/public/page-hero";
 import { PdfReader } from "@/components/public/pdf-reader";
+import { RichHtml } from "@/components/public/rich-html";
 import { getMagazineBySlug } from "@/lib/content/public";
 import { localizeHref } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
@@ -52,7 +53,6 @@ export default async function MagazineIssuePage({
             : dict.magazines.eyebrow
         }
         title={title}
-        subtitle={pickLocalized(locale, magazine.description, magazine.description_en)}
         body={dict.magazines.downloadHint}
       />
       <section className="mx-auto w-full max-w-5xl px-6 py-16">
@@ -62,6 +62,10 @@ export default async function MagazineIssuePage({
         >
           {dict.actions.backToMagazines}
         </Link>
+        <RichHtml
+          className="prose mb-8 max-w-none text-base leading-8 text-muted-foreground"
+          html={pickLocalized(locale, magazine.description, magazine.description_en)}
+        />
         <h2 className="mb-4 font-heading text-2xl">{dict.magazines.readTitle}</h2>
         <PdfReader
           src={magazine.pdf_url}

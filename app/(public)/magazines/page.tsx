@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/public/empty-state";
 import { NatureImage } from "@/components/public/nature-image";
 import { PageHero } from "@/components/public/page-hero";
+import { RichHtml } from "@/components/public/rich-html";
 import { getPageContent, getPublishedMagazines } from "@/lib/content/public";
 import { localizePage } from "@/lib/content/localize";
 import { localizeHref } from "@/lib/i18n/config";
@@ -57,9 +58,10 @@ export default async function MagazinesPage() {
                     <h2 className="font-heading text-xl group-hover:text-primary">
                       {title}
                     </h2>
-                    <p className="text-sm leading-7 text-muted-foreground">
-                      {pickLocalized(locale, magazine.description, magazine.description_en)}
-                    </p>
+                    <RichHtml
+                      className="line-clamp-3 text-sm leading-7 text-muted-foreground"
+                      html={pickLocalized(locale, magazine.description, magazine.description_en)}
+                    />
                     <p className="text-sm font-medium text-primary">
                       {dict.actions.readOnline}
                     </p>

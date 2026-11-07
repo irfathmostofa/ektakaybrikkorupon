@@ -233,9 +233,21 @@
     height: auto;
   }
   [contenteditable] img,
-  .prose-html img {
+  .prose-html img,
+  .ProseMirror img {
     height: auto;
     max-width: 100%;
+  }
+  .ProseMirror {
+    min-height: 9rem;
+    outline: none;
+  }
+  .ProseMirror p.is-editor-empty:first-child::before {
+    color: var(--muted-foreground);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
   }
 }
 

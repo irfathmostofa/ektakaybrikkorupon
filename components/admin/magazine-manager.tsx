@@ -7,12 +7,12 @@ import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ImageField } from "@/components/admin/image-field";
 import { PdfField } from "@/components/admin/pdf-field";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -39,22 +39,16 @@ function MagazineForm({ item }: { item?: Magazine }) {
         <Label htmlFor="slug">Slug</Label>
         <Input id="slug" name="slug" defaultValue={item?.slug} />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="description">Description (Bangla)</Label>
-        <Textarea
-          id="description"
-          name="description"
-          defaultValue={item?.description ?? ""}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="description_en">Description (English)</Label>
-        <Textarea
-          id="description_en"
-          name="description_en"
-          defaultValue={item?.description_en ?? ""}
-        />
-      </div>
+      <RichTextEditor
+        name="description"
+        label="Description (Bangla)"
+        defaultValue={item?.description}
+      />
+      <RichTextEditor
+        name="description_en"
+        label="Description (English)"
+        defaultValue={item?.description_en}
+      />
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="issue_date">Issue date</Label>

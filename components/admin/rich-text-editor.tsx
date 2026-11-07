@@ -1,34 +1,55 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
+import Underline from "@tiptap/extension-underline";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { uploadMediaAction } from "@/actions/media";
 import { Label } from "@/components/ui/label";
 import { compressImage } from "@/lib/compress-image";
 
-function exec(command: string, value?: string) {
-  document.execCommand(command, false, value);
-}
+const AlignImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      class: {
+        default: "align-center",
+      },
+    };
+  },
+});
 
-function wrapSelectedImage(align: string) {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) {
-    return;
-  }
-  const node = selection.anchorNode;
-  const element =
-    node instanceof HTMLElement
-      ? node
-      : node?.parentElement;
-  const image =
-    element instanceof HTMLImageElement
-      ? element
-      : element?.querySelector?.("img") ??
-        (element?.closest("img") as HTMLImageElement | null);
-  if (!image) {
-    return;
-  }
-  image.classList.remove("align-left", "align-center", "align-right", "align-full");
-  image.classList.add(align);
+function ToolbarButton({
+  active,
+  disabled,
+  onClick,
+  className,
+  children,
+}: {
+  active?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={`rounded px-2 py-1 text-xs hover:bg-background disabled:opacity-50 ${
+        active ? "bg-background font-medium" : ""
+      } ${className ?? ""}`}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
 }
 
 export function RichTextEditor({
@@ -42,45 +63,62 @@ export function RichTextEditor({
   defaultValue?: string | null;
   required?: boolean;
 }) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const hiddenRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [html, setHtml] = useState(defaultValue ?? "");
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkNewTab, setLinkNewTab] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const savedRange = useRef<Range | null>(null);
 
-  function sync() {
-    if (hiddenRef.current && editorRef.current) {
-      hiddenRef.current.value = editorRef.current.innerHTML;
-    }
-  }
-
-  function rememberRange() {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      savedRange.current = selection.getRangeAt(0);
-    }
-  }
-
-  function restoreRange() {
-    const selection = window.getSelection();
-    if (savedRange.current && selection) {
-      selection.removeAllRanges();
-      selection.addRange(savedRange.current);
-    }
-  }
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+      }),
+      Underline,
+      AlignImage.configure({
+        inline: false,
+        allowBase64: false,
+      }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        HTMLAttributes: {
+          rel: "noopener noreferrer",
+        },
+      }),
+      Placeholder.configure({
+        placeholder: "Write here…",
+      }),
+    ],
+    content: defaultValue ?? "",
+    editorProps: {
+      attributes: {
+        class: "prose-html min-h-36 px-3 py-2 text-sm outline-none",
+      },
+    },
+    onUpdate: ({ editor: instance }) => {
+      setHtml(instance.getHTML());
+    },
+  });
 
   useEffect(() => {
-    if (editorRef.current && defaultValue) {
-      editorRef.current.innerHTML = defaultValue;
-      sync();
+    if (!editor) {
+      return;
     }
-  }, [defaultValue]);
+    const next = defaultValue ?? "";
+    if (editor.getHTML() !== next) {
+      editor.commands.setContent(next, { emitUpdate: false });
+      setHtml(next);
+    }
+  }, [defaultValue, editor]);
 
   async function insertImage(file: File) {
+    if (!editor) {
+      return;
+    }
     setUploading(true);
     try {
       const compressed = await compressImage(file);
@@ -90,106 +128,127 @@ export function RichTextEditor({
       if (!result.url) {
         return;
       }
-      restoreRange();
-      editorRef.current?.focus();
-      exec(
-        "insertHTML",
-        `<img src="${result.url}" alt="" class="align-center" />`,
-      );
-      sync();
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<img src="${result.url}" alt="" class="align-center" />`)
+        .run();
     } finally {
       setUploading(false);
     }
   }
 
   function applyLink() {
+    if (!editor) {
+      return;
+    }
     const url = linkUrl.trim();
     if (!url) {
+      editor.chain().focus().unsetLink().run();
       setLinkOpen(false);
       return;
     }
-    restoreRange();
-    editorRef.current?.focus();
-    const text = linkText.trim() || url;
-    const target = linkNewTab ? ' target="_blank" rel="noopener noreferrer"' : "";
-    exec("insertHTML", `<a href="${url}"${target}>${text}</a>`);
-    sync();
+    const attrs = {
+      href: url,
+      target: linkNewTab ? "_blank" : null,
+      rel: linkNewTab ? "noopener noreferrer" : null,
+    };
+    const text = linkText.trim();
+    if (text && editor.state.selection.empty) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "text",
+          text,
+          marks: [{ type: "link", attrs }],
+        })
+        .run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink(attrs).run();
+    }
     setLinkOpen(false);
     setLinkText("");
     setLinkUrl("");
     setLinkNewTab(true);
   }
 
-  const tools = [
-    { cmd: "bold", label: "B", className: "font-bold" },
-    { cmd: "italic", label: "I", className: "italic" },
-    { cmd: "underline", label: "U", className: "underline" },
-    { cmd: "insertUnorderedList", label: "List" },
-    { cmd: "formatBlock", label: "H2", value: "h2" },
-  ];
+  function setImageAlign(align: string) {
+    editor?.chain().focus().updateAttributes("image", { class: align }).run();
+  }
 
   return (
     <div className="space-y-2">
       <Label htmlFor={name}>{label}</Label>
       <div className="overflow-hidden rounded-lg border border-input">
         <div className="flex flex-wrap gap-1 border-b border-input bg-muted/40 p-1">
-          {tools.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`rounded px-2 py-1 text-xs hover:bg-background ${item.className ?? ""}`}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                exec(item.cmd, item.value);
-                sync();
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs hover:bg-background"
-            onMouseDown={(event) => {
-              event.preventDefault();
-              rememberRange();
-              const selection = window.getSelection()?.toString() ?? "";
-              setLinkText(selection);
+          <ToolbarButton
+            active={editor?.isActive("bold")}
+            className="font-bold"
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+          >
+            B
+          </ToolbarButton>
+          <ToolbarButton
+            active={editor?.isActive("italic")}
+            className="italic"
+            onClick={() => editor?.chain().focus().toggleItalic().run()}
+          >
+            I
+          </ToolbarButton>
+          <ToolbarButton
+            active={editor?.isActive("underline")}
+            className="underline"
+            onClick={() => editor?.chain().focus().toggleUnderline().run()}
+          >
+            U
+          </ToolbarButton>
+          <ToolbarButton
+            active={editor?.isActive("bulletList")}
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+          >
+            List
+          </ToolbarButton>
+          <ToolbarButton
+            active={editor?.isActive("heading", { level: 2 })}
+            onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+          >
+            H2
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => {
+              const previous = editor?.getAttributes("link").href ?? "";
+              setLinkUrl(typeof previous === "string" ? previous : "");
+              setLinkText(editor?.state.doc.textBetween(
+                editor.state.selection.from,
+                editor.state.selection.to,
+                " ",
+              ) ?? "");
+              setLinkNewTab(editor?.getAttributes("link").target === "_blank" || !previous);
               setLinkOpen(true);
             }}
           >
             Link
-          </button>
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs hover:bg-background"
+          </ToolbarButton>
+          <ToolbarButton
             disabled={uploading}
-            onMouseDown={(event) => {
-              event.preventDefault();
-              rememberRange();
-              fileRef.current?.click();
-            }}
+            onClick={() => fileRef.current?.click()}
           >
             {uploading ? "Uploading..." : "Image"}
-          </button>
+          </ToolbarButton>
           {[
             { align: "align-left", label: "Left" },
             { align: "align-center", label: "Center" },
             { align: "align-right", label: "Right" },
             { align: "align-full", label: "Full" },
           ].map((item) => (
-            <button
+            <ToolbarButton
               key={item.align}
-              type="button"
-              className="rounded px-2 py-1 text-xs hover:bg-background"
-              onMouseDown={(event) => {
-                event.preventDefault();
-                wrapSelectedImage(item.align);
-                sync();
-              }}
+              active={editor?.isActive("image", { class: item.align })}
+              onClick={() => setImageAlign(item.align)}
             >
               {item.label}
-            </button>
+            </ToolbarButton>
           ))}
         </div>
         {linkOpen ? (
@@ -223,15 +282,7 @@ export function RichTextEditor({
             </button>
           </div>
         ) : null}
-        <div
-          id={name}
-          ref={editorRef}
-          contentEditable
-          className="prose-html min-h-36 px-3 py-2 text-sm outline-none"
-          onInput={sync}
-          onBlur={sync}
-          suppressContentEditableWarning
-        />
+        <EditorContent editor={editor} id={name} />
       </div>
       <input
         ref={fileRef}
@@ -246,13 +297,7 @@ export function RichTextEditor({
           }
         }}
       />
-      <input
-        ref={hiddenRef}
-        type="hidden"
-        name={name}
-        defaultValue={defaultValue ?? ""}
-        required={required}
-      />
+      <input type="hidden" name={name} value={html} required={required} />
     </div>
   );
 }
