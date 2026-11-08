@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GalleryLightbox } from "@/components/public/lightbox";
@@ -29,7 +30,28 @@ export async function generateMetadata({
   });
 }
 
-export default async function GalleryAlbumPage({
+function GalleryAlbumFallback() {
+  return (
+    <>
+      <section className="relative overflow-hidden bg-mist/70">
+        <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+          <div className="h-3 w-24 rounded bg-muted" />
+          <div className="mt-4 h-10 max-w-xl rounded bg-muted" />
+          <div className="mt-5 h-16 max-w-2xl rounded bg-muted" />
+        </div>
+      </section>
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="aspect-[4/3] rounded-2xl bg-muted" />
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+async function GalleryAlbumContent({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -49,7 +71,7 @@ export default async function GalleryAlbumPage({
         title={pickLocalized(locale, album.title, album.title_en)}
         subtitle={pickLocalized(locale, album.description, album.description_en)}
       />
-      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+      <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <Link
           href={localizeHref(locale, "/gallery")}
           className="mb-8 inline-block text-sm text-primary"
@@ -59,5 +81,17 @@ export default async function GalleryAlbumPage({
         <GalleryLightbox images={images} locale={locale} dict={dict} />
       </section>
     </>
+  );
+}
+
+export default function GalleryAlbumPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  return (
+    <Suspense fallback={<GalleryAlbumFallback />}>
+      <GalleryAlbumContent params={params} />
+    </Suspense>
   );
 }
