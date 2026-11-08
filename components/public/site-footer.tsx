@@ -114,7 +114,7 @@ export function SiteFooter({
             </Suspense>{" "}
             {name}. {dict.footer.rights}.
           </span>
-          <span>{dict.brand.tagline}</span>
+          <span>Developed By <a href="https://irfathchowdhuryjoy.web.app/" target="_blank">Irfath Chowdhury</a></span>
         </div>
       </div>
     </footer>

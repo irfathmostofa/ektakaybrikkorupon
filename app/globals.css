@@ -193,6 +193,10 @@
   .font-heading {
     font-family: var(--font-heading), var(--font-bangla-serif), serif;
   }
+  /* ✅ FIXED: correct attribute spelling + correct selector scope */
+  [data-scroll-behavior="smooth"] {
+    scroll-behavior: smooth;
+  }
   .text-balance {
     text-wrap: balance;
   }

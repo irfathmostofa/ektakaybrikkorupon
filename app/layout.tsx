@@ -111,6 +111,7 @@ export default function RootLayout({
     <html
       lang={defaultLocale}
       dir="ltr"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${fraunces.variable} ${sourceSans.variable} ${notoSerifBengali.variable} ${notoSansBengali.variable} ${geistMono.variable} h-full antialiased`}
     >
