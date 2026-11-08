@@ -252,6 +252,9 @@
     "membershipConfirmSubject": "{name} · সদস্য আবেদন গৃহীত",
     "membershipConfirmTitle": "আবেদন গৃহীত হয়েছে",
     "membershipConfirmBody": "প্রিয় {name},\n\nআপনার সদস্য আবেদন ({plan}) আমরা পেয়েছি। অনুমোদনের পর আমরা যোগাযোগ করব।",
+    "membershipWelcomeSubject": "{name} · স্বাগতম, আপনি এখন সদস্য",
+    "membershipWelcomeTitle": "পরিবারে স্বাগতম",
+    "membershipWelcomeBody": "প্রিয় {name},\n\nআপনার সদস্যপদ ({plan}) অনুমোদিত হয়েছে। {foundation}-এর সাথে থাকার জন্য ধন্যবাদ। পরবর্তী ধাপ শিগগির জানাব।",
     "careerConfirmSubject": "{name} · আবেদন গৃহীত",
     "careerConfirmTitle": "আবেদন গৃহীত হয়েছে",
     "careerConfirmBody": "প্রিয় {name},\n\n{role} পদে আপনার আবেদন আমরা পেয়েছি। পরবর্তী খবর শিগগিরই যাবে।"

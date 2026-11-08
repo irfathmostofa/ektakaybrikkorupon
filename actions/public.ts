@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { MEDIA_BUCKET } from "@/lib/constants";
 import { loadEmailjsCredentials, notifyQuietly } from "@/lib/email/emailjs";
 import {
@@ -66,6 +67,9 @@ export async function submitMembershipAction(
   if (error) {
     return { success: "ok" };
   }
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin/membership");
 
   const [{ data: plan }, credentials] = await Promise.all([
     supabase

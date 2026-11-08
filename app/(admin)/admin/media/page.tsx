@@ -2,10 +2,10 @@ import { listMedia } from "@/actions/media";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { MediaLibrary } from "@/components/admin/media-library";
-import { requireStaff } from "@/lib/auth";
+import { requireMenu } from "@/lib/admin/access";
 
 async function AdminMedia() {
-  await requireStaff();
+  await requireMenu("media");
   const items = await listMedia();
 
   return (

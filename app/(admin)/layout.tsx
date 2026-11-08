@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { AdminTopBar } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { getAccessibleMenus } from "@/lib/admin/access";
+import { getAdminNavCounts } from "@/lib/admin/nav-counts";
 import { requireStaff } from "@/lib/auth";
 import { noIndexMetadata } from "@/lib/seo";
 
@@ -24,13 +25,16 @@ function AdminShellFallback() {
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
-  const menus = await getAccessibleMenus(user);
+  const [menus, counts] = await Promise.all([
+    getAccessibleMenus(user),
+    getAdminNavCounts(),
+  ]);
 
   return (
     <div className="flex h-svh max-h-svh min-h-0 min-w-0 flex-1 overflow-hidden">
-      <AdminSidebar user={user} menus={menus} />
+      <AdminSidebar user={user} menus={menus} counts={counts} />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/30">
-        <AdminTopBar user={user} menus={menus} />
+        <AdminTopBar user={user} menus={menus} counts={counts} />
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 md:p-8">
           {children}
         </div>

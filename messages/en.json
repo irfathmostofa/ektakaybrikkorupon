@@ -252,6 +252,9 @@
     "membershipConfirmSubject": "{name} · Membership application received",
     "membershipConfirmTitle": "Application received",
     "membershipConfirmBody": "Dear {name},\n\nWe received your membership application ({plan}). We will write after review.",
+    "membershipWelcomeSubject": "{name} · Welcome, you are a member",
+    "membershipWelcomeTitle": "Welcome to the family",
+    "membershipWelcomeBody": "Dear {name},\n\nYour membership ({plan}) is approved. Thank you for standing with {foundation}. We will share the next steps soon.",
     "careerConfirmSubject": "{name} · Application received",
     "careerConfirmTitle": "Application received",
     "careerConfirmBody": "Dear {name},\n\nWe received your application for {role}. You will hear from us soon."

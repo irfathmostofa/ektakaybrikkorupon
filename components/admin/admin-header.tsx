@@ -3,6 +3,7 @@ import { LogoutButton } from "@/components/admin/logout-button";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { Badge } from "@/components/ui/badge";
 import type { AdminMenuKey } from "@/lib/admin/menus";
+import type { AdminNavCounts } from "@/lib/admin/nav-counts";
 import type { User } from "@/lib/types/database";
 
 function roleLabel(role: User["role"]) {
@@ -12,13 +13,15 @@ function roleLabel(role: User["role"]) {
 export function AdminTopBar({
   user,
   menus,
+  counts,
 }: {
   user: User;
   menus: AdminMenuKey[];
+  counts?: AdminNavCounts;
 }) {
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/90 px-3 backdrop-blur-sm sm:gap-3 sm:px-6">
-      <AdminMobileNav user={user} menus={menus} />
+      <AdminMobileNav user={user} menus={menus} counts={counts} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{user.email}</p>
         <p className="truncate text-xs capitalize text-muted-foreground">

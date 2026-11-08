@@ -3,7 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
-import { getMediaPublicUrl, listMedia, uploadMediaAction } from "@/actions/media";
+import { deleteMediaAction, getMediaPublicUrl, listMedia, uploadMediaAction } from "@/actions/media";
+import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,11 +22,13 @@ export function ImageUploader({
   label,
   defaultValue,
   library = true,
+  onUploaded,
 }: {
   name: string;
   label: string;
   defaultValue?: string | null;
   library?: boolean;
+  onUploaded?: (url: string, path?: string) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue ?? "");
@@ -67,6 +70,7 @@ export function ImageUploader({
         }
         if (result.url) {
           setUrl(result.url);
+          onUploaded?.(result.url, result.path);
         }
       });
     } catch {
@@ -159,27 +163,43 @@ export function ImageUploader({
           ) : items.length ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {items.map((item) => (
-                <button
-                  key={item.name}
-                  type="button"
-                  className="overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-ring"
-                  onClick={() => {
-                    setUrl(item.url);
-                    setPreview(null);
-                    setLibraryOpen(false);
-                  }}
-                >
-                  <div className="relative h-28 w-full">
-                    <Image
-                      src={item.url}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      sizes="200px"
-                      unoptimized
-                    />
-                  </div>
-                </button>
+                <div key={item.name} className="space-y-2">
+                  <button
+                    type="button"
+                    className="w-full overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-ring"
+                    onClick={() => {
+                      setUrl(item.url);
+                      setPreview(null);
+                      setLibraryOpen(false);
+                    }}
+                  >
+                    <div className="relative h-28 w-full">
+                      <Image
+                        src={item.url}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="200px"
+                        unoptimized
+                      />
+                    </div>
+                  </button>
+                  <ConfirmDelete
+                    label="Remove"
+                    title="Remove this file?"
+                    description="This deletes the uploaded file from storage."
+                    onConfirm={async () => {
+                      const formData = new FormData();
+                      formData.set("path", item.name);
+                      await deleteMediaAction(formData);
+                      setItems((current) => current.filter((file) => file.name !== item.name));
+                      if (url.includes(item.name)) {
+                        setUrl("");
+                        setPreview(null);
+                      }
+                    }}
+                  />
+                </div>
               ))}
             </div>
           ) : (

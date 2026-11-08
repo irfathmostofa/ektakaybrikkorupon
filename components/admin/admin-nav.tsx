@@ -10,6 +10,7 @@ import {
   Gift,
   HeartHandshake,
   Images,
+  ImageIcon,
   LayoutDashboard,
   BookOpen,
   Mail,
@@ -31,6 +32,7 @@ const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
   blog: FileText,
   pages: FolderOpen,
   gallery: Images,
+  media: ImageIcon,
   achievements: Award,
   finance: Wallet,
   membership: Users,
@@ -46,9 +48,11 @@ const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
 
 export function AdminNav({
   menus,
+  counts,
   onNavigate,
 }: {
   menus: AdminMenuKey[];
+  counts?: Partial<Record<AdminMenuKey, number>>;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname() || "/admin";
@@ -58,6 +62,7 @@ export function AdminNav({
       {menus.map((key) => {
         const href = ADMIN_MENU_HREFS[key];
         const Icon = ICONS[key];
+        const count = counts?.[key] ?? 0;
         const active =
           href === "/admin"
             ? pathname === "/admin"
@@ -75,7 +80,12 @@ export function AdminNav({
             }`}
           >
             <Icon className="size-4 shrink-0" />
-            {ADMIN_MENU_LABELS[key]}
+            <span className="min-w-0 flex-1 truncate">{ADMIN_MENU_LABELS[key]}</span>
+            {count > 0 ? (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary-foreground">
+                {count > 99 ? "99+" : count}
+              </span>
+            ) : null}
           </Link>
         );
       })}

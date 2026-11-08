@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState, type ReactNode } from "react";
+import { useActionState, useMemo, useState, useTransition, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import {
+  approveMembershipApplicationsAction,
   deleteMembershipPlanAction,
   saveMembershipPlanAction,
   updateMembershipApplicationAction,
@@ -160,16 +162,24 @@ function planLabel(application: MembershipApplication) {
 function ApplicationActions({
   application,
   onView,
+  onUpdated,
 }: {
   application: MembershipApplication;
   onView: () => void;
+  onUpdated: () => void;
 }) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
       <Button type="button" size="sm" variant="outline" onClick={onView}>
         View
       </Button>
-      <form action={updateMembershipApplicationAction} className="flex flex-wrap gap-2">
+      <form
+        action={async (formData) => {
+          await updateMembershipApplicationAction(formData);
+          onUpdated();
+        }}
+        className="flex flex-wrap gap-2"
+      >
         <input type="hidden" name="id" value={application.id} />
         <select
           name="status"
@@ -281,11 +291,16 @@ export function MembershipManager({
   applications: MembershipApplication[];
   donations: Donation[];
 }) {
+  const router = useRouter();
+  const [approving, startApprove] = useTransition();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<MembershipPlan | null>(null);
   const [viewing, setViewing] = useState<MembershipApplication | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const pendingCount = applications.filter((item) => item.status === "pending").length;
 
   const donationsByApplication = useMemo(() => {
     const map = new Map<string, Donation[]>();
@@ -321,11 +336,53 @@ export function MembershipManager({
     });
   }, [applications, donationsByApplication, query, statusFilter]);
 
+  const filteredIds = filteredApplications.map((item) => item.id);
+  const selectedVisible = selected.filter((id) => filteredIds.includes(id));
+  const allVisibleSelected =
+    filteredIds.length > 0 && selectedVisible.length === filteredIds.length;
+
+  function toggleSelected(id: string, checked: boolean) {
+    setSelected((current) =>
+      checked ? Array.from(new Set([...current, id])) : current.filter((item) => item !== id),
+    );
+  }
+
+  function toggleAllVisible(checked: boolean) {
+    setSelected((current) => {
+      if (checked) {
+        return Array.from(new Set([...current, ...filteredIds]));
+      }
+      return current.filter((id) => !filteredIds.includes(id));
+    });
+  }
+
+  function approveSelected() {
+    if (!selectedVisible.length) {
+      return;
+    }
+    const formData = new FormData();
+    for (const id of selectedVisible) {
+      formData.append("ids", id);
+    }
+    startApprove(async () => {
+      await approveMembershipApplicationsAction(formData);
+      setSelected([]);
+      router.refresh();
+    });
+  }
+
   return (
-    <Tabs defaultValue="plans">
+    <Tabs defaultValue={pendingCount > 0 ? "applications" : "plans"}>
       <TabsList className="w-full overflow-x-auto sm:w-auto">
         <TabsTrigger value="plans">Plans</TabsTrigger>
-        <TabsTrigger value="applications">Applications</TabsTrigger>
+        <TabsTrigger value="applications">
+          Applications
+          {pendingCount > 0 ? (
+            <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary-foreground">
+              {pendingCount > 99 ? "99+" : pendingCount}
+            </span>
+          ) : null}
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="plans" className="space-y-4">
         <div className="flex justify-end">
@@ -398,6 +455,15 @@ export function MembershipManager({
               ))}
             </select>
           </div>
+          <Button
+            type="button"
+            disabled={!selectedVisible.length || approving}
+            onClick={approveSelected}
+          >
+            {approving
+              ? "Approving..."
+              : `Approve selected${selectedVisible.length ? ` (${selectedVisible.length})` : ""}`}
+          </Button>
         </div>
         {filteredApplications.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
@@ -416,11 +482,21 @@ export function MembershipManager({
                     className="space-y-3 rounded-xl border border-border bg-card p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
+                      <label className="flex min-w-0 items-start gap-3">
+                        <input
+                          type="checkbox"
+                          className="mt-1 size-4"
+                          checked={selected.includes(application.id)}
+                          onChange={(event) =>
+                            toggleSelected(application.id, event.target.checked)
+                          }
+                        />
                       <div className="min-w-0">
                         <h3 className="truncate font-medium">{application.full_name}</h3>
                         <p className="truncate text-xs text-muted-foreground">{application.email}</p>
                         <p className="text-xs text-muted-foreground">{application.phone || "—"}</p>
                       </div>
+                      </label>
                       <Badge variant="secondary">{application.status}</Badge>
                     </div>
                     <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
@@ -455,6 +531,7 @@ export function MembershipManager({
                     <ApplicationActions
                       application={application}
                       onView={() => setViewing(application)}
+                      onUpdated={() => router.refresh()}
                     />
                   </article>
                 );
@@ -464,6 +541,15 @@ export function MembershipManager({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <input
+                        type="checkbox"
+                        className="size-4"
+                        checked={allVisibleSelected}
+                        onChange={(event) => toggleAllVisible(event.target.checked)}
+                        aria-label="Select all applications"
+                      />
+                    </TableHead>
                     <TableHead>Applicant</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead>Donor / payments</TableHead>
@@ -482,6 +568,17 @@ export function MembershipManager({
                     );
                     return (
                       <TableRow key={application.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            className="size-4"
+                            checked={selected.includes(application.id)}
+                            onChange={(event) =>
+                              toggleSelected(application.id, event.target.checked)
+                            }
+                            aria-label={`Select ${application.full_name}`}
+                          />
+                        </TableCell>
                         <TableCell className="min-w-[180px] max-w-[260px]">
                           <div className="font-medium">{application.full_name}</div>
                           <div className="truncate text-xs text-muted-foreground">{application.email}</div>
@@ -521,6 +618,7 @@ export function MembershipManager({
                           <ApplicationActions
                             application={application}
                             onView={() => setViewing(application)}
+                            onUpdated={() => router.refresh()}
                           />
                         </TableCell>
                       </TableRow>

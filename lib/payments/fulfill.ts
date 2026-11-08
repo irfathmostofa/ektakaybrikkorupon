@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/constants";
-import { notifyQuietly } from "@/lib/email/emailjs";
-import { donationReceiptEmail } from "@/lib/email/templates";
+import { loadEmailjsCredentials, notifyQuietly } from "@/lib/email/emailjs";
+import { donationAdminEmail, donationReceiptEmail } from "@/lib/email/templates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Donation } from "@/lib/types/database";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -218,15 +218,11 @@ export async function markDonationOutcome(options: {
     revalidateTag(CACHE_TAGS.causes, "max");
     revalidateTag(CACHE_TAGS.finance, "max");
 
-    const { data: settings } = await supabase
-      .from("site_settings")
-      .select("foundation_name, foundation_name_en")
-      .eq("id", 1)
-      .maybeSingle();
+    const emailCreds = await loadEmailjsCredentials();
     const foundationName =
       settled.locale === "en"
-        ? settings?.foundation_name_en || settings?.foundation_name || "1 Taka Tree Plantation"
-        : settings?.foundation_name || "১টাকায় বৃক্ষরোপণ";
+        ? emailCreds?.foundationNameEn || emailCreds?.foundationName || "1 Taka Tree Plantation"
+        : emailCreds?.foundationName || "১টাকায় বৃক্ষরোপণ";
     void notifyQuietly([
       donationReceiptEmail({
         donorName: settled.donor_name,
@@ -236,6 +232,17 @@ export async function markDonationOutcome(options: {
         locale: settled.locale,
         foundationName,
       }),
+      emailCreds?.contactEmail
+        ? donationAdminEmail({
+            donorName: settled.donor_name,
+            donorEmail: settled.donor_email,
+            donorPhone: settled.donor_phone,
+            amount: Number(settled.amount),
+            transactionId: settled.transaction_id,
+            adminEmail: emailCreds.contactEmail,
+            foundationName: emailCreds.foundationName,
+          })
+        : null,
     ]);
 
     return { ok: true as const, donation: settled, alreadySettled: false };

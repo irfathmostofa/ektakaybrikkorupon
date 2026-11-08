@@ -7,14 +7,17 @@ import { AdminNav } from "@/components/admin/admin-nav";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { Button } from "@/components/ui/button";
 import type { AdminMenuKey } from "@/lib/admin/menus";
+import type { AdminNavCounts } from "@/lib/admin/nav-counts";
 import type { User } from "@/lib/types/database";
 
 export function AdminMobileNav({
   user,
   menus,
+  counts,
 }: {
   user: User;
   menus: AdminMenuKey[];
+  counts?: AdminNavCounts;
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -79,7 +82,7 @@ export function AdminMobileNav({
             <X className="size-4" />
           </Button>
         </div>
-        <AdminNav menus={menus} onNavigate={() => setOpen(false)} />
+        <AdminNav menus={menus} counts={counts} onNavigate={() => setOpen(false)} />
         <div className="shrink-0 border-t border-sidebar-border p-3">
           <div className="mb-3 min-w-0 rounded-lg bg-sidebar-accent px-3 py-2">
             <p className="truncate text-xs font-medium">{user.email}</p>

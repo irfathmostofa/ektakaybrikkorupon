@@ -4,6 +4,9 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { requireStaff } from "@/lib/auth";
 import { formChecked, formHtml, formNumber, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, MEMBERSHIP_STATUSES } from "@/lib/constants";
+import { loadEmailjsCredentials, notifyQuietly } from "@/lib/email/emailjs";
+import { membershipWelcomeEmail } from "@/lib/email/templates";
+import { pickLocalized } from "@/lib/i18n/dictionary";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -121,6 +124,30 @@ export async function deleteMembershipPlanAction(formData: FormData) {
   revalidatePath("/membership");
 }
 
+async function sendWelcomeEmails(applications: MembershipApplication[]) {
+  if (!applications.length) {
+    return;
+  }
+  const credentials = await loadEmailjsCredentials();
+  const foundationName = credentials?.foundationName || "১টাকায় বৃক্ষরোপণ";
+  const foundationNameEn = credentials?.foundationNameEn || "1 Taka Tree Plantation";
+  await notifyQuietly(
+    applications.map((application) => {
+      const locale = application.locale === "en" ? "en" : "bn";
+      const planName =
+        pickLocalized(locale, application.plan?.name, application.plan?.name_en) ||
+        "membership";
+      return membershipWelcomeEmail({
+        fullName: application.full_name,
+        email: application.email,
+        planName,
+        locale,
+        foundationName: locale === "en" ? foundationNameEn : foundationName,
+      });
+    }),
+  );
+}
+
 export async function updateMembershipApplicationAction(formData: FormData) {
   await requireStaff();
   const id = formString(formData, "id");
@@ -130,10 +157,55 @@ export async function updateMembershipApplicationAction(formData: FormData) {
     return;
   }
   const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("membership_applications")
+    .select(
+      "*, plan:membership_plans(id, name, name_en, fee_amount, duration_label)",
+    )
+    .eq("id", id)
+    .maybeSingle();
   await supabase
     .from("membership_applications")
     .update({ status, admin_notes: adminNotes })
     .eq("id", id);
+  if (status === "approved" && current && current.status !== "approved") {
+    await sendWelcomeEmails([current as MembershipApplication]);
+  }
   revalidateTag(CACHE_TAGS.membership, "max");
   revalidatePath("/admin/membership");
+  revalidatePath("/admin", "layout");
+}
+
+export async function approveMembershipApplicationsAction(formData: FormData) {
+  await requireStaff();
+  const ids = formData
+    .getAll("ids")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+  if (!ids.length) {
+    return;
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("membership_applications")
+    .select(
+      "*, plan:membership_plans(id, name, name_en, fee_amount, duration_label)",
+    )
+    .in("id", ids)
+    .eq("status", "pending");
+  const pending = (data ?? []) as MembershipApplication[];
+  if (!pending.length) {
+    return;
+  }
+  await supabase
+    .from("membership_applications")
+    .update({ status: "approved" })
+    .in(
+      "id",
+      pending.map((item) => item.id),
+    );
+  await sendWelcomeEmails(pending);
+  revalidateTag(CACHE_TAGS.membership, "max");
+  revalidatePath("/admin/membership");
+  revalidatePath("/admin", "layout");
 }
