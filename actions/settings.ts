@@ -28,6 +28,7 @@ function asSettings(data: SiteSettings | null): SiteSettings | null {
   }
   return {
     ...data,
+    favicon_url: data.favicon_url ?? null,
     social_links: data.social_links ?? {},
     visibility: {
       ...DEFAULT_SITE_VISIBILITY,
@@ -145,10 +146,16 @@ export async function updateSiteSettingsAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("site_settings")
-    .update(payload)
-    .eq("id", 1);
+  let { error } = await supabase.from("site_settings").update(payload).eq("id", 1);
+
+  if (error?.message.includes("favicon_url")) {
+    const { favicon_url: _favicon, ...withoutFavicon } = payload;
+    const retry = await supabase
+      .from("site_settings")
+      .update(withoutFavicon)
+      .eq("id", 1);
+    error = retry.error;
+  }
 
   if (error) {
     return { error: error.message };

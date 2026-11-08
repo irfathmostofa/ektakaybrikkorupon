@@ -46,12 +46,21 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   }
 
   const supabase = createPublicClient();
-  const { data, error } = await supabase
+  const publicColumns =
+    "logo_url, foundation_name, foundation_name_en, contact_email, contact_phone, address, address_en, social_links, google_site_verification_code, meta_title, meta_title_en, meta_description, meta_description_en, visitor_count, visibility, theme";
+  let { data, error } = await supabase
     .from("site_settings_public")
-    .select(
-      "logo_url, foundation_name, foundation_name_en, contact_email, contact_phone, address, address_en, social_links, google_site_verification_code, meta_title, meta_title_en, meta_description, meta_description_en, favicon_url, visitor_count, visibility, theme",
-    )
+    .select(`${publicColumns}, favicon_url`)
     .maybeSingle();
+
+  if (error?.message.includes("favicon_url")) {
+    const retry = await supabase
+      .from("site_settings_public")
+      .select(publicColumns)
+      .maybeSingle();
+    data = retry.data ? { ...retry.data, favicon_url: null } : retry.data;
+    error = retry.error;
+  }
 
   if (error || !data) {
     return FALLBACK_SITE_SETTINGS;
