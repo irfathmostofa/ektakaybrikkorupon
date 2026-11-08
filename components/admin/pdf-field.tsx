@@ -4,7 +4,9 @@ import { useRef, useState, useTransition } from "react";
 import { FileText } from "lucide-react";
 import { uploadMagazinePdfAction } from "@/actions/magazines";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isGoogleDriveUrl, magazinePdfViewUrl } from "@/lib/google-drive";
 
 export function PdfField({
   name,
@@ -46,11 +48,16 @@ export function PdfField({
         <FileText className="size-5 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm">
-            {fileName || (url ? "PDF uploaded" : "No PDF selected")}
+            {fileName ||
+              (isGoogleDriveUrl(url)
+                ? "Google Drive PDF"
+                : url
+                  ? "PDF uploaded"
+                  : "No PDF selected")}
           </p>
           {url ? (
             <a
-              href={url}
+              href={magazinePdfViewUrl(url)}
               target="_blank"
               rel="noreferrer"
               className="text-xs text-primary hover:underline"
@@ -59,6 +66,23 @@ export function PdfField({
             </a>
           ) : null}
         </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${name}-drive`}>PDF URL / Google Drive link</Label>
+        <Input
+          id={`${name}-drive`}
+          value={url}
+          onChange={(event) => {
+            setFileName(null);
+            setError(null);
+            setUrl(event.target.value.trim());
+          }}
+          placeholder="https://drive.google.com/file/d/.../view"
+        />
+        <p className="text-xs text-muted-foreground">
+          Paste a public Google Drive share link, or upload a PDF file. Drive files must be shared as
+          Anyone with the link.
+        </p>
       </div>
       <input
         ref={fileRef}

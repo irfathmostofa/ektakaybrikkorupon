@@ -7,6 +7,7 @@ import { CACHE_TAGS, MEMBERSHIP_STATUSES } from "@/lib/constants";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
 import type {
+  Donation,
   MembershipApplication,
   MembershipPlan,
   MembershipStatus,
@@ -31,12 +32,29 @@ export async function listMembershipApplications(): Promise<MembershipApplicatio
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("membership_applications")
-    .select("*")
+    .select(
+      "*, plan:membership_plans(id, name, name_en, fee_amount, duration_label)",
+    )
     .order("created_at", { ascending: false });
   if (error) {
     throw new Error(error.message);
   }
-  return data ?? [];
+  return (data ?? []) as MembershipApplication[];
+}
+
+export async function listMembershipDonorRecords(): Promise<Donation[]> {
+  await requireStaff();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("donations")
+    .select(
+      "*, cause:causes_projects(id, title, title_en), package:donation_packages(id, name, name_en, amount)",
+    )
+    .order("created_at", { ascending: false });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return (data ?? []) as Donation[];
 }
 
 export async function saveMembershipPlanAction(

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMagazineBySlug } from "@/lib/content/public";
+import { isGoogleDriveUrl, magazinePdfDownloadUrl } from "@/lib/google-drive";
 
 function downloadName(slug: string) {
   const safe = slug.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80);
@@ -14,6 +15,10 @@ export async function GET(
   const magazine = await getMagazineBySlug(slug);
   if (!magazine?.pdf_url) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (isGoogleDriveUrl(magazine.pdf_url)) {
+    return NextResponse.redirect(magazinePdfDownloadUrl(magazine.pdf_url), 302);
   }
 
   const source = await fetch(magazine.pdf_url);

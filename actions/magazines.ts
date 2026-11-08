@@ -38,7 +38,7 @@ export async function saveMagazineAction(
     return { error: "Title is required." };
   }
   if (!pdfUrl) {
-    return { error: "Upload a PDF before saving." };
+    return { error: "Upload a PDF or paste a Google Drive link before saving." };
   }
   const supabase = await createClient();
   const payload = {

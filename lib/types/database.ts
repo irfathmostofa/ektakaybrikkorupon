@@ -372,6 +372,7 @@ export type MembershipApplication = {
   admin_notes: string | null;
   locale: ContentLocale | string | null;
   created_at: string;
+  plan?: Pick<MembershipPlan, "id" | "name" | "name_en" | "fee_amount" | "duration_label"> | null;
 };
 
 export type JobPosting = {
