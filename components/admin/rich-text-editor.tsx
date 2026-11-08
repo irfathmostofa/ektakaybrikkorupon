@@ -5,11 +5,35 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Heading2,
+  Heading3,
+  ImageIcon,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Quote,
+  Redo2,
+  Square,
+  Strikethrough,
+  Underline as UnderlineIcon,
+  Undo2,
+  Unlink,
+} from "lucide-react";
 import { uploadMediaAction } from "@/actions/media";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { compressImage } from "@/lib/compress-image";
+import { cn } from "cn";
 
 const AlignImage = Image.extend({
   addAttributes() {
@@ -38,22 +62,26 @@ function ToolbarButton({
   active,
   disabled,
   onClick,
-  className,
+  title,
   children,
 }: {
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
-  className?: string;
+  title: string;
   children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
+      title={title}
+      aria-label={title}
+      aria-pressed={active}
       disabled={disabled}
-      className={`rounded px-2 py-1 text-xs hover:bg-background disabled:opacity-50 ${
-        active ? "bg-background font-medium" : ""
-      } ${className ?? ""}`}
+      className={cn(
+        "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
+        active && "bg-primary/12 text-primary",
+      )}
       onMouseDown={(event) => {
         event.preventDefault();
         onClick();
@@ -61,6 +89,166 @@ function ToolbarButton({
     >
       {children}
     </button>
+  );
+}
+
+function ToolbarGroup({ children }: { children: React.ReactNode }) {
+  return <div className="flex items-center gap-0.5">{children}</div>;
+}
+
+function EditorToolbar({
+  editor,
+  uploading,
+  onOpenLink,
+  onInsertImage,
+}: {
+  editor: Editor | null;
+  uploading: boolean;
+  onOpenLink: () => void;
+  onInsertImage: () => void;
+}) {
+  function setImageAlign(align: string) {
+    editor?.chain().focus().updateAttributes("image", { class: align }).run();
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 border-b border-input bg-muted/40 px-2 py-1.5">
+      <ToolbarGroup>
+        <ToolbarButton
+          title="Undo"
+          disabled={!editor?.can().undo()}
+          onClick={() => editor?.chain().focus().undo().run()}
+        >
+          <Undo2 className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Redo"
+          disabled={!editor?.can().redo()}
+          onClick={() => editor?.chain().focus().redo().run()}
+        >
+          <Redo2 className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton
+          title="Bold"
+          active={editor?.isActive("bold")}
+          onClick={() => editor?.chain().focus().toggleBold().run()}
+        >
+          <Bold className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Italic"
+          active={editor?.isActive("italic")}
+          onClick={() => editor?.chain().focus().toggleItalic().run()}
+        >
+          <Italic className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Underline"
+          active={editor?.isActive("underline")}
+          onClick={() => editor?.chain().focus().toggleUnderline().run()}
+        >
+          <UnderlineIcon className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Strikethrough"
+          active={editor?.isActive("strike")}
+          onClick={() => editor?.chain().focus().toggleStrike().run()}
+        >
+          <Strikethrough className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton
+          title="Heading 2"
+          active={editor?.isActive("heading", { level: 2 })}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+        >
+          <Heading2 className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Heading 3"
+          active={editor?.isActive("heading", { level: 3 })}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+        >
+          <Heading3 className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Quote"
+          active={editor?.isActive("blockquote")}
+          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+        >
+          <Quote className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton
+          title="Bulleted list"
+          active={editor?.isActive("bulletList")}
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
+        >
+          <List className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Numbered list"
+          active={editor?.isActive("orderedList")}
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+        >
+          <ListOrdered className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton title="Insert link" active={editor?.isActive("link")} onClick={onOpenLink}>
+          <Link2 className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Remove link"
+          disabled={!editor?.isActive("link")}
+          onClick={() => editor?.chain().focus().unsetLink().run()}
+        >
+          <Unlink className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton title={uploading ? "Uploading image" : "Insert image"} disabled={uploading} onClick={onInsertImage}>
+          <ImageIcon className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton
+          title="Align image left"
+          active={editor?.isActive("image", { class: "align-left" })}
+          onClick={() => setImageAlign("align-left")}
+        >
+          <AlignLeft className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Align image center"
+          active={editor?.isActive("image", { class: "align-center" })}
+          onClick={() => setImageAlign("align-center")}
+        >
+          <AlignCenter className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Align image right"
+          active={editor?.isActive("image", { class: "align-right" })}
+          onClick={() => setImageAlign("align-right")}
+        >
+          <AlignRight className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Full-width image"
+          active={editor?.isActive("image", { class: "align-full" })}
+          onClick={() => setImageAlign("align-full")}
+        >
+          <Square className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+    </div>
   );
 }
 
@@ -105,13 +293,13 @@ export function RichTextEditor({
         },
       }),
       Placeholder.configure({
-        placeholder: "Write here…",
+        placeholder: "Start writing…",
       }),
     ],
     content: initialHtml,
     editorProps: {
       attributes: {
-        class: "prose-html min-h-36 px-3 py-2 text-sm outline-none",
+        class: "prose-html min-h-48 max-h-[28rem] overflow-y-auto px-4 py-3 text-sm leading-relaxed outline-none",
       },
     },
     onUpdate: ({ editor: instance }) => {
@@ -198,10 +386,6 @@ export function RichTextEditor({
     setLinkNewTab(true);
   }
 
-  function setImageAlign(align: string) {
-    editor?.chain().focus().updateAttributes("image", { class: align }).run();
-  }
-
   function openLinkPopover() {
     if (!editor) {
       return;
@@ -224,78 +408,26 @@ export function RichTextEditor({
       <Label htmlFor={name} required={required}>
         {label}
       </Label>
-      <div className="relative overflow-hidden rounded-lg border border-input bg-background">
-        <div className="flex flex-wrap gap-1 border-b border-input bg-muted/40 p-1">
-          <ToolbarButton
-            active={editor?.isActive("bold")}
-            className="font-bold"
-            onClick={() => editor?.chain().focus().toggleBold().run()}
-          >
-            B
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor?.isActive("italic")}
-            className="italic"
-            onClick={() => editor?.chain().focus().toggleItalic().run()}
-          >
-            I
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor?.isActive("underline")}
-            className="underline"
-            onClick={() => editor?.chain().focus().toggleUnderline().run()}
-          >
-            U
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor?.isActive("bulletList")}
-            onClick={() => editor?.chain().focus().toggleBulletList().run()}
-          >
-            List
-          </ToolbarButton>
-          <ToolbarButton
-            active={editor?.isActive("heading", { level: 2 })}
-            onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-          >
-            H2
-          </ToolbarButton>
-          <ToolbarButton onClick={openLinkPopover}>Link</ToolbarButton>
-          <ToolbarButton
-            disabled={uploading}
-            onClick={() => fileRef.current?.click()}
-          >
-            {uploading ? "Uploading..." : "Image"}
-          </ToolbarButton>
-          {[
-            { align: "align-left", label: "Left" },
-            { align: "align-center", label: "Center" },
-            { align: "align-right", label: "Right" },
-            { align: "align-full", label: "Full" },
-          ].map((item) => (
-            <ToolbarButton
-              key={item.align}
-              active={editor?.isActive("image", { class: item.align })}
-              onClick={() => setImageAlign(item.align)}
-            >
-              {item.label}
-            </ToolbarButton>
-          ))}
-        </div>
+      <div className="relative overflow-hidden rounded-xl border border-input bg-background shadow-sm transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+        <EditorToolbar
+          editor={editor}
+          uploading={uploading}
+          onOpenLink={openLinkPopover}
+          onInsertImage={() => fileRef.current?.click()}
+        />
         {linkOpen ? (
-          <div className="grid gap-2 border-b border-input bg-muted/20 p-2 sm:grid-cols-[1fr_1fr_auto_auto]">
-            <input
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          <div className="grid gap-2 border-b border-input bg-muted/20 p-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-center">
+            <Input
               placeholder="Link text"
               value={linkText}
               onChange={(event) => setLinkText(event.target.value)}
             />
-            <input
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+            <Input
               placeholder="https://"
               value={linkUrl}
               onChange={(event) => setLinkUrl(event.target.value)}
             />
-            <label className="flex items-center gap-1 text-xs">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={linkNewTab}
@@ -303,16 +435,22 @@ export function RichTextEditor({
               />
               New tab
             </label>
-            <button
-              type="button"
-              className="h-8 rounded-md bg-primary px-2 text-xs text-primary-foreground"
-              onClick={applyLink}
-            >
-              Attach
-            </button>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" onClick={applyLink}>
+                Apply
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setLinkOpen(false)}>
+                Cancel
+              </Button>
+            </div>
           </div>
         ) : null}
         <EditorContent editor={editor} />
+        {uploading ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-background/80 px-4 py-2 text-xs text-muted-foreground">
+            Uploading image…
+          </div>
+        ) : null}
         <input
           ref={hiddenRef}
           id={name}
