@@ -10,7 +10,7 @@ export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
   const settings = await getPublicSiteSettings();
-  const image = pickOgImage(settings.logo_url);
+  const image = pickOgImage(settings.og_image_url, settings.logo_url);
   const name = pickLocalized(
     defaultLocale,
     settings.foundation_name,

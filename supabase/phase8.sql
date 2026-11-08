@@ -14,6 +14,7 @@ alter table public.site_settings
   add column if not exists meta_title_en text,
   add column if not exists meta_description_en text,
   add column if not exists favicon_url text,
+  add column if not exists og_image_url text,
   add column if not exists visitor_count integer not null default 0,
   add column if not exists visibility jsonb,
   add column if not exists theme jsonb,
@@ -65,6 +66,7 @@ select
   meta_description,
   meta_description_en,
   favicon_url,
+  og_image_url,
   visitor_count,
   visibility,
   theme

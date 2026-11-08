@@ -73,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     path: "/",
     locale,
-    image: settings.logo_url,
+    image: settings.og_image_url || settings.logo_url,
   });
 
   return {

@@ -123,6 +123,16 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                   defaultValue={settings.favicon_url}
                 />
               </div>
+              <div className="md:col-span-2">
+                <ImageField
+                  name="og_image_url"
+                  label="SEO / OG image"
+                  defaultValue={settings.og_image_url}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Used for social sharing. If empty, the logo image is used.
+                </p>
+              </div>
               <Field label="Facebook" name="facebook" defaultValue={social.facebook} />
               <Field label="Twitter" name="twitter" defaultValue={social.twitter} />
               <Field label="Instagram" name="instagram" defaultValue={social.instagram} />
