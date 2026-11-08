@@ -67,8 +67,10 @@ export async function sendEmailjsMessage(
       subject: payload.subject,
       title: payload.title,
       message: payload.message,
+      message_html: "",
       reply_to: payload.reply_to || payload.to_email,
       from_name: creds.foundationName,
+      unsubscribe_link: "",
     },
   };
 

@@ -145,7 +145,11 @@ export function CampaignManager({
           to_email: recipient.email,
           to_name: recipient.name,
           subject: campaign.subject,
+          title: campaign.subject,
+          message: "",
           message_html: campaign.body,
+          from_name: senderName,
+          reply_to: senderEmail,
           unsubscribe_link: await campaignUnsubscribeUrl(recipient.email),
         });
         sent += 1;
@@ -178,7 +182,11 @@ export function CampaignManager({
         to_email: senderEmail,
         to_name: senderName || senderEmail,
         subject: `[TEST] ${campaign.subject}`,
+        title: campaign.subject,
+        message: "",
         message_html: campaign.body,
+        from_name: senderName,
+        reply_to: senderEmail,
         unsubscribe_link: await campaignUnsubscribeUrl(senderEmail),
       });
       setMessage(`Test email sent to ${senderEmail}.`);

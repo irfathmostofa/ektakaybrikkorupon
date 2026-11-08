@@ -73,7 +73,6 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     path: "/",
     locale,
-    image: settings.og_image_url || settings.logo_url,
   });
 
   return {
@@ -89,6 +88,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: seo.openGraph?.locale,
+      url: getSiteUrl(),
       siteName: name,
       title,
       description: seo.description ?? undefined,

@@ -5,7 +5,7 @@ import { pickLocalized } from "@/lib/i18n/dictionary";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getSiteUrl } from "@/lib/payments/site-url";
 import { stripHtml } from "@/lib/sanitize-html";
-import { pickOgImage } from "@/lib/site-assets";
+import { shareOgImageUrl } from "@/lib/site-assets";
 import type { PublicSiteSettings } from "@/lib/types/database";
 
 export const OG_LOCALE: Record<Locale, string> = {
@@ -108,7 +108,10 @@ export async function buildMetadata({
     );
   const canonicalPath = localizeHref(locale, path);
   const url = absoluteUrl(canonicalPath);
-  const imageUrl = pickOgImage(image || settings.og_image_url, settings.logo_url);
+  const pageImage = image?.trim();
+  const imageUrl = shareOgImageUrl(
+    pageImage && pageImage !== settings.og_image_url?.trim() ? pageImage : null,
+  );
   const ogLocale = OG_LOCALE[locale];
   const alternateLocale = locale === "bn" ? "en_GB" : "bn_BD";
 
@@ -138,6 +141,7 @@ export async function buildMetadata({
           width: 1200,
           height: 630,
           alt: title,
+          type: "image/png",
         },
       ],
       ...(type === "article"

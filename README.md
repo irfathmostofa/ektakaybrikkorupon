@@ -55,7 +55,9 @@ Then promote the first authenticated user to `super_admin` in `public.users`.
 
 SSL Commerz store ID and password are saved in Admin → Settings. Sandbox is the default until `sslcommerz_is_live` is enabled.
 
-Email.js service ID, template ID, public key, and optional private key are also saved in Admin → Settings. The template should accept `to_email`, `to_name`, `subject`, `title`, `message`, and `reply_to`. Public emails follow the applicant locale (Bangla default); admin alerts stay in English.
+Email.js service ID, template ID, public key, and optional private key are also saved in Admin → Settings. Copy the HTML and variable list from `docs/emailjs-template.md`. Public emails follow the applicant locale (Bangla default); admin alerts stay in English.
+
+Link previews use `/og.png` (1200x630 PNG). Set `NEXT_PUBLIC_SITE_URL` to the public https origin, and set the SEO / OG image in Admin → Settings. After changing it, rescrape the URL in the Facebook Sharing Debugger so WhatsApp/Facebook drop the old cache.
 
 Google Search Console verification uses `google_site_verification_code` from Admin → Settings. Public SEO files:
 

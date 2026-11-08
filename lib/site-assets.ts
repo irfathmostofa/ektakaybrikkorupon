@@ -51,6 +51,15 @@ export function pickOgImage(image?: string | null, logoUrl?: string | null) {
   return toAbsolute(NATURE_IMAGES.canopy);
 }
 
+export function shareOgImageUrl(image?: string | null) {
+  const url = new URL("/og.png", `${getSiteUrl()}/`);
+  const src = image?.trim();
+  if (src) {
+    url.searchParams.set("src", src);
+  }
+  return url.toString();
+}
+
 export async function getSiteIconUrl() {
   const settings = await getPublicSiteSettings();
   const icon = settings.favicon_url || settings.logo_url;

@@ -130,7 +130,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                   defaultValue={settings.og_image_url}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Used for social sharing. If empty, the logo image is used.
+                  Used for WhatsApp, Facebook, and Twitter link previews. Prefer a 1200x630 JPG or PNG. If empty, the logo is used.
                 </p>
               </div>
               <Field label="Facebook" name="facebook" defaultValue={social.facebook} />
@@ -301,6 +301,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
               <CardTitle>Email.js</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
+              <p className="text-xs text-muted-foreground md:col-span-2">
+                Use the HTML and variable list in docs/emailjs-template.md when creating the EmailJS template.
+              </p>
               <Field
                 label="Service ID"
                 name="emailjs_service_id"
