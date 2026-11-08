@@ -1,7 +1,13 @@
 import imageCompression from "browser-image-compression";
 
 export async function compressImage(file: File) {
-  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+  if (
+    !file.type.startsWith("image/") ||
+    file.type === "image/svg+xml" ||
+    file.type === "image/x-icon" ||
+    file.type === "image/vnd.microsoft.icon" ||
+    file.name.toLowerCase().endsWith(".ico")
+  ) {
     return file;
   }
 

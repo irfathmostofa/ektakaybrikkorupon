@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      { source: "/favicon.ico", destination: "/api/site-icon" },
       { source: "/en", destination: "/" },
       { source: "/en/:path*", destination: "/:path*" },
     ];

@@ -13,7 +13,7 @@ import { getPublicSiteSettings } from "@/lib/cache";
 import { defaultLocale } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
 import { getSiteUrl } from "@/lib/payments/site-url";
-import { buildMetadata } from "@/lib/seo";
+import { absoluteAsset, buildMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -96,9 +96,18 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: seo.twitter,
     robots: { index: true, follow: true },
-    icons: settings.favicon_url
-      ? { icon: settings.favicon_url, shortcut: settings.favicon_url }
-      : undefined,
+    icons: {
+      icon: [
+        { url: "/icon", type: "image/png", sizes: "32x32" },
+        {
+          url: settings.favicon_url
+            ? absoluteAsset(settings.favicon_url)
+            : "/api/site-icon",
+        },
+      ],
+      shortcut: "/api/site-icon",
+      apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+    },
   };
 }
 
@@ -116,6 +125,9 @@ export default function RootLayout({
       className={`${fraunces.variable} ${sourceSans.variable} ${notoSerifBengali.variable} ${notoSansBengali.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <link rel="icon" href="/api/site-icon" />
+        <link rel="shortcut icon" href="/api/site-icon" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var p=location.pathname;document.documentElement.lang=(p==="/en"||p.indexOf("/en/")===0)?"en":"${defaultLocale}"}catch(e){}})()`,

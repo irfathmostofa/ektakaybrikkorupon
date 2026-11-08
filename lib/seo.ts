@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getPublicSiteSettings } from "@/lib/cache";
-import { NATURE_IMAGES } from "@/lib/content/images";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
 import { getRequestLocale } from "@/lib/i18n/server";
 import { getSiteUrl } from "@/lib/payments/site-url";
 import { stripHtml } from "@/lib/sanitize-html";
+import { pickOgImage } from "@/lib/site-assets";
 import type { PublicSiteSettings } from "@/lib/types/database";
 
 export const OG_LOCALE: Record<Locale, string> = {
@@ -22,14 +22,18 @@ export function absoluteUrl(path = "/") {
 }
 
 export function absoluteAsset(src: string) {
-  if (
-    src.startsWith("http://") ||
-    src.startsWith("https://") ||
-    src.startsWith("data:")
-  ) {
-    return src;
+  const trimmed = src.trim();
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
   }
-  return absoluteUrl(src);
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  return absoluteUrl(trimmed);
 }
 
 export function languageAlternates(path: string) {
@@ -104,12 +108,12 @@ export async function buildMetadata({
     );
   const canonicalPath = localizeHref(locale, path);
   const url = absoluteUrl(canonicalPath);
-  const imageSrc = image || settings.logo_url || NATURE_IMAGES.canopy;
-  const imageUrl = absoluteAsset(imageSrc);
+  const imageUrl = pickOgImage(image, settings.logo_url);
   const ogLocale = OG_LOCALE[locale];
   const alternateLocale = locale === "bn" ? "en_GB" : "bn_BD";
 
   return {
+    metadataBase: new URL(getSiteUrl()),
     title,
     description: resolvedDescription,
     alternates: {
@@ -127,7 +131,15 @@ export async function buildMetadata({
       siteName,
       title,
       description: resolvedDescription,
-      images: [{ url: imageUrl, alt: title }],
+      images: [
+        {
+          url: imageUrl,
+          secureUrl: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
       ...(type === "article"
         ? {
             publishedTime: publishedTime ?? undefined,
