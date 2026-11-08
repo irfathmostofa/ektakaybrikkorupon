@@ -148,6 +148,48 @@ function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
+function planLabel(application: MembershipApplication) {
+  if (!application.plan) {
+    return "—";
+  }
+  return `${application.plan.name}${
+    application.plan.fee_amount ? ` (${formatAmount(application.plan.fee_amount)})` : ""
+  }${application.plan.duration_label ? ` · ${application.plan.duration_label}` : ""}`;
+}
+
+function ApplicationActions({
+  application,
+  onView,
+}: {
+  application: MembershipApplication;
+  onView: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+      <Button type="button" size="sm" variant="outline" onClick={onView}>
+        View
+      </Button>
+      <form action={updateMembershipApplicationAction} className="flex flex-wrap gap-2">
+        <input type="hidden" name="id" value={application.id} />
+        <select
+          name="status"
+          defaultValue={application.status}
+          className="h-8 min-w-28 flex-1 rounded-lg border border-input px-2 text-sm sm:flex-none"
+        >
+          {MEMBERSHIP_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
+        <Button type="submit" size="sm" variant="outline">
+          Save
+        </Button>
+      </form>
+    </div>
+  );
+}
+
 function ApplicationDetails({
   application,
   donations,
@@ -167,18 +209,7 @@ function ApplicationDetails({
           <DetailRow label="Email" value={application.email} />
           <DetailRow label="Phone" value={application.phone} />
           <DetailRow label="Address" value={application.address} />
-          <DetailRow
-            label="Plan"
-            value={
-              application.plan
-                ? `${application.plan.name}${
-                    application.plan.fee_amount
-                      ? ` (${formatAmount(application.plan.fee_amount)})`
-                      : ""
-                  }${application.plan.duration_label ? ` · ${application.plan.duration_label}` : ""}`
-                : "—"
-            }
-          />
+          <DetailRow label="Plan" value={planLabel(application)} />
           <DetailRow label="Motivation" value={application.motivation} />
           <DetailRow label="Locale" value={application.locale} />
           <DetailRow label="Status" value={application.status} />
@@ -203,34 +234,36 @@ function ApplicationDetails({
       <section>
         <h3 className="mb-2 font-heading text-sm">Payment history</h3>
         {donations.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Package</TableHead>
-                <TableHead>Cause</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Txn</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {donations.map((donation) => (
-                <TableRow key={donation.id}>
-                  <TableCell>{formatDate(donation.created_at)}</TableCell>
-                  <TableCell>{formatAmount(donation.amount)}</TableCell>
-                  <TableCell>{donation.package?.name ?? "—"}</TableCell>
-                  <TableCell>{donation.cause?.title ?? "General"}</TableCell>
-                  <TableCell>{donation.payment_method || "—"}</TableCell>
-                  <TableCell>{donation.transaction_id || "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{donation.status}</Badge>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Package</TableHead>
+                  <TableHead>Cause</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Txn</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {donations.map((donation) => (
+                  <TableRow key={donation.id}>
+                    <TableCell className="whitespace-nowrap">{formatDate(donation.created_at)}</TableCell>
+                    <TableCell>{formatAmount(donation.amount)}</TableCell>
+                    <TableCell>{donation.package?.name ?? "—"}</TableCell>
+                    <TableCell>{donation.cause?.title ?? "General"}</TableCell>
+                    <TableCell>{donation.payment_method || "—"}</TableCell>
+                    <TableCell className="max-w-[120px] truncate">{donation.transaction_id || "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{donation.status}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <p className="text-sm text-muted-foreground">No payment history for this applicant.</p>
         )}
@@ -251,6 +284,8 @@ export function MembershipManager({
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<MembershipPlan | null>(null);
   const [viewing, setViewing] = useState<MembershipApplication | null>(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const donationsByApplication = useMemo(() => {
     const map = new Map<string, Donation[]>();
@@ -259,6 +294,32 @@ export function MembershipManager({
     }
     return map;
   }, [applications, donations]);
+
+  const filteredApplications = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return applications.filter((application) => {
+      if (statusFilter && application.status !== statusFilter) {
+        return false;
+      }
+      if (!needle) {
+        return true;
+      }
+      const related = donationsByApplication.get(application.id) ?? [];
+      const donor = related[0];
+      return [
+        application.full_name,
+        application.email,
+        application.phone,
+        application.address,
+        application.motivation,
+        application.plan?.name,
+        donor?.donor_name,
+        donor?.donor_email,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(needle));
+    });
+  }, [applications, donationsByApplication, query, statusFilter]);
 
   return (
     <Tabs defaultValue="plans">
@@ -311,118 +372,165 @@ export function MembershipManager({
         </Table>
       </TabsContent>
       <TabsContent value="applications" className="space-y-4">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Applicant</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Address</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Motivation</TableHead>
-                <TableHead>Donor</TableHead>
-                <TableHead>Payments</TableHead>
-                <TableHead>Submitted</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {applications.map((application) => {
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="min-w-0 flex-1 space-y-1">
+            <Label htmlFor="application-search">Search</Label>
+            <Input
+              id="application-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Name, email, phone, plan, donor"
+            />
+          </div>
+          <div className="space-y-1 sm:w-44">
+            <Label htmlFor="application-status">Status</Label>
+            <select
+              id="application-status"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+            >
+              <option value="">All</option>
+              {MEMBERSHIP_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {filteredApplications.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+            No applications match this search.
+          </p>
+        ) : (
+          <>
+            <div className="grid gap-3 md:hidden">
+              {filteredApplications.map((application) => {
                 const related = donationsByApplication.get(application.id) ?? [];
                 const donor = related[0];
                 const totalGiven = related.reduce((sum, item) => sum + Number(item.amount || 0), 0);
                 return (
-                  <TableRow key={application.id}>
-                    <TableCell>
-                      <div>{application.full_name}</div>
-                      <div className="text-xs text-muted-foreground">{application.locale || "bn"}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div>{application.email}</div>
-                      <div className="text-xs text-muted-foreground">{application.phone || "—"}</div>
-                    </TableCell>
-                    <TableCell className="max-w-[180px] whitespace-pre-wrap">
-                      {application.address || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {application.plan ? (
-                        <div>
-                          <div>{application.plan.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatAmount(application.plan.fee_amount)}
-                            {application.plan.duration_label ? ` · ${application.plan.duration_label}` : ""}
-                          </div>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell className="max-w-[220px] whitespace-pre-wrap">
-                      {application.motivation || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {donor ? (
-                        <div>
-                          <div>{donor.donor_name}</div>
-                          <div className="text-xs text-muted-foreground">{donor.donor_email}</div>
-                          <div className="text-xs text-muted-foreground">{donor.donor_phone || "—"}</div>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">No donor</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {related.length ? (
-                        <div>
-                          <div>{related.length} payment{related.length === 1 ? "" : "s"}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatAmount(totalGiven)}
-                          </div>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell>{new Date(application.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{application.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setViewing(application)}
-                        >
-                          View
-                        </Button>
-                        <form action={updateMembershipApplicationAction} className="flex flex-wrap gap-2">
-                          <input type="hidden" name="id" value={application.id} />
-                          <select
-                            name="status"
-                            defaultValue={application.status}
-                            className="h-8 rounded-lg border border-input px-2 text-sm"
-                          >
-                            {MEMBERSHIP_STATUSES.map((status) => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))}
-                          </select>
-                          <Button type="submit" size="sm" variant="outline">
-                            Save
-                          </Button>
-                        </form>
+                  <article
+                    key={application.id}
+                    className="space-y-3 rounded-xl border border-border bg-card p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate font-medium">{application.full_name}</h3>
+                        <p className="truncate text-xs text-muted-foreground">{application.email}</p>
+                        <p className="text-xs text-muted-foreground">{application.phone || "—"}</p>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      <Badge variant="secondary">{application.status}</Badge>
+                    </div>
+                    <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                      <div>
+                        <dt className="text-xs text-muted-foreground">Plan</dt>
+                        <dd>{application.plan?.name ?? "—"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">Submitted</dt>
+                        <dd>{new Date(application.created_at).toLocaleDateString()}</dd>
+                      </div>
+                      <div className="col-span-2">
+                        <dt className="text-xs text-muted-foreground">Address</dt>
+                        <dd className="break-words">{application.address || "—"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">Donor</dt>
+                        <dd>{donor ? donor.donor_name : "No donor"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">Payments</dt>
+                        <dd>
+                          {related.length
+                            ? `${related.length} · ${formatAmount(totalGiven)}`
+                            : "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                    {application.motivation ? (
+                      <p className="line-clamp-3 text-sm text-muted-foreground">{application.motivation}</p>
+                    ) : null}
+                    <ApplicationActions
+                      application={application}
+                      onView={() => setViewing(application)}
+                    />
+                  </article>
                 );
               })}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Applicant</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Donor / payments</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredApplications.map((application) => {
+                    const related = donationsByApplication.get(application.id) ?? [];
+                    const donor = related[0];
+                    const totalGiven = related.reduce(
+                      (sum, item) => sum + Number(item.amount || 0),
+                      0,
+                    );
+                    return (
+                      <TableRow key={application.id}>
+                        <TableCell className="min-w-[180px] max-w-[260px]">
+                          <div className="font-medium">{application.full_name}</div>
+                          <div className="truncate text-xs text-muted-foreground">{application.email}</div>
+                          <div className="text-xs text-muted-foreground">{application.phone || "—"}</div>
+                        </TableCell>
+                        <TableCell className="min-w-[140px]">
+                          <div>{application.plan?.name ?? "—"}</div>
+                          {application.plan ? (
+                            <div className="text-xs text-muted-foreground">
+                              {formatAmount(application.plan.fee_amount)}
+                              {application.plan.duration_label
+                                ? ` · ${application.plan.duration_label}`
+                                : ""}
+                            </div>
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="min-w-[160px]">
+                          {donor ? (
+                            <div>
+                              <div>{donor.donor_name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {related.length} payment{related.length === 1 ? "" : "s"} ·{" "}
+                                {formatAmount(totalGiven)}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">No donor</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(application.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{application.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <ApplicationActions
+                            application={application}
+                            onView={() => setViewing(application)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
       </TabsContent>
       <FormDialog
         title={editing ? "Edit plan" : "Add plan"}
