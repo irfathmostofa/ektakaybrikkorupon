@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   AlignCenter,
+  AlignJustify,
   AlignLeft,
   AlignRight,
   Bold,
@@ -220,32 +220,63 @@ function EditorToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
       <ToolbarGroup>
         <ToolbarButton
+          title="Align left"
+          active={editor?.isActive({ textAlign: "left" })}
+          onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+        >
+          <AlignLeft className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Align center"
+          active={editor?.isActive({ textAlign: "center" })}
+          onClick={() => editor?.chain().focus().setTextAlign("center").run()}
+        >
+          <AlignCenter className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Align right"
+          active={editor?.isActive({ textAlign: "right" })}
+          onClick={() => editor?.chain().focus().setTextAlign("right").run()}
+        >
+          <AlignRight className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Justify"
+          active={editor?.isActive({ textAlign: "justify" })}
+          onClick={() => editor?.chain().focus().setTextAlign("justify").run()}
+        >
+          <AlignJustify className="size-4" />
+        </ToolbarButton>
+      </ToolbarGroup>
+      <Separator orientation="vertical" className="mx-1 h-5" />
+      <ToolbarGroup>
+        <ToolbarButton
           title="Align image left"
           active={editor?.isActive("image", { class: "align-left" })}
           onClick={() => setImageAlign("align-left")}
         >
-          <AlignLeft className="size-4" />
+          <AlignLeft className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton
           title="Align image center"
           active={editor?.isActive("image", { class: "align-center" })}
           onClick={() => setImageAlign("align-center")}
         >
-          <AlignCenter className="size-4" />
+          <AlignCenter className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton
           title="Align image right"
           active={editor?.isActive("image", { class: "align-right" })}
           onClick={() => setImageAlign("align-right")}
         >
-          <AlignRight className="size-4" />
+          <AlignRight className="size-3.5" />
         </ToolbarButton>
         <ToolbarButton
           title="Full-width image"
           active={editor?.isActive("image", { class: "align-full" })}
           onClick={() => setImageAlign("align-full")}
         >
-          <Square className="size-4" />
+          <Square className="size-3.5" />
         </ToolbarButton>
       </ToolbarGroup>
     </div>
@@ -279,18 +310,20 @@ export function RichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
+        link: {
+          openOnClick: false,
+          autolink: true,
+          HTMLAttributes: {
+            rel: "noopener noreferrer",
+          },
+        },
       }),
-      Underline,
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
       AlignImage.configure({
         inline: false,
         allowBase64: false,
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        HTMLAttributes: {
-          rel: "noopener noreferrer",
-        },
       }),
       Placeholder.configure({
         placeholder: "Start writing…",
