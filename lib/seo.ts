@@ -108,7 +108,7 @@ export async function buildMetadata({
     );
   const canonicalPath = localizeHref(locale, path);
   const url = absoluteUrl(canonicalPath);
-  const imageUrl = pickOgImage(image, settings.logo_url);
+  const imageUrl = pickOgImage(image || settings.og_image_url, settings.logo_url);
   const ogLocale = OG_LOCALE[locale];
   const alternateLocale = locale === "bn" ? "en_GB" : "bn_BD";
 

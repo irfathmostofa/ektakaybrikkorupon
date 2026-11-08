@@ -29,6 +29,7 @@ function asSettings(data: SiteSettings | null): SiteSettings | null {
   return {
     ...data,
     favicon_url: data.favicon_url ?? null,
+    og_image_url: data.og_image_url ?? null,
     social_links: data.social_links ?? {},
     visibility: {
       ...DEFAULT_SITE_VISIBILITY,
@@ -109,6 +110,7 @@ export async function updateSiteSettingsAction(
       String(formData.get("foundation_name_en") ?? "").trim() || null,
     logo_url: String(formData.get("logo_url") ?? "").trim() || null,
     favicon_url: String(formData.get("favicon_url") ?? "").trim() || null,
+    og_image_url: String(formData.get("og_image_url") ?? "").trim() || null,
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     contact_phone: String(formData.get("contact_phone") ?? "").trim() || null,
     address: String(formData.get("address") ?? "").trim() || null,
@@ -148,11 +150,11 @@ export async function updateSiteSettingsAction(
   const supabase = await createClient();
   let { error } = await supabase.from("site_settings").update(payload).eq("id", 1);
 
-  if (error?.message.includes("favicon_url")) {
-    const { favicon_url: _favicon, ...withoutFavicon } = payload;
+  if (error?.message.includes("og_image_url") || error?.message.includes("favicon_url")) {
+    const { og_image_url: _og, favicon_url: _favicon, ...withoutOptional } = payload;
     const retry = await supabase
       .from("site_settings")
-      .update(withoutFavicon)
+      .update(error.message.includes("og_image_url") ? { ...withoutOptional, favicon_url: payload.favicon_url } : withoutOptional)
       .eq("id", 1);
     error = retry.error;
   }

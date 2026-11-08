@@ -162,6 +162,7 @@ export type SiteSettings = {
   meta_description: string | null;
   meta_description_en: string | null;
   favicon_url: string | null;
+  og_image_url: string | null;
   visitor_count: number;
   visibility: SiteVisibility;
   theme: SiteTheme;
@@ -187,6 +188,7 @@ export type PublicSiteSettings = Pick<
   | "meta_description"
   | "meta_description_en"
   | "favicon_url"
+  | "og_image_url"
   | "visitor_count"
   | "visibility"
   | "theme"

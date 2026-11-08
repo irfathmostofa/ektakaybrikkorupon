@@ -31,6 +31,7 @@ export const FALLBACK_SITE_SETTINGS: PublicSiteSettings = {
   meta_description_en:
     "One taka a day, one tree a month. Serving the environment and humanity since 2019.",
   favicon_url: null,
+  og_image_url: null,
   visitor_count: 0,
   visibility: DEFAULT_SITE_VISIBILITY,
   theme: DEFAULT_SITE_THEME,
@@ -50,16 +51,27 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
     "logo_url, foundation_name, foundation_name_en, contact_email, contact_phone, address, address_en, social_links, google_site_verification_code, meta_title, meta_title_en, meta_description, meta_description_en, visitor_count, visibility, theme";
   let { data, error } = await supabase
     .from("site_settings_public")
-    .select(`${publicColumns}, favicon_url`)
+    .select(`${publicColumns}, favicon_url, og_image_url`)
     .maybeSingle();
 
-  if (error?.message.includes("favicon_url")) {
+  if (error?.message.includes("og_image_url") || error?.message.includes("favicon_url")) {
     const retry = await supabase
       .from("site_settings_public")
-      .select(publicColumns)
+      .select(`${publicColumns}, favicon_url`)
       .maybeSingle();
-    data = retry.data ? { ...retry.data, favicon_url: null } : retry.data;
-    error = retry.error;
+    if (retry.error?.message.includes("favicon_url")) {
+      const base = await supabase
+        .from("site_settings_public")
+        .select(publicColumns)
+        .maybeSingle();
+      data = base.data
+        ? { ...base.data, favicon_url: null, og_image_url: null }
+        : base.data;
+      error = base.error;
+    } else {
+      data = retry.data ? { ...retry.data, og_image_url: null } : retry.data;
+      error = retry.error;
+    }
   }
 
   if (error || !data) {

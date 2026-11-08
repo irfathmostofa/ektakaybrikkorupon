@@ -44,11 +44,11 @@ export function isRasterImageUrl(url: string) {
 }
 
 export function pickOgImage(image?: string | null, logoUrl?: string | null) {
-  const candidates = [image, logoUrl, NATURE_IMAGES.canopy].filter(
-    (value): value is string => Boolean(value),
-  );
-  const raster = candidates.find((value) => isRasterImageUrl(value));
-  return toAbsolute(raster || candidates[0] || NATURE_IMAGES.canopy);
+  const selected = image?.trim() || logoUrl?.trim();
+  if (selected) {
+    return toAbsolute(selected);
+  }
+  return toAbsolute(NATURE_IMAGES.canopy);
 }
 
 export async function getSiteIconUrl() {
@@ -59,5 +59,5 @@ export async function getSiteIconUrl() {
 
 export async function getSiteOgImageUrl() {
   const settings = await getPublicSiteSettings();
-  return pickOgImage(settings.logo_url, settings.logo_url);
+  return pickOgImage(settings.og_image_url, settings.logo_url);
 }
