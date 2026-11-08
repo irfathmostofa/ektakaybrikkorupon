@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormDialog } from "@/components/admin/form-dialog";
+import { HomePageForm } from "@/components/admin/home-page-form";
 import { PageForm } from "@/components/admin/page-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +48,12 @@ export function PageManager({ pages }: { pages: PageContent[] }) {
         </TableBody>
       </Table>
       <FormDialog
-        title="Edit page"
+        title={editing?.page_key === "home" ? "Edit home page" : "Edit page"}
+        description={
+          editing?.page_key === "home"
+            ? "Update each home section from its own tab."
+            : undefined
+        }
         open={Boolean(editing)}
         onOpenChange={(open) => {
           if (!open) {
@@ -56,7 +62,13 @@ export function PageManager({ pages }: { pages: PageContent[] }) {
         }}
         size="lg"
       >
-        {editing ? <PageForm key={editing.id} page={editing} /> : null}
+        {editing ? (
+          editing.page_key === "home" ? (
+            <HomePageForm key={editing.id} page={editing} />
+          ) : (
+            <PageForm key={editing.id} page={editing} />
+          )
+        ) : null}
       </FormDialog>
     </>
   );

@@ -12,7 +12,7 @@ async function AdminPages() {
     <section className="space-y-6">
       <AdminHeader
         title="Pages"
-        description="Edit public page copy from a modal form."
+        description="Edit public page copy section by section. Home page content is grouped by hero, impact, story, and more."
       />
       <PageManager pages={pages} />
     </section>

@@ -9,16 +9,17 @@ import { NATURE_IMAGES } from "@/lib/content/images";
 import {
   getFinanceEntries,
   getGalleryAlbums,
+  getHomeSections,
   getPageContent,
   getPublishedCauses,
 } from "@/lib/content/public";
+import { localizeHomeSections } from "@/lib/content/home-sections";
 import { localizePage } from "@/lib/content/localize";
 import { localizeHref } from "@/lib/i18n/config";
 import { pickLocalized } from "@/lib/i18n/dictionary";
 import { formatCurrency } from "@/lib/i18n/format";
 import { getRequestDictionary } from "@/lib/i18n/server";
 import { pageMetadata } from "@/lib/content/metadata";
-import { stripHtml } from "@/lib/sanitize-html";
 
 export async function generateMetadata() {
   return pageMetadata("home");
@@ -26,13 +27,15 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
   const { locale, dict } = await getRequestDictionary();
-  const [page, causes, albums, finance] = await Promise.all([
+  const [page, sections, causes, albums, finance] = await Promise.all([
     getPageContent("home"),
+    getHomeSections(),
     getPublishedCauses(),
     getGalleryAlbums(),
     getFinanceEntries(),
   ]);
   const copy = localizePage(locale, page);
+  const home = localizeHomeSections(locale, sections);
   const featured = causes.filter((item) => item.featured).slice(0, 3);
   const recentAlbums = albums.slice(0, 3);
   const collected = finance
@@ -41,33 +44,9 @@ export default async function HomePage() {
   const spent = finance
     .filter((item) => item.kind === "expense")
     .reduce((sum, item) => sum + Number(item.amount), 0);
-  const features = [
-    { title: dict.home.feature1Title, body: dict.home.feature1Body },
-    { title: dict.home.feature2Title, body: dict.home.feature2Body },
-    { title: dict.home.feature3Title, body: dict.home.feature3Body },
-  ];
-  const stats = [
-    {
-      value: <CountUp value={4183} locale={locale} suffix="+" />,
-      label: dict.home.statMembers,
-    },
-    {
-      value: dict.home.statDreamValue,
-      label: dict.home.statDream,
-    },
-    {
-      value: <CountUp value={25} locale={locale} suffix="%" />,
-      label: dict.home.statForest,
-    },
-    {
-      value: dict.home.statStartValue,
-      label: dict.home.statStart,
-    },
-  ];
 
   return (
     <>
-      {/* Hero: centered info over the animated sky first, then it fades out and the tree grows in the same pinned hero. */}
       <TreeJourney
         locale={locale}
         dict={dict}
@@ -75,7 +54,7 @@ export default async function HomePage() {
           <div className="relative mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center px-6 py-10 text-center">
             <Reveal>
               <p className="text-xs font-medium tracking-[0.24em] text-primary uppercase">
-                {dict.home.eyebrow}
+                {home.hero.eyebrow}
               </p>
               <h1 className="mx-auto mt-4 max-w-3xl font-heading text-3xl leading-tight text-canopy text-balance sm:text-4xl md:text-6xl">
                 {copy.title}
@@ -88,13 +67,13 @@ export default async function HomePage() {
                   href={localizeHref(locale, "/donate")}
                   className={buttonVariants({ size: "lg" })}
                 >
-                  {dict.home.donateMonthly}
+                  {home.hero.donateLabel}
                 </Link>
                 <Link
                   href={localizeHref(locale, "/about")}
                   className={buttonVariants({ variant: "outline", size: "lg" })}
                 >
-                  {dict.home.ourWork}
+                  {home.hero.workLabel}
                 </Link>
               </div>
               <p className="tj-hint">
@@ -112,15 +91,19 @@ export default async function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6">
           <Reveal>
             <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
-              {dict.home.impact}
+              {home.impact.heading}
             </p>
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((item, index) => (
-              <Reveal key={item.label} delay={index * 0.08}>
+            {home.impact.stats.map((item, index) => (
+              <Reveal key={`${item.label}-${index}`} delay={index * 0.08}>
                 <article className="rounded-2xl border border-border bg-card px-5 py-6">
                   <p className="font-heading text-3xl text-primary md:text-4xl">
-                    {item.value}
+                    {item.numeric != null ? (
+                      <CountUp value={item.numeric} locale={locale} suffix={item.suffix} />
+                    ) : (
+                      item.value
+                    )}
                   </p>
                   <p className="mt-2 text-sm text-soil">{item.label}</p>
                 </article>
@@ -134,8 +117,8 @@ export default async function HomePage() {
         <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-4 sm:px-6 md:grid-cols-2 md:gap-12">
           <div className="min-w-0 w-full">
             <NatureImage
-              src={NATURE_IMAGES.wetland}
-              alt={dict.home.storyTitle}
+              src={home.story.imageUrl ?? NATURE_IMAGES.wetland}
+              alt={home.story.title}
               className="w-full max-w-full"
               sizes="(min-width: 768px) 50vw, 100vw"
             />
@@ -145,14 +128,12 @@ export default async function HomePage() {
               {dict.about.story}
             </p>
             <h2 className="mt-3 font-heading text-2xl break-words sm:text-3xl md:text-4xl">
-              {dict.home.storyTitle}
+              {home.story.title}
             </h2>
-            <p className="mt-5 text-[0.95rem] leading-7 break-words text-foreground/85 sm:text-base sm:leading-8">
-              {dict.home.storyP1}
-            </p>
-            <p className="mt-4 text-[0.95rem] leading-7 break-words text-foreground/85 sm:text-base sm:leading-8">
-              {dict.home.storyP2}
-            </p>
+            <RichHtml
+              className="mt-5 text-[0.95rem] leading-7 break-words text-foreground/85 sm:text-base sm:leading-8"
+              html={home.story.body}
+            />
           </Reveal>
         </div>
       </section>
@@ -161,20 +142,21 @@ export default async function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6">
           <Reveal>
             <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
-              {dict.home.ourWork}
+              {home.features.eyebrow}
             </p>
             <h2 className="mt-3 font-heading text-3xl md:text-4xl">
-              {dict.home.missionTitle}
+              {home.features.heading}
             </h2>
           </Reveal>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {features.map((feature, index) => (
-              <Reveal key={feature.title} delay={index * 0.08}>
+            {home.features.items.map((feature, index) => (
+              <Reveal key={`${feature.title}-${index}`} delay={index * 0.08}>
                 <article className="h-full rounded-2xl border border-border bg-card p-6">
                   <h3 className="font-heading text-xl">{feature.title}</h3>
-                  <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                    {feature.body}
-                  </p>
+                  <RichHtml
+                    className="mt-4 text-sm leading-7 text-muted-foreground"
+                    html={feature.body}
+                  />
                 </article>
               </Reveal>
             ))}
@@ -185,10 +167,11 @@ export default async function HomePage() {
       <section className="py-20">
         <div className="mx-auto w-full max-w-3xl px-6">
           <Reveal>
-            <h2 className="font-heading text-3xl md:text-4xl">{dict.home.howTitle}</h2>
-            <p className="mt-6 whitespace-pre-line leading-8 text-foreground/85">
-              {dict.home.howBody}
-            </p>
+            <h2 className="font-heading text-3xl md:text-4xl">{home.how.title}</h2>
+            <RichHtml
+              className="mt-6 leading-8 text-foreground/85"
+              html={home.how.body}
+            />
           </Reveal>
         </div>
       </section>
@@ -199,9 +182,9 @@ export default async function HomePage() {
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
-                  {dict.home.featuredCauses}
+                  {home.listings.causesEyebrow}
                 </p>
-                <h2 className="mt-3 font-heading text-3xl">{stripHtml(copy.body) || copy.body}</h2>
+                <h2 className="mt-3 font-heading text-3xl">{home.listings.causesHeading}</h2>
               </div>
               <Link href={localizeHref(locale, "/causes")} className="text-sm text-primary">
                 {dict.actions.viewAll}
@@ -242,7 +225,7 @@ export default async function HomePage() {
         <section className="py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <div className="flex items-end justify-between">
-              <h2 className="font-heading text-3xl">{dict.home.recentGallery}</h2>
+              <h2 className="font-heading text-3xl">{home.listings.galleryHeading}</h2>
               <Link href={localizeHref(locale, "/gallery")} className="text-sm text-primary">
                 {dict.actions.viewAll}
               </Link>
@@ -283,7 +266,7 @@ export default async function HomePage() {
             </p>
           </article>
           <article className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-sm text-muted-foreground">{dict.home.transparency}</p>
+            <p className="text-sm text-muted-foreground">{home.listings.transparencyHeading}</p>
             <Link
               href={localizeHref(locale, "/transparency")}
               className="mt-4 inline-block text-sm text-primary"

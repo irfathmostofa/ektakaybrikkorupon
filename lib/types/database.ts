@@ -241,6 +241,7 @@ export type PageContent = {
   meta_title_en: string | null;
   meta_description: string | null;
   meta_description_en: string | null;
+  sections: Record<string, unknown> | null;
   updated_at: string;
 };
 

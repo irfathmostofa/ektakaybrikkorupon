@@ -316,7 +316,8 @@ alter table public.page_content
   add column if not exists subtitle_en text,
   add column if not exists body_en text,
   add column if not exists meta_title_en text,
-  add column if not exists meta_description_en text;
+  add column if not exists meta_description_en text,
+  add column if not exists sections jsonb not null default '{}'::jsonb;
 
 drop trigger if exists page_content_set_updated_at on public.page_content;
 create trigger page_content_set_updated_at

@@ -14,6 +14,10 @@ import {
   FALLBACK_POSTS,
   FALLBACK_TEAM,
 } from "@/lib/content/fallbacks";
+import {
+  mergeHomeSections,
+  type HomeSections,
+} from "@/lib/content/home-sections";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createPublicClient } from "@/lib/supabase/public";
 import type {
@@ -55,7 +59,7 @@ export async function getPageContent(pageKey: string): Promise<PageContent> {
   cacheLife("hours");
 
   const fallback = FALLBACK_PAGES[pageKey] ?? FALLBACK_PAGES.home;
-  return safeQuery(fallback, async () => {
+  const page = await safeQuery(fallback, async () => {
     const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("page_content")
@@ -64,6 +68,15 @@ export async function getPageContent(pageKey: string): Promise<PageContent> {
       .maybeSingle();
     return { data: (data as PageContent | null) ?? fallback, error };
   });
+  if (pageKey === "home") {
+    return { ...page, sections: mergeHomeSections(page.sections) };
+  }
+  return page;
+}
+
+export async function getHomeSections(): Promise<HomeSections> {
+  const page = await getPageContent("home");
+  return mergeHomeSections(page.sections);
 }
 
 export async function getPublishedCauses(): Promise<CauseProject[]> {

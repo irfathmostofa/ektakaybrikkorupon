@@ -1,3 +1,4 @@
+import { FALLBACK_HOME_SECTIONS } from "@/lib/content/home-sections";
 import { NATURE_IMAGES } from "@/lib/content/images";
 import type {
   AboutSection,
@@ -34,6 +35,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
       "প্রতিদিন এক টাকা, মাসে একটি গাছ। ২০১৯ সাল থেকে পরিবেশ ও মানবতার সেবায় নিয়োজিত।",
     meta_description_en:
       "One taka a day, one tree a month. Serving the environment and humanity since 2019.",
+    sections: FALLBACK_HOME_SECTIONS,
     updated_at: new Date().toISOString(),
   },
   about: {
@@ -51,6 +53,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "About",
     meta_description: "লক্ষ্য, দৃষ্টি, মূল্যবোধ ও দল—সবই সম্পাদকীয় কন্টেন্ট থেকে।",
     meta_description_en: "Mission, vision, values, and team assembled from the CMS.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   contact: {
@@ -67,6 +70,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Contact",
     meta_description: "১টাকায় বৃক্ষরোপণের সাথে যোগাযোগ করুন।",
     meta_description_en: "Get in touch with 1 Taka Tree Plantation.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   gallery: {
@@ -83,6 +87,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Gallery",
     meta_description: "সংরক্ষণের অ্যালবাম ও লাইটবক্স।",
     meta_description_en: "Conservation albums and lightbox viewing.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   achievements: {
@@ -99,6 +104,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Achievements",
     meta_description: "প্রভাবের মাইলফলক ও তারিখ।",
     meta_description_en: "Impact milestones and dates.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   transparency: {
@@ -115,6 +121,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Transparency",
     meta_description: "সংগ্রহ ও ব্যয়ের প্রকাশিত ইতিহাস।",
     meta_description_en: "Published collection and expense history.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   membership: {
@@ -132,6 +139,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Membership",
     meta_description: "সদস্য পরিকল্পনা ও আবেদন।",
     meta_description_en: "Membership plans and application.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   careers: {
@@ -148,6 +156,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Careers",
     meta_description: "খালি পদ ও আবেদন।",
     meta_description_en: "Open roles and applications.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
   magazines: {
@@ -164,6 +173,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "Magazines",
     meta_description: "অনলাইনে পড়ুন ও পিডিএফ ডাউনলোড করুন।",
     meta_description_en: "Read online and download the PDF.",
+    sections: null,
     updated_at: new Date().toISOString(),
   },
 };
