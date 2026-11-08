@@ -70,7 +70,7 @@ export function SiteHeader({
               <Sprout className="size-4" />
             </span>
           )}
-          <span className="truncate font-heading text-base font-semibold tracking-tight">
+          <span className="truncate hidden font-heading text-base font-semibold tracking-tight md:inline-block">
             {name}
           </span>
         </Link>
@@ -107,7 +107,7 @@ export function SiteHeader({
           </Link> */}
           <Link
             href={localizeHref(locale, "/donate")}
-            className={`${buttonVariants({ size: "sm" })} hidden sm:inline-flex`}
+            className={`${buttonVariants({ size: "sm" })} hidden sm:inline-flex py-4`}
           >
             {dict.nav.donate}
           </Link>
