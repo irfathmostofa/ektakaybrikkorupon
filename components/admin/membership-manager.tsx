@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MEMBERSHIP_STATUSES } from "@/lib/constants";
+import { formatAdminDate, formatAdminDateTime, formatAdminNumber } from "@/lib/i18n/format";
 import type { Donation, MembershipApplication, MembershipPlan } from "@/lib/types/database";
 
 const initialState: ActionState = {};
@@ -120,11 +121,11 @@ function PlanForm({ plan }: { plan?: MembershipPlan }) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString();
+  return formatAdminDateTime(value);
 }
 
 function formatAmount(value: number) {
-  return Number(value).toLocaleString();
+  return formatAdminNumber(value);
 }
 
 function normalizeContact(value: string | null | undefined) {
@@ -404,7 +405,7 @@ export function MembershipManager({
             {plans.map((plan) => (
               <TableRow key={plan.id}>
                 <TableCell>{plan.name}</TableCell>
-                <TableCell>{Number(plan.fee_amount).toLocaleString()}</TableCell>
+                <TableCell>{formatAdminNumber(plan.fee_amount)}</TableCell>
                 <TableCell>{plan.duration_label || "—"}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{plan.is_active ? "active" : "hidden"}</Badge>
@@ -506,7 +507,7 @@ export function MembershipManager({
                       </div>
                       <div>
                         <dt className="text-xs text-muted-foreground">Submitted</dt>
-                        <dd>{new Date(application.created_at).toLocaleDateString()}</dd>
+                        <dd>{formatAdminDate(application.created_at)}</dd>
                       </div>
                       <div className="col-span-2">
                         <dt className="text-xs text-muted-foreground">Address</dt>
@@ -609,7 +610,7 @@ export function MembershipManager({
                           )}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
-                          {new Date(application.created_at).toLocaleDateString()}
+                          {formatAdminDate(application.created_at)}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">{application.status}</Badge>

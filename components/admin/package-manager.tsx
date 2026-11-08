@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { asFormAction } from "@/lib/admin/form-action";
+import { formatAdminNumber } from "@/lib/i18n/format";
 import type { DonationPackage } from "@/lib/types/database";
 
 function PackageForm({ item }: { item?: DonationPackage }) {
@@ -107,7 +108,7 @@ export function PackageManager({ packages }: { packages: DonationPackage[] }) {
           {packages.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
-              <TableCell>{Number(item.amount).toLocaleString()}</TableCell>
+              <TableCell>{formatAdminNumber(item.amount)}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{item.is_active ? "Active" : "Inactive"}</Badge>
               </TableCell>

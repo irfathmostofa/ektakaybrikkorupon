@@ -4,7 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { requireMenu } from "@/lib/admin/access";
 import { formHtml, formOptional, formString } from "@/lib/admin/form";
 import { CACHE_TAGS, CAMPAIGN_AUDIENCES, CAMPAIGN_STATUSES } from "@/lib/constants";
-import { loadEmailjsCredentials } from "@/lib/email/emailjs";
+import { loadEmailjsCredentials, sendEmailjsMessageResult } from "@/lib/email/emailjs";
 import { getSiteUrl } from "@/lib/payments/site-url";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -213,24 +213,39 @@ export async function listCampaignRecipients(audience: CampaignAudience) {
 
 export async function getCampaignEmailConfig() {
   await requireMenu("campaigns");
-  const fromEnv = {
-    serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID?.trim() || "",
-    templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID?.trim() || "",
-    publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY?.trim() || "",
-  };
-  if (fromEnv.serviceId && fromEnv.templateId && fromEnv.publicKey) {
-    return { ...fromEnv, source: "env" as const };
-  }
   const creds = await loadEmailjsCredentials();
   if (!creds) {
     return null;
   }
-  return {
-    serviceId: creds.serviceId,
-    templateId: creds.templateId,
-    publicKey: creds.publicKey,
-    source: "settings" as const,
-  };
+  return { configured: true as const };
+}
+
+export async function sendCampaignEmailAction(input: {
+  toEmail: string;
+  toName: string;
+  subject: string;
+  title: string;
+  messageHtml: string;
+  fromName: string;
+  replyTo: string;
+  unsubscribeLink: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  await requireMenu("campaigns");
+  const toEmail = input.toEmail.trim();
+  if (!toEmail) {
+    return { ok: false, error: "Recipient email is required." };
+  }
+  return sendEmailjsMessageResult({
+    to_email: toEmail,
+    to_name: input.toName.trim() || toEmail,
+    subject: input.subject,
+    title: input.title,
+    message: "",
+    message_html: input.messageHtml,
+    from_name: input.fromName,
+    reply_to: input.replyTo,
+    unsubscribe_link: input.unsubscribeLink,
+  });
 }
 
 export async function recordCampaignSendAction(formData: FormData): Promise<ActionState> {

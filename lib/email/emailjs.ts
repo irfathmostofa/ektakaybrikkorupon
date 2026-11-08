@@ -13,48 +13,64 @@ type EmailjsCredentials = {
   foundationNameEn: string | null;
 };
 
-export async function loadEmailjsCredentials(): Promise<EmailjsCredentials | null> {
-  if (!isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+function credentialsFromEnv(): EmailjsCredentials | null {
+  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID?.trim() || "";
+  const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID?.trim() || "";
+  const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY?.trim() || "";
+  if (!serviceId || !templateId || !publicKey) {
     return null;
   }
-
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select(
-      "emailjs_service_id, emailjs_template_id, emailjs_public_key, emailjs_private_key, contact_email, foundation_name, foundation_name_en",
-    )
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (
-    error ||
-    !data?.emailjs_service_id ||
-    !data.emailjs_template_id ||
-    !data.emailjs_public_key
-  ) {
-    return null;
-  }
-
   return {
-    serviceId: data.emailjs_service_id,
-    templateId: data.emailjs_template_id,
-    publicKey: data.emailjs_public_key,
-    privateKey: data.emailjs_private_key,
-    contactEmail: data.contact_email,
-    foundationName: data.foundation_name || FALLBACK_SITE_SETTINGS.foundation_name,
-    foundationNameEn:
-      data.foundation_name_en || FALLBACK_SITE_SETTINGS.foundation_name_en || null,
+    serviceId,
+    templateId,
+    publicKey,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY?.trim() || null,
+    contactEmail: null,
+    foundationName: FALLBACK_SITE_SETTINGS.foundation_name,
+    foundationNameEn: FALLBACK_SITE_SETTINGS.foundation_name_en || null,
   };
 }
 
-export async function sendEmailjsMessage(
+export async function loadEmailjsCredentials(): Promise<EmailjsCredentials | null> {
+  if (isSupabaseConfigured() && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select(
+        "emailjs_service_id, emailjs_template_id, emailjs_public_key, emailjs_private_key, contact_email, foundation_name, foundation_name_en",
+      )
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (
+      !error &&
+      data?.emailjs_service_id &&
+      data.emailjs_template_id &&
+      data.emailjs_public_key
+    ) {
+      return {
+        serviceId: data.emailjs_service_id,
+        templateId: data.emailjs_template_id,
+        publicKey: data.emailjs_public_key,
+        privateKey: data.emailjs_private_key,
+        contactEmail: data.contact_email,
+        foundationName: data.foundation_name || FALLBACK_SITE_SETTINGS.foundation_name,
+        foundationNameEn:
+          data.foundation_name_en || FALLBACK_SITE_SETTINGS.foundation_name_en || null,
+      };
+    }
+  }
+
+  return credentialsFromEnv();
+}
+
+export async function sendEmailjsMessageResult(
   payload: EmailPayload,
   credentials?: EmailjsCredentials | null,
-): Promise<boolean> {
+): Promise<{ ok: boolean; error?: string }> {
   const creds = credentials === undefined ? await loadEmailjsCredentials() : credentials;
   if (!creds) {
-    return false;
+    return { ok: false, error: "EmailJS is not configured." };
   }
 
   const body: Record<string, unknown> = {
@@ -67,10 +83,10 @@ export async function sendEmailjsMessage(
       subject: payload.subject,
       title: payload.title,
       message: payload.message,
-      message_html: "",
+      message_html: payload.message_html ?? "",
       reply_to: payload.reply_to || payload.to_email,
-      from_name: creds.foundationName,
-      unsubscribe_link: "",
+      from_name: payload.from_name || creds.foundationName,
+      unsubscribe_link: payload.unsubscribe_link ?? "",
     },
   };
 
@@ -86,10 +102,24 @@ export async function sendEmailjsMessage(
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
     });
-    return response.ok;
+    if (!response.ok) {
+      const detail = (await response.text()).trim().slice(0, 240);
+      return {
+        ok: false,
+        error: detail || `EmailJS ${response.status}`,
+      };
+    }
+    return { ok: true };
   } catch {
-    return false;
+    return { ok: false, error: "EmailJS request failed." };
   }
+}
+
+export async function sendEmailjsMessage(
+  payload: EmailPayload,
+  credentials?: EmailjsCredentials | null,
+): Promise<boolean> {
+  return (await sendEmailjsMessageResult(payload, credentials)).ok;
 }
 
 export async function notifyQuietly(

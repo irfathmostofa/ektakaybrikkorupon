@@ -2,7 +2,7 @@
 
 Use one EmailJS template for contact replies, donation receipts, membership and career mail, and admin campaign sends.
 
-Configure the service ID, template ID, public key, and optional private key in Admin → Settings.
+Configure the service ID, template ID, public key, and private key in Admin → Settings. Campaign sends use the private key on the server.
 
 ## Dashboard fields
 

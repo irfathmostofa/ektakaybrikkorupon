@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { asFormAction } from "@/lib/admin/form-action";
+import { formatAdminNumber } from "@/lib/i18n/format";
 import type { FinanceCategory, FinanceEntry, FinanceKind } from "@/lib/types/database";
 
 function EntryForm({
@@ -206,16 +207,16 @@ export function FinanceManager({
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Collections</p>
-          <p className="mt-1 text-xl font-semibold">{collectionTotal.toLocaleString()}</p>
+          <p className="mt-1 text-xl font-semibold">{formatAdminNumber(collectionTotal)}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Expenses</p>
-          <p className="mt-1 text-xl font-semibold">{expenseTotal.toLocaleString()}</p>
+          <p className="mt-1 text-xl font-semibold">{formatAdminNumber(expenseTotal)}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Balance</p>
           <p className="mt-1 text-xl font-semibold">
-            {(collectionTotal - expenseTotal).toLocaleString()}
+            {formatAdminNumber(collectionTotal - expenseTotal)}
           </p>
         </div>
       </div>
@@ -260,7 +261,7 @@ export function FinanceManager({
                 </select>
               </div>
               <p className="text-sm text-muted-foreground">
-                Filtered total: {visibleTotal.toLocaleString()}
+                Filtered total: {formatAdminNumber(visibleTotal)}
               </p>
               <div className="ml-auto">
                 <Button type="button" onClick={() => setCreating(true)}>
@@ -284,7 +285,7 @@ export function FinanceManager({
                     <TableCell>{entry.entry_date}</TableCell>
                     <TableCell>{entry.title}</TableCell>
                     <TableCell>{entry.category?.name ?? "—"}</TableCell>
-                    <TableCell>{Number(entry.amount).toLocaleString()}</TableCell>
+                    <TableCell>{formatAdminNumber(entry.amount)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button

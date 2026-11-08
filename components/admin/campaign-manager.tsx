@@ -7,6 +7,7 @@ import {
   listCampaignRecipients,
   recordCampaignSendAction,
   saveCampaignAction,
+  sendCampaignEmailAction,
   type CampaignRecipient,
 } from "@/actions/campaigns";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
@@ -27,31 +28,13 @@ import {
 } from "@/components/ui/table";
 import { asFormAction } from "@/lib/admin/form-action";
 import { CAMPAIGN_AUDIENCES } from "@/lib/constants";
+import { formatAdminDateTime } from "@/lib/i18n/format";
 import type {
   CampaignAudience,
   EmailCampaign,
 } from "@/lib/types/database";
 
 const EMAILJS_MONTHLY_LIMIT = 200;
-
-async function sendEmailjsBrowser(
-  config: { serviceId: string; templateId: string; publicKey: string },
-  params: Record<string, string>,
-) {
-  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id: config.serviceId,
-      template_id: config.templateId,
-      user_id: config.publicKey,
-      template_params: params,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error("EmailJS send failed.");
-  }
-}
 
 function CampaignForm({
   campaign,
@@ -102,7 +85,7 @@ export function CampaignManager({
   senderName,
 }: {
   campaigns: EmailCampaign[];
-  emailConfig: { serviceId: string; templateId: string; publicKey: string } | null;
+  emailConfig: { configured: true } | null;
   senderEmail: string;
   senderName: string;
 }) {
@@ -141,17 +124,19 @@ export function CampaignManager({
     setProgress({ sent: 0, failed: 0, total: list.length });
     for (const recipient of list) {
       try {
-        await sendEmailjsBrowser(emailConfig, {
-          to_email: recipient.email,
-          to_name: recipient.name,
+        const result = await sendCampaignEmailAction({
+          toEmail: recipient.email,
+          toName: recipient.name,
           subject: campaign.subject,
           title: campaign.subject,
-          message: "",
-          message_html: campaign.body,
-          from_name: senderName,
-          reply_to: senderEmail,
-          unsubscribe_link: await campaignUnsubscribeUrl(recipient.email),
+          messageHtml: campaign.body,
+          fromName: senderName,
+          replyTo: senderEmail,
+          unsubscribeLink: await campaignUnsubscribeUrl(recipient.email),
         });
+        if (!result.ok) {
+          throw new Error(result.error || "EmailJS send failed.");
+        }
         sent += 1;
       } catch {
         failed += 1;
@@ -178,20 +163,22 @@ export function CampaignManager({
     }
     setBusy(true);
     try {
-      await sendEmailjsBrowser(emailConfig, {
-        to_email: senderEmail,
-        to_name: senderName || senderEmail,
+      const result = await sendCampaignEmailAction({
+        toEmail: senderEmail,
+        toName: senderName || senderEmail,
         subject: `[TEST] ${campaign.subject}`,
         title: campaign.subject,
-        message: "",
-        message_html: campaign.body,
-        from_name: senderName,
-        reply_to: senderEmail,
-        unsubscribe_link: await campaignUnsubscribeUrl(senderEmail),
+        messageHtml: campaign.body,
+        fromName: senderName,
+        replyTo: senderEmail,
+        unsubscribeLink: await campaignUnsubscribeUrl(senderEmail),
       });
+      if (!result.ok) {
+        throw new Error(result.error || "EmailJS send failed.");
+      }
       setMessage(`Test email sent to ${senderEmail}.`);
-    } catch {
-      setMessage("Test email failed.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Test email failed.");
     } finally {
       setBusy(false);
     }
@@ -266,7 +253,7 @@ export function CampaignManager({
                   <TableCell>{item.sent_count}</TableCell>
                   <TableCell>{item.failed_count}</TableCell>
                   <TableCell>
-                    {item.sent_at ? new Date(item.sent_at).toLocaleString() : "—"}
+                    {item.sent_at ? formatAdminDateTime(item.sent_at) : "—"}
                   </TableCell>
                 </TableRow>
               ))}

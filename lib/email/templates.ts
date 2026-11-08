@@ -8,7 +8,10 @@ export type EmailPayload = {
   subject: string;
   title: string;
   message: string;
+  message_html?: string;
   reply_to?: string;
+  from_name?: string;
+  unsubscribe_link?: string;
 };
 
 function localeOf(value: string | null | undefined): Locale {

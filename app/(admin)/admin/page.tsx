@@ -4,6 +4,7 @@ import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPage } from "@/components/admin/admin-page";
 import { StatCard } from "@/components/admin/stat-card";
 import { requireStaff } from "@/lib/auth";
+import { formatAdminNumber } from "@/lib/i18n/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -72,8 +73,8 @@ async function AdminDashboard() {
         <StatCard title="Open jobs" value={openJobs ?? 0} />
         <StatCard
           title="Balance"
-          value={(collected - spent).toLocaleString()}
-          hint={`Collected ${collected.toLocaleString()} · Spent ${spent.toLocaleString()}`}
+          value={formatAdminNumber(collected - spent)}
+          hint={`Collected ${formatAdminNumber(collected)} · Spent ${formatAdminNumber(spent)}`}
         />
       </div>
     </section>

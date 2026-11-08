@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { asFormAction } from "@/lib/admin/form-action";
 import { DONATION_STATUSES } from "@/lib/constants";
+import { formatAdminDate, formatAdminNumber } from "@/lib/i18n/format";
 import type { CauseProject, Donation, DonationPackage } from "@/lib/types/database";
 
 function DonationForm({
@@ -218,9 +219,9 @@ export function DonationManager({
                 <div>{donation.donor_name}</div>
                 <div className="text-xs text-muted-foreground">{donation.donor_email}</div>
               </TableCell>
-              <TableCell>{Number(donation.amount).toLocaleString()}</TableCell>
+              <TableCell>{formatAdminNumber(donation.amount)}</TableCell>
               <TableCell>{donation.package?.name ?? "—"}</TableCell>
-              <TableCell>{new Date(donation.created_at).toLocaleDateString()}</TableCell>
+              <TableCell>{formatAdminDate(donation.created_at)}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{donation.status}</Badge>
               </TableCell>
