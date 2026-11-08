@@ -93,7 +93,7 @@ export function SiteFooter({
             {settings.contact_phone ? (
               <span className="text-canopy-foreground/80">{settings.contact_phone}</span>
             ) : null}
-            {socials.map(([network, url]) => (
+            <div className="flex gap-2">{socials.map(([network, url]) => (
               <a
                 key={network}
                 href={url}
@@ -101,7 +101,8 @@ export function SiteFooter({
               >
                 {network}
               </a>
-            ))}
+            ))}</div>
+            
           </div>
         </div>
       </div>

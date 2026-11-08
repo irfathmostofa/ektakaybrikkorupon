@@ -248,37 +248,7 @@ function EditorToolbar({
           <AlignJustify className="size-4" />
         </ToolbarButton>
       </ToolbarGroup>
-      <Separator orientation="vertical" className="mx-1 h-5" />
-      <ToolbarGroup>
-        <ToolbarButton
-          title="Align image left"
-          active={editor?.isActive("image", { class: "align-left" })}
-          onClick={() => setImageAlign("align-left")}
-        >
-          <AlignLeft className="size-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Align image center"
-          active={editor?.isActive("image", { class: "align-center" })}
-          onClick={() => setImageAlign("align-center")}
-        >
-          <AlignCenter className="size-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Align image right"
-          active={editor?.isActive("image", { class: "align-right" })}
-          onClick={() => setImageAlign("align-right")}
-        >
-          <AlignRight className="size-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Full-width image"
-          active={editor?.isActive("image", { class: "align-full" })}
-          onClick={() => setImageAlign("align-full")}
-        >
-          <Square className="size-3.5" />
-        </ToolbarButton>
-      </ToolbarGroup>
+     
     </div>
   );
 }
