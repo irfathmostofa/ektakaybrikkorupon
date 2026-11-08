@@ -63,11 +63,15 @@ function CampaignForm({
       {campaign ? <input type="hidden" name="id" value={campaign.id} /> : null}
       <input type="hidden" name="status" value="draft" />
       <div className="space-y-2">
-        <Label htmlFor="name">Campaign name</Label>
+        <Label htmlFor="name" required>
+          Campaign name
+        </Label>
         <Input id="name" name="name" defaultValue={campaign?.name} required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="subject">Subject</Label>
+        <Label htmlFor="subject" required>
+          Subject
+        </Label>
         <Input id="subject" name="subject" defaultValue={campaign?.subject} required />
       </div>
       <div className="space-y-2">
@@ -85,7 +89,7 @@ function CampaignForm({
           ))}
         </select>
       </div>
-      <RichTextEditor name="body" label="Message" defaultValue={campaign?.body} />
+      <RichTextEditor name="body" label="Message" defaultValue={campaign?.body} required />
       <SubmitButton>Save draft</SubmitButton>
     </form>
   );

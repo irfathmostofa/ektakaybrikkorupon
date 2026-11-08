@@ -28,7 +28,9 @@ function MagazineForm({ item }: { item?: Magazine }) {
     <form action={asFormAction(saveMagazineAction)} className="grid gap-3">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="title">Title (Bangla)</Label>
+        <Label htmlFor="title" required>
+          Title (Bangla)
+        </Label>
         <Input id="title" name="title" defaultValue={item?.title} required />
       </div>
       <div className="space-y-2">
@@ -43,6 +45,7 @@ function MagazineForm({ item }: { item?: Magazine }) {
         name="description"
         label="Description (Bangla)"
         defaultValue={item?.description}
+        required
       />
       <RichTextEditor
         name="description_en"

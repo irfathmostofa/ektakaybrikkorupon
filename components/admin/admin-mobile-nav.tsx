@@ -65,7 +65,7 @@ export function AdminMobileNav({
         role="dialog"
         aria-modal="true"
         aria-label="Admin menu"
-        className="absolute inset-y-0 left-0 flex h-full w-[min(18rem,85vw)] max-w-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground shadow-lg"
+        className="absolute inset-y-0 left-0 flex h-svh max-h-svh min-h-0 w-[min(18rem,85vw)] max-w-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground shadow-lg"
       >
         <div className="flex shrink-0 items-center justify-between border-b border-sidebar-border px-4 py-3">
           <p className="text-sm font-semibold">Hope Admin</p>

@@ -29,7 +29,9 @@ function PackageForm({ item }: { item?: DonationPackage }) {
     <form action={asFormAction(saveDonationPackageAction)} className="grid gap-3">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="name">Name (Bangla)</Label>
+        <Label htmlFor="name" required>
+          Name (Bangla)
+        </Label>
         <Input id="name" name="name" defaultValue={item?.name} required />
       </div>
       <div className="space-y-2">
@@ -38,7 +40,9 @@ function PackageForm({ item }: { item?: DonationPackage }) {
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
+          <Label htmlFor="amount" required>
+            Amount
+          </Label>
           <Input
             id="amount"
             name="amount"
@@ -63,6 +67,7 @@ function PackageForm({ item }: { item?: DonationPackage }) {
         name="description"
         label="Description (Bangla)"
         defaultValue={item?.description}
+        required
       />
       <RichTextEditor
         name="description_en"

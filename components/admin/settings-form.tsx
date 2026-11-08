@@ -20,20 +20,25 @@ function Field({
   name,
   defaultValue,
   type = "text",
+  required,
 }: {
   label: string;
   name: string;
   defaultValue?: string | null;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} required={required}>
+        {label}
+      </Label>
       <Input
         id={name}
         name={name}
         type={type}
         defaultValue={defaultValue ?? ""}
+        required={required}
       />
     </div>
   );
@@ -68,6 +73,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 label="Foundation name (Bangla)"
                 name="foundation_name"
                 defaultValue={settings.foundation_name}
+                required
               />
               <Field
                 label="Foundation name (English)"

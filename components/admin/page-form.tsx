@@ -22,7 +22,9 @@ export function PageForm({ page }: { page: PageContent }) {
       <input type="hidden" name="id" value={page.id} />
       <p className="text-sm text-muted-foreground">Page key: {page.page_key}</p>
       <div className="space-y-2">
-        <Label htmlFor="title">Title (Bangla)</Label>
+        <Label htmlFor="title" required>
+          Title (Bangla)
+        </Label>
         <Input id="title" name="title" defaultValue={page.title} required />
       </div>
       <div className="space-y-2">
@@ -41,7 +43,7 @@ export function PageForm({ page }: { page: PageContent }) {
           defaultValue={page.subtitle_en ?? ""}
         />
       </div>
-      <RichTextEditor name="body" label="Body (Bangla)" defaultValue={page.body} />
+      <RichTextEditor name="body" label="Body (Bangla)" defaultValue={page.body} required />
       <RichTextEditor name="body_en" label="Body (English)" defaultValue={page.body_en} />
       <div className="space-y-2">
         <Label htmlFor="meta_title">Meta title (Bangla)</Label>

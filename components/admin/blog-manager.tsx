@@ -42,7 +42,9 @@ function TaxonomyForm({
     <form action={asFormAction(action)} className="grid gap-3">
       {item ? <input type="hidden" name="id" value={item.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="name">Name (Bangla)</Label>
+        <Label htmlFor="name" required>
+          Name (Bangla)
+        </Label>
         <Input id="name" name="name" defaultValue={item?.name} required />
       </div>
       <div className="space-y-2">

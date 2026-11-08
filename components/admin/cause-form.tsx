@@ -37,7 +37,9 @@ export function CauseForm({
     <form action={formAction} className="grid gap-4">
       {cause ? <input type="hidden" name="id" value={cause.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="title">Title (Bangla)</Label>
+        <Label htmlFor="title" required>
+          Title (Bangla)
+        </Label>
         <Input id="title" name="title" defaultValue={cause?.title} required />
       </div>
       <div className="space-y-2">
@@ -68,6 +70,7 @@ export function CauseForm({
         name="description"
         label="Description (Bangla)"
         defaultValue={cause?.description}
+        required
       />
       <RichTextEditor
         name="description_en"

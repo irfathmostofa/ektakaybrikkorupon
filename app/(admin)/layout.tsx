@@ -10,9 +10,9 @@ export const metadata: Metadata = noIndexMetadata("Admin");
 
 function AdminShellFallback() {
   return (
-    <div className="flex h-svh min-h-0 min-w-0 flex-1 overflow-hidden">
-      <div className="hidden h-full w-64 shrink-0 border-r border-border bg-card md:block" />
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-muted/30">
+    <div className="flex h-svh max-h-svh min-h-0 min-w-0 flex-1 overflow-hidden">
+      <div className="hidden h-full min-h-0 w-64 shrink-0 self-stretch border-r border-border bg-card md:block" />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/30">
         <div className="h-14 shrink-0 border-b border-border bg-background" />
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           <div className="h-40 rounded-xl bg-muted" />
@@ -27,9 +27,9 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   const menus = await getAccessibleMenus(user);
 
   return (
-    <div className="flex h-svh min-h-0 min-w-0 flex-1 overflow-hidden">
+    <div className="flex h-svh max-h-svh min-h-0 min-w-0 flex-1 overflow-hidden">
       <AdminSidebar user={user} menus={menus} />
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-muted/30">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/30">
         <AdminTopBar user={user} menus={menus} />
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 md:p-8">
           {children}

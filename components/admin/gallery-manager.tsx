@@ -27,7 +27,9 @@ function AlbumForm({ album }: { album?: GalleryAlbum }) {
     <form action={asFormAction(saveGalleryAlbumAction)} className="grid gap-3">
       {album ? <input type="hidden" name="id" value={album.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="title">Title (Bangla)</Label>
+        <Label htmlFor="title" required>
+          Title (Bangla)
+        </Label>
         <Input id="title" name="title" defaultValue={album?.title} required />
       </div>
       <div className="space-y-2">

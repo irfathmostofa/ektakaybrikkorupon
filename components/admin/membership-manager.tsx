@@ -37,7 +37,9 @@ function PlanForm({ plan }: { plan?: MembershipPlan }) {
     <form action={formAction} className="grid gap-3">
       {plan ? <input type="hidden" name="id" value={plan.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="name">Name (Bangla)</Label>
+        <Label htmlFor="name" required>
+          Name (Bangla)
+        </Label>
         <Input id="name" name="name" defaultValue={plan?.name} required />
       </div>
       <div className="space-y-2">
@@ -52,6 +54,7 @@ function PlanForm({ plan }: { plan?: MembershipPlan }) {
         name="description"
         label="Description (Bangla)"
         defaultValue={plan?.description}
+        required
       />
       <RichTextEditor
         name="description_en"

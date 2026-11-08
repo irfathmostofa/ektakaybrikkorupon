@@ -33,7 +33,9 @@ function SubscriberForm({ item }: { item?: EmailSubscriber }) {
         <Input id="full_name" name="full_name" defaultValue={item?.full_name ?? ""} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" required>
+          Email
+        </Label>
         <Input id="email" name="email" type="email" defaultValue={item?.email} required />
       </div>
       <SubmitButton>{item ? "Save" : "Add subscriber"}</SubmitButton>
@@ -109,7 +111,9 @@ export function SubscriberManager({ subscribers }: { subscribers: EmailSubscribe
       >
         <form action={asFormAction(importSubscribersAction)} className="grid gap-3">
           <div className="space-y-2">
-            <Label htmlFor="csv">CSV (email,full_name)</Label>
+            <Label htmlFor="csv" required>
+              CSV (email,full_name)
+            </Label>
             <Textarea id="csv" name="csv" rows={8} required />
           </div>
           <SubmitButton>Import</SubmitButton>

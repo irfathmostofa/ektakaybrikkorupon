@@ -22,6 +22,18 @@ const AlignImage = Image.extend({
   },
 });
 
+function isEmptyHtml(value: string) {
+  return (
+    !value.trim() ||
+    /^<p>(<br\s*\/?>|&nbsp;|\s)*<\/p>$/i.test(value.trim()) ||
+    !value
+      .replace(/<br\s*\/?>/gi, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .trim()
+  );
+}
+
 function ToolbarButton({
   active,
   disabled,
@@ -64,6 +76,7 @@ export function RichTextEditor({
   required?: boolean;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const hiddenRef = useRef<HTMLInputElement>(null);
   const initialHtml = defaultValue ?? "";
   const [html, setHtml] = useState(initialHtml);
   const [linkOpen, setLinkOpen] = useState(false);
@@ -112,14 +125,20 @@ export function RichTextEditor({
     }
     const next = defaultValue ?? "";
     const current = editor.getHTML();
-    const empty = (value: string) =>
-      !value.trim() || /^<p>(<br\s*\/?>|&nbsp;|\s)*<\/p>$/i.test(value.trim());
-    if (current === next || (empty(current) && empty(next))) {
+    if (current === next || (isEmptyHtml(current) && isEmptyHtml(next))) {
       return;
     }
     editor.commands.setContent(next, { emitUpdate: false });
     setHtml(next);
   }, [defaultValue, editor]);
+
+  const submittedValue = isEmptyHtml(html) ? "" : html;
+
+  useEffect(() => {
+    hiddenRef.current?.setCustomValidity(
+      required && !submittedValue ? "This field is required." : "",
+    );
+  }, [required, submittedValue]);
 
   async function insertImage(file: File) {
     if (!editor) {
@@ -183,10 +202,29 @@ export function RichTextEditor({
     editor?.chain().focus().updateAttributes("image", { class: align }).run();
   }
 
+  function openLinkPopover() {
+    if (!editor) {
+      return;
+    }
+    const previous = editor.getAttributes("link").href ?? "";
+    setLinkUrl(typeof previous === "string" ? previous : "");
+    setLinkText(
+      editor.state.doc.textBetween(
+        editor.state.selection.from,
+        editor.state.selection.to,
+        " ",
+      ),
+    );
+    setLinkNewTab(editor.getAttributes("link").target === "_blank" || !previous);
+    setLinkOpen(true);
+  }
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <div className="overflow-hidden rounded-lg border border-input">
+      <Label htmlFor={name} required={required}>
+        {label}
+      </Label>
+      <div className="relative overflow-hidden rounded-lg border border-input bg-background">
         <div className="flex flex-wrap gap-1 border-b border-input bg-muted/40 p-1">
           <ToolbarButton
             active={editor?.isActive("bold")}
@@ -221,21 +259,7 @@ export function RichTextEditor({
           >
             H2
           </ToolbarButton>
-          <ToolbarButton
-            onClick={() => {
-              const previous = editor?.getAttributes("link").href ?? "";
-              setLinkUrl(typeof previous === "string" ? previous : "");
-              setLinkText(editor?.state.doc.textBetween(
-                editor.state.selection.from,
-                editor.state.selection.to,
-                " ",
-              ) ?? "");
-              setLinkNewTab(editor?.getAttributes("link").target === "_blank" || !previous);
-              setLinkOpen(true);
-            }}
-          >
-            Link
-          </ToolbarButton>
+          <ToolbarButton onClick={openLinkPopover}>Link</ToolbarButton>
           <ToolbarButton
             disabled={uploading}
             onClick={() => fileRef.current?.click()}
@@ -288,7 +312,25 @@ export function RichTextEditor({
             </button>
           </div>
         ) : null}
-         <EditorContent editor={editor} id={name} />
+        <EditorContent editor={editor} />
+        <input
+          ref={hiddenRef}
+          id={name}
+          type="text"
+          name={name}
+          value={submittedValue}
+          required={required}
+          tabIndex={-1}
+          aria-label={label}
+          className="pointer-events-none absolute bottom-2 left-3 h-px w-px opacity-0"
+          onChange={() => {}}
+          onFocus={() => editor?.commands.focus()}
+          onInvalid={(event) => {
+            event.preventDefault();
+            hiddenRef.current?.setCustomValidity("This field is required.");
+            editor?.commands.focus();
+          }}
+        />
       </div>
       <input
         ref={fileRef}
@@ -303,7 +345,6 @@ export function RichTextEditor({
           }
         }}
       />
-      <input type="hidden" name={name} value={html} required={required} readOnly />
     </div>
   );
 }

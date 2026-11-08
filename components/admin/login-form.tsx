@@ -15,7 +15,9 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value={nextPath} />
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" required>
+          Email
+        </Label>
         <Input
           id="email"
           name="email"
@@ -25,7 +27,9 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" required>
+          Password
+        </Label>
         <Input
           id="password"
           name="password"

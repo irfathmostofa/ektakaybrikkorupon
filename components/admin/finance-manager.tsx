@@ -44,7 +44,9 @@ function EntryForm({
       <input type="hidden" name="kind" value={kind} />
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="entry_date">Date</Label>
+          <Label htmlFor="entry_date" required>
+            Date
+          </Label>
           <Input
             id="entry_date"
             name="entry_date"
@@ -54,7 +56,9 @@ function EntryForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
+          <Label htmlFor="amount" required>
+            Amount
+          </Label>
           <Input
             id="amount"
             name="amount"
@@ -67,7 +71,9 @@ function EntryForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="title">{kind === "collection" ? "Title / source" : "Title"}</Label>
+        <Label htmlFor="title" required>
+          {kind === "collection" ? "Title / source" : "Title"}
+        </Label>
         <Input id="title" name="title" defaultValue={entry?.title} required />
       </div>
       <div className="space-y-2">
@@ -136,7 +142,9 @@ function CategoryForm({
       {category ? <input type="hidden" name="id" value={category.id} /> : null}
       <input type="hidden" name="kind" value={kind} />
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name" required>
+          Name
+        </Label>
         <Input id="name" name="name" defaultValue={category?.name} required />
       </div>
       <div className="space-y-2">

@@ -32,7 +32,9 @@ function JobForm({ job }: { job?: JobPosting }) {
     <form action={asFormAction(saveJobPostingAction)} className="grid gap-3">
       {job ? <input type="hidden" name="id" value={job.id} /> : null}
       <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title" required>
+          Title
+        </Label>
         <Input id="title" name="title" defaultValue={job?.title} required />
       </div>
       <div className="space-y-2">
@@ -74,6 +76,7 @@ function JobForm({ job }: { job?: JobPosting }) {
         name="description"
         label="Description (Bangla)"
         defaultValue={job?.description}
+        required
       />
       <RichTextEditor
         name="description_en"

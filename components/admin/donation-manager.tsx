@@ -38,11 +38,15 @@ function DonationForm({
       {donation ? <input type="hidden" name="id" value={donation.id} /> : null}
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="donor_name">Donor</Label>
+          <Label htmlFor="donor_name" required>
+            Donor
+          </Label>
           <Input id="donor_name" name="donor_name" defaultValue={donation?.donor_name} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="donor_email">Email</Label>
+          <Label htmlFor="donor_email" required>
+            Email
+          </Label>
           <Input
             id="donor_email"
             name="donor_email"
@@ -58,7 +62,9 @@ function DonationForm({
           <Input id="donor_phone" name="donor_phone" defaultValue={donation?.donor_phone ?? ""} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
+          <Label htmlFor="amount" required>
+            Amount
+          </Label>
           <Input
             id="amount"
             name="amount"

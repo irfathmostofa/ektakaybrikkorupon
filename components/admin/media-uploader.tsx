@@ -56,7 +56,9 @@ export function MediaUploader({ onUploaded }: { onUploaded?: (url: string) => vo
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="space-y-2">
-        <Label htmlFor="file">Upload image</Label>
+        <Label htmlFor="file" required>
+          Upload image
+        </Label>
         <Input id="file" name="file" type="file" accept="image/*" required />
       </div>
       <Button type="submit" disabled={pending}>

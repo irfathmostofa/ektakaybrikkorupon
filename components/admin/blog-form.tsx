@@ -45,7 +45,9 @@ export function BlogForm({
       {post ? <input type="hidden" name="id" value={post.id} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="title">Title (Bangla)</Label>
+          <Label htmlFor="title" required>
+            Title (Bangla)
+          </Label>
           <Input id="title" name="title" defaultValue={post?.title} required />
         </div>
         <div className="space-y-2">
@@ -69,6 +71,7 @@ export function BlogForm({
         name="content"
         label="Content (Bangla)"
         defaultValue={post?.content}
+        required
       />
       <RichTextEditor
         name="content_en"

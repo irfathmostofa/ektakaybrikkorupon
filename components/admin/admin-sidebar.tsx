@@ -11,7 +11,7 @@ export function AdminSidebar({
   menus: AdminMenuKey[];
 }) {
   return (
-    <aside className="hidden h-full w-64 shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
+    <aside className="hidden h-svh max-h-svh min-h-0 w-64 shrink-0 flex-col self-stretch overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
       <div className="shrink-0 border-b border-sidebar-border px-5 py-4">
         <p className="text-sm font-bold tracking-tight">Admin</p>
       </div>
