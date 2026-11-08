@@ -31,19 +31,25 @@ export function ImageUploader({
   const [url, setUrl] = useState(defaultValue ?? "");
   const [preview, setPreview] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryLoading, setLibraryLoading] = useState(false);
   const [items, setItems] = useState<MediaItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   async function loadLibrary() {
-    const listed = await listMedia();
-    const withUrls = await Promise.all(
-      listed.map(async (item) => ({
-        name: item.name,
-        url: await getMediaPublicUrl(item.name),
-      })),
-    );
-    setItems(withUrls);
+    setLibraryLoading(true);
+    try {
+      const listed = await listMedia();
+      const withUrls = await Promise.all(
+        listed.map(async (item) => ({
+          name: item.name,
+          url: await getMediaPublicUrl(item.name),
+        })),
+      );
+      setItems(withUrls);
+    } finally {
+      setLibraryLoading(false);
+    }
   }
 
   async function handleFile(file: File) {
@@ -115,12 +121,13 @@ export function ImageUploader({
             type="button"
             variant="outline"
             size="sm"
+            disabled={libraryLoading}
             onClick={() => {
               setLibraryOpen(true);
               void loadLibrary();
             }}
           >
-            Choose from library
+            {libraryLoading ? "Loading..." : "Choose from library"}
           </Button>
         ) : null}
         {url ? (
@@ -144,31 +151,42 @@ export function ImageUploader({
           <DialogHeader>
             <DialogTitle>Media Library</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {items.map((item) => (
-              <button
-                key={item.name}
-                type="button"
-                className="overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-ring"
-                onClick={() => {
-                  setUrl(item.url);
-                  setPreview(null);
-                  setLibraryOpen(false);
-                }}
-              >
-                <div className="relative h-28 w-full">
-                  <Image
-                    src={item.url}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                    sizes="200px"
-                    unoptimized
-                  />
-                </div>
-              </button>
-            ))}
-          </div>
+          {libraryLoading ? (
+            <div className="flex min-h-40 flex-col items-center justify-center gap-3 py-10 text-sm text-muted-foreground">
+              <span className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
+              Loading library...
+            </div>
+          ) : items.length ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {items.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  className="overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-ring"
+                  onClick={() => {
+                    setUrl(item.url);
+                    setPreview(null);
+                    setLibraryOpen(false);
+                  }}
+                >
+                  <div className="relative h-28 w-full">
+                    <Image
+                      src={item.url}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      sizes="200px"
+                      unoptimized
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-muted-foreground">
+              No images in the library yet.
+            </p>
+          )}
         </DialogContent>
       </Dialog>
     </div>
