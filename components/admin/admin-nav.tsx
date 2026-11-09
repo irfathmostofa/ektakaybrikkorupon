@@ -34,7 +34,7 @@ const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
   pages: FolderOpen,
   team: UsersRound,
   gallery: Images,
-  // media: ImageIcon,
+  media: ImageIcon,
   achievements: Award,
   finance: Wallet,
   membership: Users,
