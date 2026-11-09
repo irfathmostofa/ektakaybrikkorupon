@@ -82,15 +82,16 @@ export function BlogManager({
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="tags">Tags</TabsTrigger>
         </TabsList>
-        <Link
+       
+      </div>
+
+      <TabsContent value="posts" className="space-y-4">
+         <Link
           href="/admin/blog/new"
           className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
         >
           Add new
         </Link>
-      </div>
-
-      <TabsContent value="posts" className="space-y-4">
         <Table>
           <TableHeader>
             <TableRow>
