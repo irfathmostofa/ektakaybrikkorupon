@@ -174,7 +174,7 @@ function ApplicationActions({
       <Button type="button" size="sm" variant="outline" onClick={onView}>
         View
       </Button>
-      <form
+      {/* <form
         action={async (formData) => {
           await updateMembershipApplicationAction(formData);
           onUpdated();
@@ -196,7 +196,7 @@ function ApplicationActions({
         <Button type="submit" size="sm" variant="outline">
           Save
         </Button>
-      </form>
+      </form> */}
     </div>
   );
 }
