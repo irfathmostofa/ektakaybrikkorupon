@@ -16,7 +16,7 @@ import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -71,27 +71,34 @@ export function BlogManager({
   categories: BlogCategory[];
   tags: BlogTag[];
 }) {
+  const [tab, setTab] = useState("posts");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   return (
-    <Tabs defaultValue="posts">
+    <Tabs defaultValue="posts" value={tab} onValueChange={setTab}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TabsList>
           <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="tags">Tags</TabsTrigger>
         </TabsList>
-       
+        {tab === "posts" ? (
+          <Link href="/admin/blog/new" className={buttonVariants()}>
+            Add new
+          </Link>
+        ) : tab === "categories" ? (
+          <FormDialog triggerLabel="Add new" title="Add category">
+            <TaxonomyForm action={createBlogCategoryAction} />
+          </FormDialog>
+        ) : (
+          <FormDialog triggerLabel="Add new" title="Add tag">
+            <TaxonomyForm action={createBlogTagAction} />
+          </FormDialog>
+        )}
       </div>
 
       <TabsContent value="posts" className="space-y-4">
-         <Link
-          href="/admin/blog/new"
-          className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-        >
-          Add new
-        </Link>
         <Table>
           <TableHeader>
             <TableRow>
@@ -168,9 +175,6 @@ export function BlogManager({
       </TabsContent>
 
       <TabsContent value="categories" className="space-y-4">
-        <FormDialog triggerLabel="Add new" title="Add category">
-          <TaxonomyForm action={createBlogCategoryAction} />
-        </FormDialog>
         <Table>
           <TableHeader>
             <TableRow>
@@ -205,9 +209,6 @@ export function BlogManager({
       </TabsContent>
 
       <TabsContent value="tags" className="space-y-4">
-        <FormDialog triggerLabel="Add new" title="Add tag">
-          <TaxonomyForm action={createBlogTagAction} />
-        </FormDialog>
         <Table>
           <TableHeader>
             <TableRow>
