@@ -230,6 +230,7 @@
     "message": "Message",
     "required": "This field is required.",
     "invalidEmail": "Enter a valid email.",
+    "duplicateEmail": "This email is already registered for membership.",
     "selectPlan": "Choose a plan",
     "placeholderName": "Your name",
     "placeholderEmail": "you@example.com",

@@ -98,6 +98,9 @@ export function MembershipForm({
       {state.error === "email" ? (
         <p className="text-sm text-destructive">{dict.forms.invalidEmail}</p>
       ) : null}
+      {state.error === "duplicateEmail" ? (
+        <p className="text-sm text-destructive">{dict.forms.duplicateEmail}</p>
+      ) : null}
       {state.error === "required" ? (
         <p className="text-sm text-destructive">{dict.forms.required}</p>
       ) : null}

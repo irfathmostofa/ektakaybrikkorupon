@@ -49,7 +49,7 @@ supabase/schema.sql
 supabase/seed.sql
 ```
 
-`supabase/phase4.sql` and `supabase/phase5.sql` are legacy no-ops. Fresh installs only need `schema.sql`. Existing databases that are missing blog tags/categories should also run `supabase/phase7.sql`. Existing databases that need the magazine section should also run `supabase/magazines.sql`.
+`supabase/phase4.sql` and `supabase/phase5.sql` are legacy no-ops. Fresh installs only need `schema.sql`. Existing databases that are missing blog tags/categories should also run `supabase/phase7.sql`. Existing databases that need the magazine section should also run `supabase/magazines.sql`. Existing databases that need unique membership emails should also run `supabase/phase9.sql`.
 
 Then promote the first authenticated user to `super_admin` in `public.users`.
 

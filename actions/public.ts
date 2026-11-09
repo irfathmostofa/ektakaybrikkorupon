@@ -13,6 +13,7 @@ import {
 } from "@/lib/email/templates";
 import { pickLocalized } from "@/lib/i18n/dictionary";
 import { getLocale, type Locale } from "@/lib/i18n/config";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { ActionState } from "@/actions/settings";
@@ -25,6 +26,39 @@ function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function escapeIlike(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
+function isDuplicateEmailError(error: { code?: string; message?: string } | null) {
+  if (!error) {
+    return false;
+  }
+  const message = (error.message ?? "").toLowerCase();
+  return (
+    error.code === "23505" ||
+    message.includes("duplicate") ||
+    message.includes("unique")
+  );
+}
+
+async function membershipEmailTaken(email: string) {
+  try {
+    const admin = createAdminClient();
+    const { count } = await admin
+      .from("membership_applications")
+      .select("id", { count: "exact", head: true })
+      .ilike("email", escapeIlike(email));
+    return (count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
 function foundationName(locale: Locale, bn: string | null | undefined, en: string | null | undefined) {
   return pickLocalized(locale, bn, en) || (locale === "en" ? "1 Taka Tree Plantation" : "১টাকায় বৃক্ষরোপণ");
 }
@@ -34,7 +68,7 @@ export async function submitMembershipAction(
   formData: FormData,
 ): Promise<ActionState> {
   const fullName = required(formData.get("full_name"));
-  const email = required(formData.get("email"));
+  const email = normalizeEmail(required(formData.get("email")));
   const phone = required(formData.get("phone"));
   const address = required(formData.get("address"));
   const planId = required(formData.get("plan_id"));
@@ -52,6 +86,10 @@ export async function submitMembershipAction(
     return { success: "ok" };
   }
 
+  if (await membershipEmailTaken(email)) {
+    return { error: "duplicateEmail" };
+  }
+
   const supabase = createPublicClient();
   const { error } = await supabase.from("membership_applications").insert({
     full_name: fullName,
@@ -65,6 +103,9 @@ export async function submitMembershipAction(
   });
 
   if (error) {
+    if (isDuplicateEmailError(error)) {
+      return { error: "duplicateEmail" };
+    }
     return { success: "ok" };
   }
 

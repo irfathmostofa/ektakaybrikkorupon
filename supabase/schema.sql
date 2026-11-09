@@ -822,6 +822,9 @@ create table if not exists public.membership_applications (
 create index if not exists membership_applications_status_idx
   on public.membership_applications (status, created_at desc);
 
+create unique index if not exists membership_applications_email_lower_idx
+  on public.membership_applications (lower(email));
+
 -- ---------------------------------------------------------------------------
 -- job_postings / job_applications
 -- ---------------------------------------------------------------------------

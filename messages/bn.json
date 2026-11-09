@@ -230,6 +230,7 @@
     "message": "বার্তা",
     "required": "এই ঘরটি প্রয়োজন।",
     "invalidEmail": "সঠিক ইমেইল লিখুন।",
+    "duplicateEmail": "এই ইমেইল দিয়ে ইতিমধ্যে সদস্য আবেদন করা হয়েছে।",
     "selectPlan": "একটি পরিকল্পনা বেছে নিন",
     "placeholderName": "আপনার নাম",
     "placeholderEmail": "you@example.com",
