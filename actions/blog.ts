@@ -159,11 +159,15 @@ export async function createBlogPostAction(
 ): Promise<ActionState> {
   await requireMenu("blog");
   const title = formString(formData, "title");
-  const slug = slugify(formString(formData, "slug")) || slugify(title);
+  const titleEn = formOptional(formData, "title_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(titleEn ?? "");
   const status = parseBlogStatus(formString(formData, "status") || "draft");
 
-  if (!title || !slug) {
+  if (!title) {
     return { error: "Title is required." };
+  }
+  if (!slug) {
+    return { error: "English title is required for the slug." };
   }
 
   const supabase = await createClient();
@@ -171,7 +175,7 @@ export async function createBlogPostAction(
     .from("blog_posts")
     .insert({
       title,
-      title_en: formOptional(formData, "title_en"),
+      title_en: titleEn,
       slug,
       excerpt: formOptional(formData, "excerpt"),
       excerpt_en: formOptional(formData, "excerpt_en"),
@@ -207,11 +211,15 @@ export async function updateBlogPostAction(
   await requireMenu("blog");
   const id = formString(formData, "id");
   const title = formString(formData, "title");
-  const slug = slugify(formString(formData, "slug")) || slugify(title);
+  const titleEn = formOptional(formData, "title_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(titleEn ?? "");
   const status = parseBlogStatus(formString(formData, "status") || "draft");
 
-  if (!id || !title || !slug) {
+  if (!id || !title) {
     return { error: "Title is required." };
+  }
+  if (!slug) {
+    return { error: "English title is required for the slug." };
   }
 
   const supabase = await createClient();
@@ -225,7 +233,7 @@ export async function updateBlogPostAction(
     .from("blog_posts")
     .update({
       title,
-      title_en: formOptional(formData, "title_en"),
+      title_en: titleEn,
       slug,
       excerpt: formOptional(formData, "excerpt"),
       excerpt_en: formOptional(formData, "excerpt_en"),
@@ -307,14 +315,18 @@ export async function createBlogCategoryAction(
 ): Promise<ActionState> {
   await requireMenu("blog");
   const name = formString(formData, "name");
-  const slug = slugify(formString(formData, "slug")) || slugify(name);
-  if (!name || !slug) {
+  const nameEn = formOptional(formData, "name_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(nameEn ?? "");
+  if (!name) {
     return { error: "Name is required." };
+  }
+  if (!slug) {
+    return { error: "English name is required for the slug." };
   }
   const supabase = await createClient();
   const { error } = await supabase.from("blog_categories").insert({
     name,
-    name_en: formOptional(formData, "name_en"),
+    name_en: nameEn,
     slug,
   });
   if (error) {
@@ -337,14 +349,18 @@ export async function updateBlogCategoryAction(
   await requireMenu("blog");
   const id = formString(formData, "id");
   const name = formString(formData, "name");
-  const slug = slugify(formString(formData, "slug")) || slugify(name);
-  if (!id || !name || !slug) {
+  const nameEn = formOptional(formData, "name_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(nameEn ?? "");
+  if (!id || !name) {
     return { error: "Name is required." };
+  }
+  if (!slug) {
+    return { error: "English name is required for the slug." };
   }
   const supabase = await createClient();
   const { error } = await supabase
     .from("blog_categories")
-    .update({ name, name_en: formOptional(formData, "name_en"), slug })
+    .update({ name, name_en: nameEn, slug })
     .eq("id", id);
   if (error) {
     if (isMissingRelation(error)) {
@@ -377,14 +393,18 @@ export async function createBlogTagAction(
 ): Promise<ActionState> {
   await requireMenu("blog");
   const name = formString(formData, "name");
-  const slug = slugify(formString(formData, "slug")) || slugify(name);
-  if (!name || !slug) {
+  const nameEn = formOptional(formData, "name_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(nameEn ?? "");
+  if (!name) {
     return { error: "Name is required." };
+  }
+  if (!slug) {
+    return { error: "English name is required for the slug." };
   }
   const supabase = await createClient();
   const { error } = await supabase.from("blog_tags").insert({
     name,
-    name_en: formOptional(formData, "name_en"),
+    name_en: nameEn,
     slug,
   });
   if (error) {
@@ -405,14 +425,18 @@ export async function updateBlogTagAction(
   await requireMenu("blog");
   const id = formString(formData, "id");
   const name = formString(formData, "name");
-  const slug = slugify(formString(formData, "slug")) || slugify(name);
-  if (!id || !name || !slug) {
+  const nameEn = formOptional(formData, "name_en");
+  const slug = slugify(formString(formData, "slug")) || slugify(nameEn ?? "");
+  if (!id || !name) {
     return { error: "Name is required." };
+  }
+  if (!slug) {
+    return { error: "English name is required for the slug." };
   }
   const supabase = await createClient();
   const { error } = await supabase
     .from("blog_tags")
-    .update({ name, name_en: formOptional(formData, "name_en"), slug })
+    .update({ name, name_en: nameEn, slug })
     .eq("id", id);
   if (error) {
     if (isMissingRelation(error)) {

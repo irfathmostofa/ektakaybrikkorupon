@@ -48,8 +48,10 @@ function TaxonomyForm({
         <Input id="name" name="name" defaultValue={item?.name} required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="name_en">Name (English)</Label>
-        <Input id="name_en" name="name_en" defaultValue={item?.name_en ?? ""} />
+        <Label htmlFor="name_en" required>
+          Name (English)
+        </Label>
+        <Input id="name_en" name="name_en" defaultValue={item?.name_en ?? ""} required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="slug">Slug</Label>

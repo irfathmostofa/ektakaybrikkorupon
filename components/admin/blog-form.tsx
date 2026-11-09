@@ -39,7 +39,7 @@ export function BlogForm({
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
   const [status, setStatus] = useState(post?.status ?? "draft");
   const [locale, setLocale] = useState<"bn" | "en">("bn");
-  const slug = slugTouched ? manualSlug : slugify(titleEn || title);
+  const slug = slugTouched ? manualSlug : slugify(titleEn);
   const selectedCategories = useMemo(
     () => new Set((post?.categories ?? []).map((item) => item.id)),
     [post?.categories],
@@ -74,9 +74,10 @@ export function BlogForm({
           <Input
             id="title_en"
             name="title_en"
+            required
             value={titleEn}
             onChange={(event) => setTitleEn(event.target.value)}
-            placeholder="English title (optional)"
+            placeholder="English title"
             className="h-auto border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
           />
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
