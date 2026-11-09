@@ -19,7 +19,7 @@ export function AdminSidebar({
         <p className="text-sm font-bold tracking-tight">Admin</p>
       </div>
       <AdminNav menus={menus} counts={counts} />
-      <div className="shrink-0 border-t border-sidebar-border p-3">
+      {/* <div className="shrink-0 border-t border-sidebar-border p-3">
         <div className="mb-3 min-w-0 rounded-lg bg-sidebar-accent px-3 py-2">
           <p className="truncate text-xs font-medium">{user.email}</p>
           <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">
@@ -27,7 +27,7 @@ export function AdminSidebar({
           </p>
         </div>
         <LogoutButton />
-      </div>
+      </div> */}
     </aside>
   );
 }
