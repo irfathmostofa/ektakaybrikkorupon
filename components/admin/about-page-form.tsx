@@ -216,6 +216,9 @@ export function AboutPageForm({ page }: { page: PageContent }) {
 
       <TabsContent value="team">
         <SectionForm pageId={page.id} section="team">
+          <p className="text-sm text-muted-foreground">
+            This heading is shown above the team list. Add or edit people from Team members on the Pages screen.
+          </p>
           <Field
             label="Heading (Bangla)"
             name="heading"
