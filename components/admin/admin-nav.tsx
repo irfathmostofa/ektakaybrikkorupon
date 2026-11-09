@@ -18,6 +18,7 @@ import {
   Settings,
   UserPlus,
   Users,
+  UsersRound,
   Wallet,
 } from "lucide-react";
 import {
@@ -31,6 +32,7 @@ const ICONS: Record<AdminMenuKey, typeof LayoutDashboard> = {
   causes: HeartHandshake,
   blog: FileText,
   pages: FolderOpen,
+  team: UsersRound,
   gallery: Images,
   media: ImageIcon,
   achievements: Award,

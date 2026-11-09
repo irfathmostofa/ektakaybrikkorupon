@@ -85,13 +85,7 @@ export function TeamManager({ members }: { members: TeamMember[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">Team members</h2>
-          <p className="text-sm text-muted-foreground">
-            People shown on the public about page.
-          </p>
-        </div>
+      <div className="flex justify-end">
         <Button type="button" onClick={() => setCreating(true)}>
           Add new
         </Button>

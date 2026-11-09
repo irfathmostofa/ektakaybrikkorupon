@@ -51,7 +51,7 @@ export async function saveTeamMemberAction(
     return { error: error.message };
   }
   revalidateTag(CACHE_TAGS.about, "max");
-  revalidatePath("/admin/pages");
+  revalidatePath("/admin/team");
   revalidatePath("/about");
   return { success: id ? "Team member updated." : "Team member added." };
 }
@@ -65,6 +65,6 @@ export async function deleteTeamMemberAction(formData: FormData) {
     throw new Error(error.message);
   }
   revalidateTag(CACHE_TAGS.about, "max");
-  revalidatePath("/admin/pages");
+  revalidatePath("/admin/team");
   revalidatePath("/about");
 }
