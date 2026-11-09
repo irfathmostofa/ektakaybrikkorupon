@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AboutPageForm } from "@/components/admin/about-page-form";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { HomePageForm } from "@/components/admin/home-page-form";
 import { PageForm } from "@/components/admin/page-form";
@@ -48,11 +49,19 @@ export function PageManager({ pages }: { pages: PageContent[] }) {
         </TableBody>
       </Table>
       <FormDialog
-        title={editing?.page_key === "home" ? "Edit home page" : "Edit page"}
+        title={
+          editing?.page_key === "home"
+            ? "Edit home page"
+            : editing?.page_key === "about"
+              ? "Edit about page"
+              : "Edit page"
+        }
         description={
           editing?.page_key === "home"
             ? "Update each home section from its own tab."
-            : undefined
+            : editing?.page_key === "about"
+              ? "Update each about section from its own tab."
+              : undefined
         }
         open={Boolean(editing)}
         onOpenChange={(open) => {
@@ -65,6 +74,8 @@ export function PageManager({ pages }: { pages: PageContent[] }) {
         {editing ? (
           editing.page_key === "home" ? (
             <HomePageForm key={editing.id} page={editing} />
+          ) : editing.page_key === "about" ? (
+            <AboutPageForm key={editing.id} page={editing} />
           ) : (
             <PageForm key={editing.id} page={editing} />
           )

@@ -15,6 +15,10 @@ import {
   FALLBACK_TEAM,
 } from "@/lib/content/fallbacks";
 import {
+  mergeAboutSections,
+  type AboutSections,
+} from "@/lib/content/about-sections";
+import {
   mergeHomeSections,
   type HomeSections,
 } from "@/lib/content/home-sections";
@@ -71,12 +75,20 @@ export async function getPageContent(pageKey: string): Promise<PageContent> {
   if (pageKey === "home") {
     return { ...page, sections: mergeHomeSections(page.sections) };
   }
+  if (pageKey === "about") {
+    return { ...page, sections: mergeAboutSections(page.sections) };
+  }
   return page;
 }
 
 export async function getHomeSections(): Promise<HomeSections> {
   const page = await getPageContent("home");
   return mergeHomeSections(page.sections);
+}
+
+export async function getAboutPageSections(): Promise<AboutSections> {
+  const page = await getPageContent("about");
+  return mergeAboutSections(page.sections);
 }
 
 export async function getPublishedCauses(): Promise<CauseProject[]> {

@@ -5,6 +5,12 @@ import { formHtml, formOptional, formString } from "@/lib/admin/form";
 import { requireStaff } from "@/lib/auth";
 import { CACHE_TAGS } from "@/lib/constants";
 import {
+  isAboutSectionKey,
+  mergeAboutSections,
+  type AboutSectionKey,
+  type AboutSections,
+} from "@/lib/content/about-sections";
+import {
   isHomeSectionKey,
   mergeHomeSections,
   type HomeFeature,
@@ -281,6 +287,119 @@ export async function updateHomeSectionAction(
           title_en: formOptional(formData, "title_en"),
           subtitle: formOptional(formData, "subtitle"),
           subtitle_en: formOptional(formData, "subtitle_en"),
+        }
+      : {};
+
+  if (section === "hero" && !heroUpdate.title) {
+    return { error: "Title is required." };
+  }
+
+  const { error } = await supabase
+    .from("page_content")
+    .update({
+      sections: next,
+      ...heroUpdate,
+    })
+    .eq("id", id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidateTag(CACHE_TAGS.pages, "max");
+  return { success: "Section saved." };
+}
+
+function applyAboutTextBlock(formData: FormData) {
+  return {
+    eyebrow: formString(formData, "eyebrow"),
+    eyebrow_en: formOptional(formData, "eyebrow_en"),
+    title: formString(formData, "title"),
+    title_en: formOptional(formData, "title_en"),
+    body: formHtml(formData, "body") ?? formString(formData, "body"),
+    body_en: formHtml(formData, "body_en") ?? formOptional(formData, "body_en"),
+  };
+}
+
+function applyAboutSection(
+  current: AboutSections,
+  section: AboutSectionKey,
+  formData: FormData,
+): AboutSections {
+  if (section === "hero") {
+    return {
+      ...current,
+      hero: {
+        eyebrow: formString(formData, "eyebrow"),
+        eyebrow_en: formOptional(formData, "eyebrow_en"),
+      },
+    };
+  }
+  if (section === "story") {
+    return {
+      ...current,
+      story: {
+        ...applyAboutTextBlock(formData),
+        image_url: formOptional(formData, "image_url"),
+      },
+    };
+  }
+  if (section === "impact") {
+    return {
+      ...current,
+      impact: {
+        heading: formString(formData, "heading"),
+        heading_en: formOptional(formData, "heading_en"),
+      },
+    };
+  }
+  if (section === "team") {
+    return {
+      ...current,
+      team: {
+        heading: formString(formData, "heading"),
+        heading_en: formOptional(formData, "heading_en"),
+      },
+    };
+  }
+  return {
+    ...current,
+    [section]: applyAboutTextBlock(formData),
+  };
+}
+
+export async function updateAboutSectionAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireStaff();
+  const id = formString(formData, "id");
+  const section = formString(formData, "section");
+  if (!id || !isAboutSectionKey(section)) {
+    return { error: "A valid about section is required." };
+  }
+
+  const supabase = await createClient();
+  const { data, error: loadError } = await supabase
+    .from("page_content")
+    .select("sections")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (loadError) {
+    return { error: loadError.message };
+  }
+
+  const next = applyAboutSection(mergeAboutSections(data?.sections), section, formData);
+  const heroUpdate =
+    section === "hero"
+      ? {
+          title: formString(formData, "title"),
+          title_en: formOptional(formData, "title_en"),
+          subtitle: formOptional(formData, "subtitle"),
+          subtitle_en: formOptional(formData, "subtitle_en"),
+          body: formHtml(formData, "body") ?? formString(formData, "body"),
+          body_en: formHtml(formData, "body_en") ?? formOptional(formData, "body_en"),
         }
       : {};
 

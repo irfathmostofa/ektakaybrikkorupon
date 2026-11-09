@@ -1,3 +1,4 @@
+import { FALLBACK_ABOUT_PAGE_SECTIONS } from "@/lib/content/about-sections";
 import { FALLBACK_HOME_SECTIONS } from "@/lib/content/home-sections";
 import { NATURE_IMAGES } from "@/lib/content/images";
 import type {
@@ -53,7 +54,7 @@ export const FALLBACK_PAGES: Record<string, PageContent> = {
     meta_title_en: "About",
     meta_description: "লক্ষ্য, দৃষ্টি, মূল্যবোধ ও দল—সবই সম্পাদকীয় কন্টেন্ট থেকে।",
     meta_description_en: "Mission, vision, values, and team assembled from the CMS.",
-    sections: null,
+    sections: FALLBACK_ABOUT_PAGE_SECTIONS,
     updated_at: new Date().toISOString(),
   },
   contact: {
