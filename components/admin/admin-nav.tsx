@@ -24,6 +24,7 @@ import {
 import {
   ADMIN_MENU_HREFS,
   ADMIN_MENU_LABELS,
+  visibleMenus,
   type AdminMenuKey,
 } from "@/lib/admin/menus";
 
@@ -61,7 +62,7 @@ export function AdminNav({
 
   return (
     <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3">
-      {menus.map((key) => {
+      {visibleMenus(menus).map((key) => {
         const href = ADMIN_MENU_HREFS[key];
         const Icon = ICONS[key];
         const count = counts?.[key] ?? 0;

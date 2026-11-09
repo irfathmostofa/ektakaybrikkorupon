@@ -111,6 +111,12 @@ export function sanitizeMenus(value: unknown): AdminMenuKey[] {
   );
 }
 
+export const SIDEBAR_HIDDEN_MENUS = new Set<AdminMenuKey>(["media"]);
+
+export function visibleMenus(menus: AdminMenuKey[]) {
+  return menus.filter((key) => !SIDEBAR_HIDDEN_MENUS.has(key));
+}
+
 export function menusForRole(
   role: UserRole,
   stored?: Partial<Record<UserRole, readonly string[]>> | null,

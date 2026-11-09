@@ -102,7 +102,7 @@ export function UserManager({
   const [editing, setEditing] = useState<User | null>(null);
   const adminMenus = menusForRole("admin", roleMenus);
   const editorMenus = menusForRole("editor", roleMenus);
-  const assignable = ADMIN_MENU_KEYS.filter((key) => key !== "users" || true);
+  const assignable = ADMIN_MENU_KEYS.filter((key) => key !== "media");
 
   return (
     <Tabs defaultValue="users">

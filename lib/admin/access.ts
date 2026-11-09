@@ -5,6 +5,7 @@ import {
   menusForRole,
   menuKeyFromPath,
   sanitizeMenus,
+  visibleMenus,
   type AdminMenuKey,
 } from "@/lib/admin/menus";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -73,7 +74,7 @@ export async function requireSuperAdmin() {
 
 export async function getAccessibleMenus(user: User) {
   const stored = await getStoredRoleMenus();
-  return menusForRole(user.role, stored);
+  return visibleMenus(menusForRole(user.role, stored));
 }
 
 export async function assertPathAccess(user: User, pathname: string) {
