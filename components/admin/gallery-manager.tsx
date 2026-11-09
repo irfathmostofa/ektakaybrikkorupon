@@ -12,7 +12,7 @@ import {
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { ImageField } from "@/components/admin/image-field";
-import { ImageUploader } from "@/components/admin/image-uploader";
+import { MediaUploader } from "@/components/admin/media-uploader";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +86,7 @@ function MultiImageForm({ albumId }: { albumId: string }) {
   return (
     <form action={asFormAction(addGalleryImagesAction)} className="grid gap-3">
       <input type="hidden" name="album_id" value={albumId} />
-      <ImageUploader
+      <MediaUploader
         name="image_url"
         label="Upload image"
         defaultValue=""

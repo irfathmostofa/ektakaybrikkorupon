@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { deleteMediaAction, getMediaPublicUrl } from "@/actions/media";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
-import { ImageUploader } from "@/components/admin/image-uploader";
+import { MediaUploader } from "@/components/admin/media-uploader";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function MediaLibrary({
@@ -36,8 +36,7 @@ export function MediaLibrary({
 
   return (
     <div className="space-y-8">
-      <ImageUploader
-        name="unused"
+      <MediaUploader
         label="Upload image"
         onUploaded={() => router.refresh()}
       />

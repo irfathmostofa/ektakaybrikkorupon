@@ -196,6 +196,7 @@ export async function createBlogPostAction(
 
   revalidateTag(CACHE_TAGS.blog, "max");
   revalidatePath("/admin/blog");
+  revalidatePath(`/admin/blog/${data.id}`);
   return { success: "Post created." };
 }
 
@@ -251,6 +252,7 @@ export async function updateBlogPostAction(
 
   revalidateTag(CACHE_TAGS.blog, "max");
   revalidatePath("/admin/blog");
+  revalidatePath(`/admin/blog/${id}`);
   return { success: "Post updated." };
 }
 

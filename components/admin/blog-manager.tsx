@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   createBlogCategoryAction,
   createBlogTagAction,
@@ -11,7 +12,6 @@ import {
   updateBlogCategoryAction,
   updateBlogTagAction,
 } from "@/actions/blog";
-import { BlogForm } from "@/components/admin/blog-form";
 import { ConfirmDelete } from "@/components/admin/confirm-delete";
 import { FormDialog } from "@/components/admin/form-dialog";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -69,25 +69,26 @@ export function BlogManager({
   categories: BlogCategory[];
   tags: BlogTag[];
 }) {
-  const [editing, setEditing] = useState<BlogPost | null>(null);
-  const [creating, setCreating] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   return (
     <Tabs defaultValue="posts">
-      <TabsList>
-        <TabsTrigger value="posts">Posts</TabsTrigger>
-        <TabsTrigger value="categories">Categories</TabsTrigger>
-        <TabsTrigger value="tags">Tags</TabsTrigger>
-      </TabsList>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TabsList>
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
+        </TabsList>
+        <Link
+          href="/admin/blog/new"
+          className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+        >
+          Add new
+        </Link>
+      </div>
 
       <TabsContent value="posts" className="space-y-4">
-        <div className="flex justify-end">
-          <Button type="button" onClick={() => setCreating(true)}>
-            Add new
-          </Button>
-        </div>
         <Table>
           <TableHeader>
             <TableRow>
@@ -102,13 +103,9 @@ export function BlogManager({
             {posts.map((post) => (
               <TableRow key={post.id}>
                 <TableCell>
-                  <button
-                    type="button"
-                    className="text-left hover:underline"
-                    onClick={() => setEditing(post)}
-                  >
+                  <Link href={`/admin/blog/${post.id}`} className="text-left hover:underline">
                     {post.title}
-                  </button>
+                  </Link>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">{post.status}</Badge>
@@ -119,9 +116,12 @@ export function BlogManager({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => setEditing(post)}>
+                    <Link
+                      href={`/admin/blog/${post.id}`}
+                      className="inline-flex h-7 items-center rounded-lg border border-border px-2.5 text-[0.8rem] hover:bg-muted"
+                    >
                       Edit
-                    </Button>
+                    </Link>
                     <Button
                       type="button"
                       variant="outline"
@@ -237,29 +237,6 @@ export function BlogManager({
           </TableBody>
         </Table>
       </TabsContent>
-
-      <FormDialog
-        title={editing ? "Edit post" : "Add post"}
-        open={creating || Boolean(editing)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCreating(false);
-            setEditing(null);
-          }
-        }}
-        size="lg"
-      >
-        <BlogForm
-          key={editing?.id ?? "new"}
-          post={editing ?? undefined}
-          categories={categories}
-          tags={tags}
-          onSuccess={() => {
-            setCreating(false);
-            setEditing(null);
-          }}
-        />
-      </FormDialog>
     </Tabs>
   );
 }

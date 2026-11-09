@@ -12,6 +12,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  Heading1,
   Heading2,
   Heading3,
   ImageIcon,
@@ -19,20 +20,25 @@ import {
   Link2,
   List,
   ListOrdered,
+  Minus,
   Quote,
   Redo2,
-  Square,
   Strikethrough,
   Underline as UnderlineIcon,
   Undo2,
   Unlink,
 } from "lucide-react";
-import { uploadMediaAction } from "@/actions/media";
+import { MediaUploader } from "@/components/admin/media-uploader";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { compressImage } from "@/lib/compress-image";
 import { cn } from "cn";
 
 const AlignImage = Image.extend({
@@ -98,19 +104,13 @@ function ToolbarGroup({ children }: { children: React.ReactNode }) {
 
 function EditorToolbar({
   editor,
-  uploading,
   onOpenLink,
   onInsertImage,
 }: {
   editor: Editor | null;
-  uploading: boolean;
   onOpenLink: () => void;
   onInsertImage: () => void;
 }) {
-  function setImageAlign(align: string) {
-    editor?.chain().focus().updateAttributes("image", { class: align }).run();
-  }
-
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-input bg-muted/40 px-2 py-1.5">
       <ToolbarGroup>
@@ -163,6 +163,13 @@ function EditorToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
       <ToolbarGroup>
         <ToolbarButton
+          title="Heading 1"
+          active={editor?.isActive("heading", { level: 1 })}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+        >
+          <Heading1 className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
           title="Heading 2"
           active={editor?.isActive("heading", { level: 2 })}
           onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -182,6 +189,12 @@ function EditorToolbar({
           onClick={() => editor?.chain().focus().toggleBlockquote().run()}
         >
           <Quote className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          title="Horizontal line"
+          onClick={() => editor?.chain().focus().setHorizontalRule().run()}
+        >
+          <Minus className="size-4" />
         </ToolbarButton>
       </ToolbarGroup>
       <Separator orientation="vertical" className="mx-1 h-5" />
@@ -213,7 +226,7 @@ function EditorToolbar({
         >
           <Unlink className="size-4" />
         </ToolbarButton>
-        <ToolbarButton title={uploading ? "Uploading image" : "Insert image"} disabled={uploading} onClick={onInsertImage}>
+        <ToolbarButton title="Insert image" onClick={onInsertImage}>
           <ImageIcon className="size-4" />
         </ToolbarButton>
       </ToolbarGroup>
@@ -258,13 +271,16 @@ export function RichTextEditor({
   label,
   defaultValue,
   required,
+  placeholder = "Start writing…",
+  variant = "default",
 }: {
   name: string;
-  label: string;
+  label?: string;
   defaultValue?: string | null;
   required?: boolean;
+  placeholder?: string;
+  variant?: "default" | "document";
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
   const initialHtml = defaultValue ?? "";
   const [html, setHtml] = useState(initialHtml);
@@ -272,14 +288,16 @@ export function RichTextEditor({
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkNewTab, setLinkNewTab] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
+  const [pendingImageUrl, setPendingImageUrl] = useState("");
+  const documentMode = variant === "document";
 
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [2, 3] },
+        heading: { levels: [1, 2, 3] },
         link: {
           openOnClick: false,
           autolink: true,
@@ -296,13 +314,18 @@ export function RichTextEditor({
         allowBase64: false,
       }),
       Placeholder.configure({
-        placeholder: "Start writing…",
+        placeholder,
       }),
     ],
     content: initialHtml,
     editorProps: {
       attributes: {
-        class: "prose-html min-h-48 max-h-[28rem] overflow-y-auto px-4 py-3 text-sm leading-relaxed outline-none",
+        class: cn(
+          "prose-html overflow-y-auto px-4 py-3 leading-relaxed outline-none",
+          documentMode
+            ? "min-h-[32rem] max-h-[70vh] text-base"
+            : "min-h-48 max-h-[28rem] text-sm",
+        ),
       },
     },
     onUpdate: ({ editor: instance }) => {
@@ -319,8 +342,7 @@ export function RichTextEditor({
     if (current === next || (isEmptyHtml(current) && isEmptyHtml(next))) {
       return;
     }
-    editor.commands.setContent(next, { emitUpdate: false });
-    setHtml(next);
+    editor.commands.setContent(next);
   }, [defaultValue, editor]);
 
   const submittedValue = isEmptyHtml(html) ? "" : html;
@@ -331,27 +353,17 @@ export function RichTextEditor({
     );
   }, [required, submittedValue]);
 
-  async function insertImage(file: File) {
-    if (!editor) {
+  function insertUploadedImage(url: string) {
+    if (!editor || !url) {
       return;
     }
-    setUploading(true);
-    try {
-      const compressed = await compressImage(file);
-      const formData = new FormData();
-      formData.append("file", compressed, compressed.name);
-      const result = await uploadMediaAction(formData);
-      if (!result.url) {
-        return;
-      }
-      editor
-        .chain()
-        .focus()
-        .insertContent(`<img src="${result.url}" alt="" class="align-center" />`)
-        .run();
-    } finally {
-      setUploading(false);
-    }
+    editor
+      .chain()
+      .focus()
+      .insertContent(`<img src="${url}" alt="" class="align-center" />`)
+      .run();
+    setMediaOpen(false);
+    setPendingImageUrl("");
   }
 
   function applyLink() {
@@ -408,15 +420,16 @@ export function RichTextEditor({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} required={required}>
-        {label}
-      </Label>
+      {label ? (
+        <Label htmlFor={name} required={required}>
+          {label}
+        </Label>
+      ) : null}
       <div className="relative overflow-hidden rounded-xl border border-input bg-background shadow-sm transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
         <EditorToolbar
           editor={editor}
-          uploading={uploading}
           onOpenLink={openLinkPopover}
-          onInsertImage={() => fileRef.current?.click()}
+          onInsertImage={() => setMediaOpen(true)}
         />
         {linkOpen ? (
           <div className="grid gap-2 border-b border-input bg-muted/20 p-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-center">
@@ -449,11 +462,6 @@ export function RichTextEditor({
           </div>
         ) : null}
         <EditorContent editor={editor} />
-        {uploading ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-background/80 px-4 py-2 text-xs text-muted-foreground">
-            Uploading image…
-          </div>
-        ) : null}
         <input
           ref={hiddenRef}
           id={name}
@@ -462,7 +470,7 @@ export function RichTextEditor({
           value={submittedValue}
           required={required}
           tabIndex={-1}
-          aria-label={label}
+          aria-label={label ?? name}
           className="pointer-events-none absolute bottom-2 left-3 h-px w-px opacity-0"
           onChange={() => {}}
           onFocus={() => editor?.commands.focus()}
@@ -473,19 +481,32 @@ export function RichTextEditor({
           }}
         />
       </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          event.target.value = "";
-          if (file) {
-            void insertImage(file);
+      <Dialog
+        open={mediaOpen}
+        onOpenChange={(open) => {
+          setMediaOpen(open);
+          if (!open) {
+            setPendingImageUrl("");
           }
         }}
-      />
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Insert image</DialogTitle>
+          </DialogHeader>
+          <MediaUploader
+            label="Upload or choose an image"
+            onUploaded={(nextUrl) => setPendingImageUrl(nextUrl)}
+          />
+          <Button
+            type="button"
+            disabled={!pendingImageUrl}
+            onClick={() => insertUploadedImage(pendingImageUrl)}
+          >
+            Insert into post
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

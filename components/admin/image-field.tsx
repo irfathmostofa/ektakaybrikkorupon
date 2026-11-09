@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageUploader } from "@/components/admin/image-uploader";
+import { MediaUploader } from "@/components/admin/media-uploader";
 
 export function ImageField({
   name,
@@ -14,7 +14,7 @@ export function ImageField({
   library?: boolean;
 }) {
   return (
-    <ImageUploader
+    <MediaUploader
       name={name}
       label={label}
       defaultValue={defaultValue}
