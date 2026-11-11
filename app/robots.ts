@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/payments/site-url";
 
-export const dynamic = "force-dynamic";
-
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl();
 

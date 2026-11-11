@@ -9,8 +9,6 @@ import {
 import { locales, localizeHref, type Locale } from "@/lib/i18n/config";
 import { absoluteUrl, sitemapLanguageAlternates } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
-
 const STATIC_PATHS = [
   "/",
   "/about",
