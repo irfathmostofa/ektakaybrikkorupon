@@ -52,7 +52,7 @@ export default async function HomePage() {
         dict={dict}
         hero={
           <div className="relative mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center px-6 py-10 text-center">
-            <Reveal>
+            <Reveal eager>
               <p className="text-xs font-medium tracking-[0.24em] text-primary uppercase">
                 {home.hero.eyebrow}
               </p>

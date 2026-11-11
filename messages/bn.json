@@ -204,10 +204,16 @@
   },
   "blog": {
     "eyebrow": "মাঠ নোট",
+    "intro": "মাঠ থেকে আসা গল্প, ধীরে লেখা।",
     "empty": "এখন কোনো প্রকাশিত লেখা নেই.",
     "searchPlaceholder": "লেখা খুঁজুন",
     "allCategories": "সব",
-    "noResults": "আপনার খোঁজার সাথে মিলে এমন কোনো লেখা নেই।"
+    "noResults": "আপনার খোঁজার সাথে মিলে এমন কোনো লেখা নেই।",
+    "featured": "নতুন",
+    "readArticle": "লেখা পড়ুন",
+    "readTime": "{n} মিনিটের পড়া",
+    "resultCount": "{n}টি লেখা",
+    "related": "আরও মাঠ নোট"
   },
   "magazines": {
     "eyebrow": "মাঠের পত্রিকা",

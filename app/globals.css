@@ -243,6 +243,29 @@
     max-width: 100%;
     border-radius: 0.5rem;
   }
+  .rich-html img,
+  .blog-article img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem 0;
+    border-radius: 0.9rem;
+  }
+  .blog-article .align-left,
+  .blog-article .align-right,
+  .blog-article .align-center {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.5rem 0;
+  }
+  .blog-article figure {
+    margin: 1.5rem 0;
+  }
+  .blog-article figure img {
+    margin: 0;
+  }
   .ProseMirror {
     min-height: 12rem;
     outline: none;

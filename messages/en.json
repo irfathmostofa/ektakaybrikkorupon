@@ -204,10 +204,16 @@
   },
   "blog": {
     "eyebrow": "Field notes",
+    "intro": "Stories from the field, written slowly.",
     "empty": "No published posts yet.",
-    "searchPlaceholder": "Search posts",
+    "searchPlaceholder": "Search stories",
     "allCategories": "All",
-    "noResults": "No posts match your search."
+    "noResults": "No posts match your search.",
+    "featured": "Latest",
+    "readArticle": "Read article",
+    "readTime": "{n} min read",
+    "resultCount": "{n} stories",
+    "related": "More field notes"
   },
   "magazines": {
     "eyebrow": "Field journal",

@@ -559,8 +559,13 @@ export function TreeJourney({
     const readTarget = () => {
       const r = track.getBoundingClientRect();
       const sh = stageEl.offsetHeight;
-      const run = Math.max(1, r.height - sh);
+      const run = r.height - sh;
       if (heroEl) {
+        if (run <= 1) {
+          scrollP = 0;
+          target = 0;
+          return;
+        }
         scrollP = clamp((topPx - r.top) / run);
         target = clamp(clamp((scrollP - INTRO) / (1 - INTRO)) / END);
         return;
@@ -693,13 +698,28 @@ export function TreeJourney({
       window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
     };
 
+    if (heroEl) {
+      heroEl.style.opacity = "1";
+      heroEl.style.visibility = "visible";
+      heroEl.style.pointerEvents = "auto";
+      heroEl.style.transform = "none";
+      lastHeroVis = true;
+    }
+
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     const ro = new ResizeObserver(measure);
     ro.observe(stageEl);
     window.addEventListener("orientationchange", measure);
+    let retry2 = 0;
+    const retry1 = window.requestAnimationFrame(() => {
+      measure();
+      retry2 = window.requestAnimationFrame(measure);
+    });
 
     return () => {
+      window.cancelAnimationFrame(retry1);
+      window.cancelAnimationFrame(retry2);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("orientationchange", measure);
       ro.disconnect();
@@ -826,7 +846,7 @@ export function TreeJourney({
           }
         >
           {hero ? (
-            <div ref={heroRef} className="tj-hero">
+            <div ref={heroRef} className="tj-hero" style={{ opacity: 1, visibility: "visible" }}>
               {hero}
             </div>
           ) : null}
