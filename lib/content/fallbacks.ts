@@ -4,6 +4,7 @@ import { NATURE_IMAGES } from "@/lib/content/images";
 import type {
   AboutSection,
   Achievement,
+  BlogCategory,
   BlogPost,
   CauseProject,
   FinanceCategory,
@@ -798,6 +799,23 @@ export const FALLBACK_CAUSES: CauseProject[] = [
   },
 ];
 
+export const FALLBACK_CATEGORIES: BlogCategory[] = [
+  {
+    id: "cat-nature",
+    name: "প্রকৃতি",
+    name_en: "Nature",
+    slug: "nature",
+    created_at: "2026-02-11T00:00:00.000Z",
+  },
+  {
+    id: "cat-notes",
+    name: "মাঠ নোট",
+    name_en: "Field notes",
+    slug: "field-notes",
+    created_at: "2026-02-11T00:00:00.000Z",
+  },
+];
+
 export const FALLBACK_POSTS: BlogPost[] = [
   {
     id: "b1",
@@ -816,6 +834,7 @@ export const FALLBACK_POSTS: BlogPost[] = [
     view_count: 0,
     created_at: "2026-02-11T00:00:00.000Z",
     updated_at: "2026-02-11T00:00:00.000Z",
+    categories: [FALLBACK_CATEGORIES[0]],
   },
   {
     id: "b2",
@@ -832,6 +851,7 @@ export const FALLBACK_POSTS: BlogPost[] = [
     view_count: 0,
     created_at: "2025-12-02T00:00:00.000Z",
     updated_at: "2025-12-02T00:00:00.000Z",
+    categories: [FALLBACK_CATEGORIES[1]],
   },
 ];
 

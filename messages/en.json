@@ -204,7 +204,10 @@
   },
   "blog": {
     "eyebrow": "Field notes",
-    "empty": "No published posts yet."
+    "empty": "No published posts yet.",
+    "searchPlaceholder": "Search posts",
+    "allCategories": "All",
+    "noResults": "No posts match your search."
   },
   "magazines": {
     "eyebrow": "Field journal",

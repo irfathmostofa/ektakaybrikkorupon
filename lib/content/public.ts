@@ -27,6 +27,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import type {
   AboutSection,
   Achievement,
+  BlogCategory,
   BlogPost,
   CauseProject,
   FinanceEntry,
@@ -128,11 +129,45 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
       .select("*")
       .eq("status", "published")
       .order("published_at", { ascending: false });
+    if (error || !data || data.length === 0) {
+      return { data: FALLBACK_POSTS, error };
+    }
+
+    const posts = data as BlogPost[];
+    const postIds = posts.map((post) => post.id);
+    const [{ data: categories }, { data: categoryRows }] = await Promise.all([
+      supabase.from("blog_categories").select("*").order("name", { ascending: true }),
+      supabase
+        .from("blog_post_categories")
+        .select("post_id, category_id")
+        .in("post_id", postIds),
+    ]);
+    const categoriesById = new Map(
+      (categories ?? []).map((item) => [item.id, item as BlogCategory]),
+    );
+
     return {
-      data: data && data.length > 0 ? (data as BlogPost[]) : FALLBACK_POSTS,
-      error,
+      data: posts.map((post) => ({
+        ...post,
+        categories: (categoryRows ?? [])
+          .filter((row) => row.post_id === post.id)
+          .map((row) => categoriesById.get(row.category_id))
+          .filter((item): item is BlogCategory => Boolean(item)),
+      })),
+      error: null,
     };
   });
+}
+
+export async function getPublishedBlogCategories(): Promise<BlogCategory[]> {
+  const posts = await getPublishedPosts();
+  const unique = new Map<string, BlogCategory>();
+  for (const post of posts) {
+    for (const category of post.categories ?? []) {
+      unique.set(category.slug, category);
+    }
+  }
+  return [...unique.values()].sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
