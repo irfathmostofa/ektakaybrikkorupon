@@ -1,10 +1,11 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { User } from "@/lib/types/database";
 
-export async function getCurrentUser(): Promise<User | null> {
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   await connection();
 
   if (!isSupabaseConfigured()) {
@@ -32,7 +33,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
   await supabase.auth.signOut();
   return null;
-}
+});
 
 export async function requireStaff() {
   const user = await getCurrentUser();

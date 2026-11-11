@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { requireStaff, isAdminRole } from "@/lib/auth";
 import {
@@ -27,7 +28,7 @@ export function parseRoleMenus(value: unknown): RoleMenus {
   return menus;
 }
 
-export async function getStoredRoleMenus(): Promise<RoleMenus> {
+export const getStoredRoleMenus = cache(async (): Promise<RoleMenus> => {
   if (!isSupabaseConfigured()) {
     return {};
   }
@@ -42,7 +43,7 @@ export async function getStoredRoleMenus(): Promise<RoleMenus> {
   } catch {
     return {};
   }
-}
+});
 
 export async function requireMenu(menu: AdminMenuKey) {
   const user = await requireStaff();

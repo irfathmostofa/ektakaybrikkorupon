@@ -1,12 +1,20 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export type AuthState = {
   error?: string;
+  ok?: boolean;
+  nextPath?: string;
 };
+
+function safeAdminPath(value: string) {
+  if (!value.startsWith("/admin") || value.startsWith("/admin/login")) {
+    return "/admin";
+  }
+  return value;
+}
 
 export async function loginAction(
   _prevState: AuthState,
@@ -18,7 +26,7 @@ export async function loginAction(
 
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const nextPath = String(formData.get("next") ?? "/admin");
+  const nextPath = safeAdminPath(String(formData.get("next") ?? "/admin"));
 
   if (!email || !password) {
     return { error: "Email and password are required." };
@@ -31,15 +39,15 @@ export async function loginAction(
     return { error: error.message };
   }
 
-  redirect(nextPath.startsWith("/admin") ? nextPath : "/admin");
+  return { ok: true, nextPath };
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<AuthState> {
   if (!isSupabaseConfigured()) {
-    redirect("/admin/login");
+    return { ok: true, nextPath: "/admin/login" };
   }
 
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/admin/login");
+  return { ok: true, nextPath: "/admin/login" };
 }

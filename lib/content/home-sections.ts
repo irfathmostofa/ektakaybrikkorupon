@@ -90,7 +90,7 @@ export const FALLBACK_HOME_SECTIONS: HomeSections = {
   hero: {
     eyebrow: "১টাকায় বৃক্ষরোপণ",
     eyebrow_en: "1 Taka Tree Plantation",
-    donate_label: "মাসে ৩০ টাকা দান করুন",
+    donate_label: "মাসে ৩০ টাকা ডোনেট",
     donate_label_en: "Donate 30 taka a month",
     work_label: "আমাদের কার্যক্রম",
     work_label_en: "Our work",

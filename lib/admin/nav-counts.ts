@@ -1,10 +1,11 @@
+import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { AdminMenuKey } from "@/lib/admin/menus";
 
 export type AdminNavCounts = Partial<Record<AdminMenuKey, number>>;
 
-export async function getAdminNavCounts(): Promise<AdminNavCounts> {
+export const getAdminNavCounts = cache(async (): Promise<AdminNavCounts> => {
   if (!isSupabaseConfigured()) {
     return {};
   }
@@ -18,4 +19,4 @@ export async function getAdminNavCounts(): Promise<AdminNavCounts> {
   } catch {
     return {};
   }
-}
+});

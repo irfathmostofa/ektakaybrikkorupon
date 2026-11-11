@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Award,
   Briefcase,
@@ -59,10 +60,18 @@ export function AdminNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname() || "/admin";
+  const router = useRouter();
+  const items = useMemo(() => visibleMenus(menus), [menus]);
+
+  useEffect(() => {
+    items.forEach((key) => {
+      router.prefetch(ADMIN_MENU_HREFS[key]);
+    });
+  }, [items, router]);
 
   return (
     <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3">
-      {visibleMenus(menus).map((key) => {
+      {items.map((key) => {
         const href = ADMIN_MENU_HREFS[key];
         const Icon = ICONS[key];
         const count = counts?.[key] ?? 0;
@@ -75,6 +84,8 @@ export function AdminNav({
             key={href}
             href={href}
             prefetch
+            onMouseEnter={() => router.prefetch(href)}
+            onFocus={() => router.prefetch(href)}
             onClick={onNavigate}
             className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
               active
